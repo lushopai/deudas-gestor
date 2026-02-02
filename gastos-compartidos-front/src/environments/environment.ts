@@ -5,11 +5,11 @@ export const environment = {
 
     // Si estamos en localhost, usar localhost
     if (hostname === 'localhost' || hostname === '127.0.0.1') {
-      return 'http://localhost:8080/api';
+      return 'http://localhost:9150/api';
     }
 
     // Si estamos en la red local (ej: 192.168.1.3), usar la misma IP
-    return `http://${hostname}:8080/api`;
+    return `http://${hostname}:9150/api`;
   },
   google: {
     // Cambié el clientId al que está configurado en Google Cloud Console
