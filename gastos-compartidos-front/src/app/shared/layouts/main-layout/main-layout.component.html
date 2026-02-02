@@ -3,7 +3,7 @@
   <mat-sidenav #sidenav [(opened)]="sidenavAberto" [mode]="(isMobile$ | async) ? 'over' : 'side'" class="sidenav">
     <!-- User Profile Section -->
     <div class="sidenav-user-section">
-      <img [src]="(usuario$ | async)?.fotoPerfil || 'assets/default-avatar.png'" alt="Avatar" class="sidenav-avatar" />
+      <img [src]="(usuario$ | async)?.fotoPerfil | defaultAvatar" alt="Avatar" class="sidenav-avatar" />
       <div class="sidenav-user-info">
         <div class="user-name">{{ (usuario$ | async)?.nombre || 'Usuario' }}</div>
         <div class="user-email">{{ (usuario$ | async)?.email }}</div>
@@ -22,20 +22,6 @@
         </span>
       </mat-list-item>
     </mat-nav-list>
-
-    <mat-divider></mat-divider>
-
-    <!-- Settings Section -->
-    <mat-nav-list>
-      <mat-list-item (click)="abrirPerfil()" class="nav-item">
-        <mat-icon matListItemIcon>person_outline</mat-icon>
-        <span matListItemTitle>Mi Perfil</span>
-      </mat-list-item>
-      <mat-list-item (click)="cerrarSesion()" class="nav-item logout-item">
-        <mat-icon matListItemIcon>logout</mat-icon>
-        <span matListItemTitle>Cerrar Sesión</span>
-      </mat-list-item>
-    </mat-nav-list>
   </mat-sidenav>
 
   <!-- Main Content -->
@@ -45,10 +31,13 @@
       <button mat-icon-button (click)="sidenav.toggle()" class="menu-button">
         <mat-icon>menu</mat-icon>
       </button>
-      <span class="logo">💰 Gastos Compartidos</span>
+      <div class="logo">
+        <mat-icon class="logo-icon">account_balance_wallet</mat-icon>
+        <span class="logo-text">Gastos Compartidos</span>
+      </div>
       <span class="spacer"></span>
       <button mat-icon-button [matMenuTriggerFor]="headerMenu">
-        <mat-icon>account_circle</mat-icon>
+        <mat-icon>more_vert</mat-icon>
       </button>
       <mat-menu #headerMenu="matMenu">
         <button mat-menu-item (click)="abrirPerfil()">

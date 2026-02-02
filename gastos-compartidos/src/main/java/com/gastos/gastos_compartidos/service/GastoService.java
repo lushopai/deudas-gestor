@@ -121,6 +121,74 @@ public class GastoService {
                 return GastoResponseDTO.fromEntity(gasto);
         }
 
+        public GastoResponseDTO actualizarGasto(Long gastoId, Long usuarioId, GastoCreateDTO request) {
+                // Buscar el gasto existente
+                Gasto gasto = gastoRepository.findById(gastoId)
+                                .orElseThrow(() -> new ResourceNotFoundException("Gasto no encontrado"));
+
+                // Validar que el usuario que actualiza sea el que creó el gasto
+                if (!gasto.getUsuario().getId().equals(usuarioId)) {
+                        throw new BadRequestException("Solo el usuario que registró el gasto puede actualizarlo");
+                }
+
+                // Validar categoría
+                Categoria categoria = categoriaRepository.findById(request.getCategoriaId())
+                                .orElseThrow(() -> new ResourceNotFoundException("Categoría no encontrada"));
+
+                // Actualizar campos básicos
+                gasto.setDescripcion(request.getDescripcion());
+                gasto.setMonto(request.getMonto());
+                gasto.setCategoria(categoria);
+                gasto.setNotas(request.getNotas());
+                gasto.setRutaFoto(request.getRutaFoto());
+                gasto.setFechaGasto(request.getFechaGasto());
+
+                // Si hay splits, actualizarlos
+                if (request.getSplit() != null && !request.getSplit().isEmpty()) {
+                        // Eliminar splits antiguos
+                        gastoSplitRepository.deleteAll(gasto.getSplits());
+                        gasto.getSplits().clear();
+
+                        // Validar total del split
+                        BigDecimal totalSplit = request.getSplit().values()
+                                        .stream()
+                                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+                        if (totalSplit.compareTo(request.getMonto()) != 0) {
+                                throw new BadRequestException(
+                                                String.format("El total del split ($%.2f) debe coincidir con el monto ($%.2f)",
+                                                                totalSplit, request.getMonto()));
+                        }
+
+                        // Crear nuevos splits
+                        for (Map.Entry<Long, BigDecimal> entry : request.getSplit().entrySet()) {
+                                Long usuarioSplitId = entry.getKey();
+                                BigDecimal monto = entry.getValue();
+
+                                Usuario usuarioSplit = usuarioRepository.findById(usuarioSplitId)
+                                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                                "Usuario no encontrado en split"));
+
+                                GastoSplit.TipoSplit tipo = usuarioSplitId.equals(usuarioId)
+                                                ? GastoSplit.TipoSplit.PAGO
+                                                : GastoSplit.TipoSplit.DEBE;
+
+                                GastoSplit split = GastoSplit.builder()
+                                                .gasto(gasto)
+                                                .usuario(usuarioSplit)
+                                                .monto(monto)
+                                                .tipo(tipo)
+                                                .build();
+
+                                gastoSplitRepository.save(split);
+                                gasto.getSplits().add(split);
+                        }
+                }
+
+                gasto = gastoRepository.save(gasto);
+                return GastoResponseDTO.fromEntity(gasto);
+        }
+
         public GastoResponseDTO obtenerGasto(Long gastoId) {
                 Gasto gasto = gastoRepository.findById(gastoId)
                                 .orElseThrow(() -> new ResourceNotFoundException("Gasto no encontrado"));

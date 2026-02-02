@@ -12,6 +12,7 @@ import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
 import { AuthService } from '../../../core/services/auth.service';
+import { DefaultAvatarPipe } from '../../pipes/default-avatar.pipe';
 
 interface NavItem {
   label: string;
@@ -32,7 +33,8 @@ interface NavItem {
     MatIconModule,
     MatListModule,
     MatMenuModule,
-    MatDividerModule
+    MatDividerModule,
+    DefaultAvatarPipe
   ],
   templateUrl: './main-layout.component.html',
   styleUrls: ['./main-layout.component.scss']

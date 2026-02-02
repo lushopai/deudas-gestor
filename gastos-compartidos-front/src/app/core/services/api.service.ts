@@ -40,6 +40,14 @@ export class ApiService {
     return this.http.post(`${this.apiUrl}/gastos`, gasto);
   }
 
+  getGasto(id: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/gastos/${id}`);
+  }
+
+  actualizarGasto(id: number, gasto: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/gastos/${id}`, gasto);
+  }
+
   getGastosPorPareja(parejaId: number): Observable<any> {
     return this.http.get(`${this.apiUrl}/gastos/pareja/${parejaId}`);
   }

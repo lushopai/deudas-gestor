@@ -36,6 +36,7 @@
     "@react-oauth/google": "^0.13.4",
     "ng-gapi": "^0.0.94",
     "rxjs": "~7.8.0",
+    "sweetalert2": "^11.26.18",
     "tesseract.js": "^7.0.0",
     "tslib": "^2.3.0"
   },

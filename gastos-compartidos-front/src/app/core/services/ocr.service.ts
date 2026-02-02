@@ -8,49 +8,41 @@ interface OcrResult {
     cantidad?: number;
     descripcion?: string;
     fecha?: string;
+    tipoDocumento?: string;
   };
+}
+
+interface ImagenProcesada {
+  canvas: HTMLCanvasElement;
+  tipo: 'original' | 'mejorada';
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class OcrService {
+
+  /**
+   * Procesa un recibo con pre-procesamiento de imagen mejorado
+   */
   async procesarRecibo(imagenFile: File): Promise<OcrResult> {
     try {
-      console.log('🔍 [OCR] Iniciando procesamiento de recibo...');
+      console.log('🔍 [OCR] Iniciando procesamiento mejorado de recibo...');
 
-      // Crear worker con configuración mejorada para detectar números
-      const worker = await Tesseract.createWorker('spa+eng', 1, {
-        logger: m => console.log('📊 [Tesseract]', m)
-      });
+      // 1. Pre-procesar la imagen para mejorar OCR
+      const imagenMejorada = await this.preprocesarImagen(imagenFile);
 
-      // Configurar para mejorar detección de números
-      await worker.setParameters({
-        tessedit_char_whitelist: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzáéíóúñÁÉÍÓÚÑ$.,:/- ',
-        tessedit_pageseg_mode: Tesseract.PSM.AUTO,
-      });
+      // 2. Ejecutar OCR con configuración optimizada
+      const resultado = await this.ejecutarOCR(imagenMejorada);
 
-      const result = await worker.recognize(imagenFile);
-      const texto = result.data.text;
-      const confianza = result.data.confidence;
+      // 3. Post-procesar y extraer datos estructurados
+      const datos = this.extraerDatosAvanzado(resultado.texto);
 
-      console.log('📄 [OCR] Texto extraído (completo):');
-      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-      console.log(texto);
-      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-      console.log('📊 [OCR] Confianza:', confianza + '%');
-      console.log('📏 [OCR] Longitud del texto:', texto.length, 'caracteres');
-
-      // Análisis básico del texto para extraer datos
-      const datos = this.extraerDatos(texto);
-
-      console.log('✅ [OCR] Datos extraídos:', datos);
-
-      await worker.terminate();
+      console.log('✅ [OCR] Procesamiento completado:', datos);
 
       return {
-        texto,
-        confianza,
+        texto: resultado.texto,
+        confianza: resultado.confianza,
         datos
       };
     } catch (error) {
@@ -59,116 +51,321 @@ export class OcrService {
     }
   }
 
-  private extraerDatos(texto: string): any {
+  /**
+   * Pre-procesa la imagen para mejorar la calidad del OCR
+   */
+  private async preprocesarImagen(file: File): Promise<HTMLCanvasElement> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+        img.onload = () => {
+          try {
+            // Crear canvas para procesamiento
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d')!;
+
+            // Redimensionar si es muy grande (optimización)
+            const maxWidth = 1920;
+            const maxHeight = 1920;
+            let width = img.width;
+            let height = img.height;
+
+            if (width > maxWidth || height > maxHeight) {
+              const ratio = Math.min(maxWidth / width, maxHeight / height);
+              width *= ratio;
+              height *= ratio;
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+
+            // Dibujar imagen original
+            ctx.drawImage(img, 0, 0, width, height);
+
+            // Obtener datos de píxeles
+            const imageData = ctx.getImageData(0, 0, width, height);
+            const data = imageData.data;
+
+            // Aplicar mejoras
+            this.aplicarMejoras(data);
+
+            // Actualizar canvas
+            ctx.putImageData(imageData, 0, 0);
+
+            console.log('✨ [OCR] Imagen pre-procesada:', { width, height });
+            resolve(canvas);
+          } catch (error) {
+            reject(error);
+          }
+        };
+        img.src = e.target?.result as string;
+      };
+
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  /**
+   * Aplica mejoras a los píxeles de la imagen
+   */
+  private aplicarMejoras(data: Uint8ClampedArray): void {
+    // 1. Convertir a escala de grises
+    for (let i = 0; i < data.length; i += 4) {
+      const gray = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+      data[i] = gray;
+      data[i + 1] = gray;
+      data[i + 2] = gray;
+    }
+
+    // 2. Aumentar contraste
+    const factor = 1.5; // Factor de contraste
+    for (let i = 0; i < data.length; i += 4) {
+      data[i] = Math.min(255, Math.max(0, factor * (data[i] - 128) + 128));
+      data[i + 1] = Math.min(255, Math.max(0, factor * (data[i + 1] - 128) + 128));
+      data[i + 2] = Math.min(255, Math.max(0, factor * (data[i + 2] - 128) + 128));
+    }
+
+    // 3. Binarización (Umbral adaptativo simplificado)
+    const threshold = this.calcularUmbral(data);
+    for (let i = 0; i < data.length; i += 4) {
+      const value = data[i] > threshold ? 255 : 0;
+      data[i] = value;
+      data[i + 1] = value;
+      data[i + 2] = value;
+    }
+  }
+
+  /**
+   * Calcula el umbral óptimo usando el método de Otsu simplificado
+   */
+  private calcularUmbral(data: Uint8ClampedArray): number {
+    const histogram = new Array(256).fill(0);
+
+    // Construir histograma
+    for (let i = 0; i < data.length; i += 4) {
+      histogram[data[i]]++;
+    }
+
+    // Calcular umbral promedio ponderado
+    let sum = 0;
+    let total = 0;
+    for (let i = 0; i < 256; i++) {
+      sum += i * histogram[i];
+      total += histogram[i];
+    }
+
+    return sum / total;
+  }
+
+  /**
+   * Ejecuta OCR con configuración optimizada
+   */
+  private async ejecutarOCR(canvas: HTMLCanvasElement): Promise<{ texto: string; confianza: number }> {
+    console.log('🤖 [OCR] Ejecutando Tesseract...');
+
+    const worker = await Tesseract.createWorker('spa+eng', 1, {
+      logger: m => {
+        if (m.status === 'recognizing text') {
+          console.log(`📊 [Tesseract] Progreso: ${Math.round(m.progress * 100)}%`);
+        }
+      }
+    });
+
+    // Configuración optimizada para recibos
+    await worker.setParameters({
+      tessedit_char_whitelist: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzáéíóúñÁÉÍÓÚÑ$.,:/- ()[]',
+      tessedit_pageseg_mode: Tesseract.PSM.AUTO,
+      preserve_interword_spaces: '1',
+    });
+
+    const result = await worker.recognize(canvas);
+    await worker.terminate();
+
+    console.log('📄 [OCR] Texto extraído:');
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log(result.data.text);
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log('📊 [OCR] Confianza:', Math.round(result.data.confidence) + '%');
+
+    return {
+      texto: result.data.text,
+      confianza: Math.round(result.data.confidence)
+    };
+  }
+
+  /**
+   * Extrae datos estructurados del texto con patrones avanzados
+   */
+  private extraerDatosAvanzado(texto: string): any {
     const datos: any = {};
 
-    // Buscar montos con múltiples patrones
-    // Patrones: $5.000, $5,000, 5.000, 5000, $5.000,50, etc.
-    const patronesMontos = [
-      /\$\s*(\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{2})?)/g,  // $5.000 o $5.000,50
-      /(?:total|monto|precio|valor|importe)[\s:]*\$?\s*(\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{2})?)/gi,  // Con palabras clave
-      /\$\s*(\d+)/g,  // Cualquier número después de $
-      /(\d{1,3}(?:[.,]\d{3})+)/g  // Números con separadores de miles
+    // Detectar tipo de documento
+    datos.tipoDocumento = this.detectarTipoDocumento(texto);
+    console.log('📋 [OCR] Tipo de documento:', datos.tipoDocumento);
+
+    // Extraer monto con patrones específicos por tipo
+    datos.cantidad = this.extraerMonto(texto, datos.tipoDocumento);
+
+    // Extraer fecha
+    datos.fecha = this.extraerFecha(texto);
+
+    // Extraer descripción
+    datos.descripcion = this.extraerDescripcion(texto, datos.tipoDocumento);
+
+    return datos;
+  }
+
+  /**
+   * Detecta el tipo de documento basado en palabras clave
+   */
+  private detectarTipoDocumento(texto: string): string {
+    const textoLower = texto.toLowerCase();
+
+    const patrones = {
+      'Boleta de Supermercado': ['supermercado', 'jumbo', 'lider', 'santa isabel', 'unimarc', 'tottus', 'walmart'],
+      'Atención Médica': ['clínica', 'hospital', 'médico', 'consulta', 'atención', 'salud', 'isapre', 'fonasa'],
+      'Voucher': ['voucher', 'comprobante', 'transacción', 'tarjeta', 'débito', 'crédito'],
+      'Factura': ['factura', 'rut', 'giro', 'razón social'],
+      'Boleta': ['boleta', 'ticket', 'vale']
+    };
+
+    for (const [tipo, palabras] of Object.entries(patrones)) {
+      if (palabras.some(palabra => textoLower.includes(palabra))) {
+        return tipo;
+      }
+    }
+
+    return 'Documento Genérico';
+  }
+
+  /**
+   * Extrae el monto con patrones específicos
+   */
+  private extraerMonto(texto: string, tipoDocumento: string): number | undefined {
+    console.log('💰 [OCR] Extrayendo monto...');
+
+    // Palabras clave según tipo de documento
+    const palabrasClave = {
+      'Boleta de Supermercado': ['total', 'total a pagar', 'total general'],
+      'Atención Médica': ['total', 'copago', 'valor consulta', 'monto'],
+      'Voucher': ['monto', 'total', 'importe'],
+      'default': ['total', 'monto', 'precio', 'valor', 'importe', 'pagar']
+    };
+
+    const palabras = palabrasClave[tipoDocumento as keyof typeof palabrasClave] || palabrasClave.default;
+
+    // Patrones de búsqueda
+    const patrones = [
+      // Con palabras clave
+      ...palabras.map(p => new RegExp(`${p}[\\s:]*\\$?\\s*(\\d{1,3}(?:[.,]\\d{3})*(?:[.,]\\d{2})?)`, 'gi')),
+      // Formato moneda chilena: $5.000 o $5.000,50
+      /\$\s*(\d{1,3}(?:\.\d{3})*(?:,\d{2})?)/g,
+      // Solo números grandes (probablemente totales)
+      /(\d{1,3}(?:[.,]\d{3})+)/g
     ];
 
-    let montoEncontrado = false;
-    for (const patron of patronesMontos) {
+    const montosEncontrados: number[] = [];
+
+    for (const patron of patrones) {
       const matches = Array.from(texto.matchAll(patron));
-      console.log(`🔎 [OCR] Probando patrón: ${patron}, matches encontrados:`, matches.length);
 
-      if (matches.length > 0) {
-        console.log('📝 [OCR] Matches:', matches.map(m => m[0]));
-
-        // Tomar el monto más grande encontrado (probablemente el total)
-        const montos = matches.map(m => {
-          let numStr = m[1] || m[0];
-          console.log('  🔢 [OCR] Procesando:', numStr);
-
-          // Limpiar el string: remover $, espacios
-          numStr = numStr.replace(/[$\s]/g, '');
-
-          // Determinar si usa punto o coma como decimal
-          // Si tiene punto seguido de 3 dígitos, es separador de miles
-          // Si tiene coma seguida de 2 dígitos al final, es decimal
-          if (numStr.match(/,\d{2}$/)) {
-            // Formato: 5.000,50 (europeo/latinoamericano)
-            numStr = numStr.replace(/\./g, '').replace(',', '.');
-            console.log('    → Formato europeo/latinoamericano:', numStr);
-          } else if (numStr.match(/\.\d{2}$/)) {
-            // Formato: 5,000.50 (anglosajón)
-            numStr = numStr.replace(/,/g, '');
-            console.log('    → Formato anglosajón:', numStr);
-          } else {
-            // Sin decimales claros, asumir que punto/coma son separadores de miles
-            numStr = numStr.replace(/[.,]/g, '');
-            console.log('    → Sin decimales, removiendo separadores:', numStr);
-          }
-
-          const numero = parseFloat(numStr);
-          console.log('    → Número final:', numero);
-          return numero;
-        }).filter(n => !isNaN(n) && n > 0);
-
-        console.log('💰 [OCR] Montos válidos encontrados:', montos);
-
-        if (montos.length > 0) {
-          datos.cantidad = Math.max(...montos);
-          console.log('✅ [OCR] Monto seleccionado (máximo):', datos.cantidad);
-          montoEncontrado = true;
-          break;
+      for (const match of matches) {
+        const monto = this.normalizarMonto(match[1] || match[0]);
+        if (monto && monto > 0 && monto < 10000000) { // Filtrar montos razonables
+          montosEncontrados.push(monto);
         }
       }
     }
 
-    if (!montoEncontrado) {
-      console.warn('⚠️ [OCR] No se pudo detectar ningún monto en el texto');
+    if (montosEncontrados.length > 0) {
+      // Retornar el monto más grande (generalmente es el total)
+      const montoMax = Math.max(...montosEncontrados);
+      console.log('✅ [OCR] Monto detectado:', montoMax);
+      return montoMax;
     }
 
-    // Buscar fecha (DD/MM/YYYY, YYYY-MM-DD, DD-MM-YYYY, etc.)
+    console.warn('⚠️ [OCR] No se pudo detectar monto');
+    return undefined;
+  }
+
+  /**
+   * Normaliza un string de monto a número
+   */
+  private normalizarMonto(montoStr: string): number | null {
+    // Limpiar
+    let limpio = montoStr.replace(/[$\s]/g, '');
+
+    // Determinar formato
+    if (limpio.match(/,\d{2}$/)) {
+      // Formato: 5.000,50 (europeo/latinoamericano)
+      limpio = limpio.replace(/\./g, '').replace(',', '.');
+    } else if (limpio.match(/\.\d{2}$/)) {
+      // Formato: 5,000.50 (anglosajón)
+      limpio = limpio.replace(/,/g, '');
+    } else {
+      // Sin decimales claros
+      limpio = limpio.replace(/[.,]/g, '');
+    }
+
+    const numero = parseFloat(limpio);
+    return isNaN(numero) ? null : numero;
+  }
+
+  /**
+   * Extrae fecha del texto
+   */
+  private extraerFecha(texto: string): string | undefined {
     const patronesFecha = [
+      /(\d{1,2}[-/]\d{1,2}[-/]\d{4})/,  // DD-MM-YYYY
       /(\d{4}[-/]\d{1,2}[-/]\d{1,2})/,  // YYYY-MM-DD
-      /(\d{1,2}[-/]\d{1,2}[-/]\d{4})/,  // DD-MM-YYYY o MM-DD-YYYY
       /(\d{1,2}[-/]\d{1,2}[-/]\d{2})/   // DD-MM-YY
     ];
 
     for (const patron of patronesFecha) {
-      const matchFecha = texto.match(patron);
-      if (matchFecha) {
-        datos.fecha = matchFecha[1];
-        break;
+      const match = texto.match(patron);
+      if (match) {
+        console.log('📅 [OCR] Fecha detectada:', match[1]);
+        return match[1];
       }
     }
 
-    // Buscar descripción - intentar encontrar líneas significativas
-    const lineas = texto.split('\n').map(l => l.trim()).filter(l => l.length > 2);
+    return undefined;
+  }
 
-    // Buscar palabras clave que indiquen descripción
-    const palabrasClave = ['folio', 'boleta', 'factura', 'ticket', 'compra', 'venta'];
-    let descripcionEncontrada = false;
+  /**
+   * Extrae descripción del texto
+   */
+  private extraerDescripcion(texto: string, tipoDocumento: string): string {
+    const lineas = texto.split('\n').map(l => l.trim()).filter(l => l.length > 3);
 
+    // Palabras clave según tipo
+    const palabrasClave: Record<string, string[]> = {
+      'Boleta de Supermercado': ['supermercado', 'compra'],
+      'Atención Médica': ['consulta', 'atención', 'médico'],
+      'Voucher': ['compra', 'transacción'],
+      'default': ['compra', 'gasto']
+    };
+
+    const palabras = palabrasClave[tipoDocumento] || palabrasClave['default'];
+
+    // Buscar línea con palabra clave
     for (const linea of lineas) {
       const lineaLower = linea.toLowerCase();
-      for (const palabra of palabrasClave) {
-        if (lineaLower.includes(palabra)) {
-          datos.descripcion = linea.substring(0, 100);
-          descripcionEncontrada = true;
-          break;
-        }
-      }
-      if (descripcionEncontrada) break;
-    }
-
-    // Si no se encontró descripción con palabras clave, usar la primera línea significativa
-    if (!descripcionEncontrada && lineas.length > 0) {
-      // Evitar líneas que solo tengan números o símbolos
-      for (const linea of lineas) {
-        if (linea.match(/[a-zA-Z]/) && linea.length > 3) {
-          datos.descripcion = linea.substring(0, 100);
-          break;
-        }
+      if (palabras.some(p => lineaLower.includes(p))) {
+        return linea.substring(0, 100);
       }
     }
 
-    return datos;
+    // Si no se encuentra, usar primera línea significativa
+    for (const linea of lineas) {
+      if (linea.match(/[a-zA-Z]/) && linea.length > 5 && !linea.match(/^\d+$/)) {
+        return linea.substring(0, 100);
+      }
+    }
+
+    return `${tipoDocumento} - ${new Date().toLocaleDateString()}`;
   }
 }

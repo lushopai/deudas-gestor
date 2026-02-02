@@ -52,8 +52,8 @@ export class PerfilComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.cargarPerfil();
     this.inicializarFormulario();
+    this.cargarPerfil();
   }
 
   cargarPerfil() {

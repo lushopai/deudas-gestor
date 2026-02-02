@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -42,9 +43,20 @@ public class GastoController {
     public ResponseEntity<GastoResponseDTO> crearGasto(
             @AuthenticationPrincipal CustomUserDetails currentUser,
             @Valid @RequestBody GastoCreateDTO request) {
-        
+
         GastoResponseDTO gasto = gastoService.crearGasto(currentUser.getId(), request);
         return ResponseEntity.status(HttpStatus.CREATED).body(gasto);
+    }
+
+    @PutMapping("/{gastoId}")
+    @Operation(summary = "Actualizar gasto", description = "Actualiza un gasto existente (solo el usuario que lo registró puede hacerlo)")
+    public ResponseEntity<GastoResponseDTO> actualizarGasto(
+            @PathVariable Long gastoId,
+            @AuthenticationPrincipal CustomUserDetails currentUser,
+            @Valid @RequestBody GastoCreateDTO request) {
+
+        GastoResponseDTO gasto = gastoService.actualizarGasto(gastoId, currentUser.getId(), request);
+        return ResponseEntity.ok(gasto);
     }
 
     @GetMapping("/{gastoId}")
@@ -58,7 +70,7 @@ public class GastoController {
     @Operation(summary = "Obtener gastos del usuario", description = "Lista todos los gastos del usuario autenticado")
     public ResponseEntity<List<GastoResponseDTO>> obtenerGastosDelUsuario(
             @AuthenticationPrincipal CustomUserDetails currentUser) {
-        
+
         List<GastoResponseDTO> gastos = gastoService.obtenerGastosPorUsuario(currentUser.getId());
         return ResponseEntity.ok(gastos);
     }
@@ -68,7 +80,7 @@ public class GastoController {
     public ResponseEntity<List<GastoResponseDTO>> obtenerGastosRecientes(
             @AuthenticationPrincipal CustomUserDetails currentUser,
             @RequestParam(defaultValue = "5") int cantidad) {
-        
+
         List<GastoResponseDTO> gastos = gastoService.obtenerGastosRecientes(currentUser.getId(), cantidad);
         return ResponseEntity.ok(gastos);
     }
@@ -77,7 +89,7 @@ public class GastoController {
     @Operation(summary = "Obtener resumen de gastos", description = "Obtiene el total, promedio y desglose por categoría")
     public ResponseEntity<Map<String, Object>> obtenerResumenGastos(
             @AuthenticationPrincipal CustomUserDetails currentUser) {
-        
+
         Map<String, Object> resumen = gastoService.obtenerResumenGastos(currentUser.getId());
         return ResponseEntity.ok(resumen);
     }
@@ -86,7 +98,7 @@ public class GastoController {
     @Operation(summary = "Obtener gastos de la pareja", description = "Lista todos los gastos de la pareja del usuario autenticado")
     public ResponseEntity<List<GastoResponseDTO>> obtenerGastosPorPareja(
             @AuthenticationPrincipal CustomUserDetails currentUser) {
-        
+
         Long parejaId = parejaService.obtenerParejaDelUsuario(currentUser.getId()).getId();
         List<GastoResponseDTO> gastos = gastoService.obtenerGastosPorPareja(parejaId);
         return ResponseEntity.ok(gastos);
@@ -98,7 +110,7 @@ public class GastoController {
             @AuthenticationPrincipal CustomUserDetails currentUser,
             @RequestParam int ano,
             @RequestParam int mes) {
-        
+
         Long parejaId = parejaService.obtenerParejaDelUsuario(currentUser.getId()).getId();
         List<GastoResponseDTO> gastos = gastoService.obtenerGastosPorParejaYMes(parejaId, ano, mes);
         return ResponseEntity.ok(gastos);
@@ -109,7 +121,7 @@ public class GastoController {
     public ResponseEntity<?> eliminarGasto(
             @PathVariable Long gastoId,
             @AuthenticationPrincipal CustomUserDetails currentUser) {
-        
+
         gastoService.eliminarGasto(gastoId, currentUser.getId());
         return ResponseEntity.noContent().build();
     }

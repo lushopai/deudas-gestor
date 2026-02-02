@@ -5,7 +5,7 @@ export const environment = {
 
     // Si estamos en localhost, usar localhost
     if (hostname === 'localhost' || hostname === '127.0.0.1') {
-      return 'http://localhost:9150/api';
+      return 'http://192.168.1.18:9150/api';
     }
 
     // Si estamos en la red local (ej: 192.168.1.3), usar la misma IP

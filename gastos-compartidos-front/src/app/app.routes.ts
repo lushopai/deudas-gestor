@@ -5,6 +5,7 @@ import { DashboardComponent } from './features/dashboard/dashboard.component';
 import { PerfilComponent } from './features/usuario/perfil.component';
 import { GastoFormComponent } from './features/gasto/gasto-form.component';
 import { GastosListComponent } from './features/gasto/gastos-list.component';
+import { ReportesComponent } from './features/reportes/reportes.component';
 import { MainLayoutComponent } from './shared/layouts/main-layout/main-layout.component';
 import { AuthGuard } from './core/guards/auth.guard';
 
@@ -21,7 +22,9 @@ export const routes: Routes = [
       { path: 'perfil', component: PerfilComponent },
       { path: 'gastos', component: GastosListComponent },
       { path: 'gastos/nuevo', component: GastoFormComponent },
-      { path: 'gastos/ocr', component: GastoFormComponent }
+      { path: 'gastos/editar/:id', component: GastoFormComponent },
+      { path: 'gastos/ocr', component: GastoFormComponent },
+      { path: 'reportes', component: ReportesComponent }
     ]
   },
   { path: '**', redirectTo: '/login' }

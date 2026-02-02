@@ -1,6 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatTableModule } from '@angular/material/table';
@@ -13,6 +13,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDialogModule } from '@angular/material/dialog';
 import { GastoService, Gasto } from '../../core/services/gasto.service';
+import { AlertService } from '../../core/services/alert.service';
 
 @Component({
   selector: 'app-gastos-list',
@@ -43,6 +44,8 @@ export class GastosListComponent implements OnInit {
 
   constructor(
     private gastoService: GastoService,
+    private alertService: AlertService,
+    private router: Router,
     private cdRef: ChangeDetectorRef
   ) { }
 
@@ -63,6 +66,11 @@ export class GastosListComponent implements OnInit {
       error: (err) => {
         console.error('Error al cargar gastos:', err);
         this.error = 'No se pudieron cargar los gastos';
+        this.alertService.error(
+          'No se pudieron cargar los gastos',
+          'Error de conexión',
+          err.message || 'Verifica tu conexión e intenta nuevamente'
+        );
         this.cargando = false;
         this.cdRef.detectChanges();
       }
@@ -70,19 +78,35 @@ export class GastosListComponent implements OnInit {
   }
 
   eliminarGasto(id: number) {
-    if (!confirm('¿Estás seguro de que deseas eliminar este gasto?')) {
-      return;
-    }
+    this.alertService.confirm(
+      'Esta acción no se puede deshacer',
+      '¿Eliminar este gasto?'
+    ).then((result) => {
+      if (result.isConfirmed) {
+        this.alertService.loading('Eliminando gasto...');
 
-    this.gastoService.eliminarGasto(id).subscribe({
-      next: () => {
-        this.cargarGastos();
-      },
-      error: (err) => {
-        console.error('Error al eliminar gasto:', err);
-        alert('No se pudo eliminar el gasto');
+        this.gastoService.eliminarGasto(id).subscribe({
+          next: () => {
+            this.alertService.close();
+            this.alertService.success('El gasto se eliminó correctamente');
+            this.cargarGastos();
+          },
+          error: (err) => {
+            this.alertService.close();
+            console.error('Error al eliminar gasto:', err);
+            this.alertService.error(
+              'No se pudo eliminar el gasto',
+              'Error',
+              err.error?.message || 'Intenta nuevamente'
+            );
+          }
+        });
       }
     });
+  }
+
+  editarGasto(id: number) {
+    this.router.navigate(['/gastos/editar', id]);
   }
 
   reintentar() {
