@@ -1,0 +1,302 @@
+:host {
+  display: block;
+  height: 100%;
+  background: #f8f9fa;
+}
+
+.gastos-list-container {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  height: 100%;
+}
+
+/* Loading State */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px;
+  text-align: center;
+
+  mat-progress-bar {
+    margin-bottom: 12px;
+  }
+
+  p {
+    color: #666;
+    margin: 0;
+  }
+}
+
+/* Error Card */
+.error-card {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+  color: white;
+  margin: 0;
+
+  mat-card-content {
+    padding: 24px !important;
+  }
+}
+
+.error-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.error-icon {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+  opacity: 0.9;
+}
+
+.error-message {
+  font-size: 14px;
+  opacity: 0.95;
+}
+
+.retry-btn {
+  margin-top: 12px;
+  color: white;
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* Gastos Table Card */
+.gastos-table-card {
+  background: white;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  mat-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    margin: 0;
+  }
+
+  mat-card-title {
+    margin: 0;
+    font-size: 18px;
+  }
+}
+
+.spacer {
+  flex: 1;
+}
+
+/* Table Responsive */
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.gastos-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.header-row {
+  background: #f5f5f5;
+  border-bottom: 2px solid #ddd;
+}
+
+.header-row th {
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+  color: #666;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.data-row {
+  border-bottom: 1px solid #eee;
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: #f9f9f9;
+  }
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  td {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+}
+
+.descripcion-cell {
+  max-width: 300px;
+}
+
+.descripcion-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.descripcion {
+  font-weight: 600;
+  color: #333;
+}
+
+.notas {
+  font-size: 12px;
+  color: #999;
+  font-style: italic;
+}
+
+.monto-cell {
+  text-align: right;
+}
+
+.monto {
+  font-weight: 700;
+  color: #667eea;
+  font-size: 16px;
+}
+
+.categoria-cell {
+  text-align: center;
+}
+
+mat-chip {
+  height: 28px !important;
+  padding: 0 8px !important;
+  font-size: 12px !important;
+  background: #667eea20 !important;
+  color: #667eea !important;
+
+  &.highlight {
+    background: #ff6b6b20 !important;
+    color: #ff6b6b !important;
+  }
+}
+
+.fecha-cell {
+  color: #999;
+  font-size: 13px;
+}
+
+.acciones-cell {
+  text-align: center;
+}
+
+.action-menu-btn {
+  color: #667eea;
+
+  &:hover {
+    background: rgba(102, 126, 234, 0.1);
+  }
+}
+
+.delete-option {
+  mat-icon {
+    color: #ff6b6b !important;
+  }
+
+  span {
+    color: #ff6b6b !important;
+  }
+}
+
+/* Empty State */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 48px 24px;
+  background: white;
+  border-radius: 12px;
+  text-align: center;
+  margin: auto;
+}
+
+.empty-icon {
+  font-size: 64px;
+  width: 64px;
+  height: 64px;
+  color: #ddd;
+  opacity: 0.6;
+}
+
+.empty-text {
+  font-size: 18px;
+  font-weight: 600;
+  color: #666;
+}
+
+.empty-hint {
+  font-size: 14px;
+  color: #999;
+  margin: 0;
+}
+
+.empty-action-btn {
+  margin-top: 12px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .gastos-list-container {
+    padding: 12px;
+    gap: 12px;
+  }
+
+  .header-row th {
+    font-size: 11px;
+    padding: 8px 12px;
+  }
+
+  .data-row td {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  .displayedColumns {
+    display: none;
+
+    &.descripcion,
+    &.monto,
+    &.acciones {
+      display: table-cell;
+    }
+  }
+
+  .descripcion-cell {
+    max-width: 150px;
+  }
+
+  .monto {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .gastos-table-card mat-card-header {
+    padding: 12px;
+  }
+
+  .gastos-table-card mat-card-title {
+    font-size: 16px;
+  }
+
+  .data-row td {
+    padding: 8px;
+    font-size: 11px;
+  }
+}

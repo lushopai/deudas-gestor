@@ -1,0 +1,141 @@
+<!-- Main Content -->
+<div class="dashboard-container">
+  <!-- Welcome Card -->
+  <mat-card class="welcome-card">
+    <mat-card-content>
+      <div class="welcome-content">
+        <div class="welcome-text">
+          <h2 class="welcome-title">Hola, {{ (authService.usuario$ | async)?.nombre || 'Usuario' }}! 👋</h2>
+          <p class="welcome-subtitle">Gestiona tus gastos compartidos de forma fácil</p>
+        </div>
+        <img 
+          [src]="(authService.usuario$ | async)?.fotoPerfil" 
+          alt="Avatar" 
+          class="welcome-avatar"
+          *ngIf="(authService.usuario$ | async)?.fotoPerfil"
+        />
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Action Buttons -->
+  <div class="action-buttons">
+    <button 
+      mat-raised-button 
+      color="primary" 
+      (click)="abrirNuevoGasto()"
+      class="action-btn"
+    >
+      <mat-icon>add_circle</mat-icon>
+      <span>Nuevo Gasto</span>
+    </button>
+    <button 
+      mat-raised-button 
+      color="accent" 
+      (click)="abrirOCR()"
+      class="action-btn"
+    >
+      <mat-icon>receipt</mat-icon>
+      <span>Escanear Recibo (OCR)</span>
+    </button>
+  </div>
+
+  <!-- Error State -->
+  <mat-card class="error-card" *ngIf="error && !cargando">
+    <mat-card-content>
+      <div class="error-content">
+        <mat-icon class="error-icon">error_outline</mat-icon>
+        <div class="error-message">{{ error }}</div>
+        <button mat-stroked-button (click)="reintentar()" class="retry-btn">
+          <mat-icon>refresh</mat-icon>
+          Reintentar
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="cargando">
+    <mat-card class="skeleton-card"></mat-card>
+    <mat-card class="skeleton-card"></mat-card>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-grid" *ngIf="!cargando && resumenGastos">
+    <mat-card class="stat-card">
+      <mat-icon class="stat-icon">trending_up</mat-icon>
+      <div class="stat-value">${{ resumenGastos.totalGastos | number: '1.2-2' }}</div>
+      <div class="stat-label">Gastos Totales</div>
+      <div class="stat-detail">{{ resumenGastos.cantidadGastos }} transacciones</div>
+    </mat-card>
+    <mat-card class="stat-card">
+      <mat-icon class="stat-icon">calculate</mat-icon>
+      <div class="stat-value">${{ resumenGastos.promedioPorGasto | number: '1.2-2' }}</div>
+      <div class="stat-label">Promedio por Gasto</div>
+      <div class="stat-detail">Gasto medio</div>
+    </mat-card>
+  </div>
+
+  <!-- Gastos por Categoría -->
+  <mat-card class="categorias-card" *ngIf="!cargando && resumenGastos && Object.keys(resumenGastos.gastosPorCategoria).length > 0">
+    <mat-card-header>
+      <mat-card-title>Gastos por Categoría</mat-card-title>
+    </mat-card-header>
+    <mat-divider></mat-divider>
+    <mat-card-content>
+      <div class="categoria-item" *ngFor="let categoria of Object.keys(resumenGastos.gastosPorCategoria)">
+        <div class="categoria-header">
+          <span class="categoria-nombre">{{ categoria }}</span>
+          <span class="categoria-monto">${{ resumenGastos.gastosPorCategoria[categoria] | number: '1.2-2' }}</span>
+        </div>
+        <mat-progress-bar 
+          mode="determinate" 
+          [value]="obtenerPorcentaje(resumenGastos.gastosPorCategoria[categoria], resumenGastos.totalGastos)"
+          class="categoria-progress"
+        ></mat-progress-bar>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Gastos Recientes -->
+  <mat-card class="gastos-card" *ngIf="!cargando && gastosRecientes.length > 0">
+    <mat-card-header>
+      <mat-card-title>Gastos Recientes</mat-card-title>
+      <button mat-icon-button routerLink="/gastos" class="view-all-btn">
+        <mat-icon>arrow_forward</mat-icon>
+      </button>
+    </mat-card-header>
+    <mat-divider></mat-divider>
+    <mat-card-content>
+      <div class="gasto-item" *ngFor="let gasto of gastosRecientes">
+        <div class="gasto-row">
+          <div class="gasto-info">
+            <div class="gasto-descripcion">{{ gasto.descripcion }}</div>
+            <div class="gasto-fecha">{{ gasto.fechaCreacion | date: 'dd/MM/yyyy HH:mm' }}</div>
+          </div>
+          <div class="gasto-monto" [class.positivo]="true">
+            ${{ gasto.monto | number: '1.2-2' }}
+          </div>
+        </div>
+        <mat-progress-bar 
+          mode="determinate" 
+          value="100" 
+          class="gasto-divider"
+        ></mat-progress-bar>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="!cargando && gastosRecientes.length === 0">
+    <mat-icon class="empty-icon">inbox</mat-icon>
+    <div class="empty-text">Sin gastos aún</div>
+    <div class="empty-hint">Crea tu primer gasto para comenzar a seguir tus gastos compartidos</div>
+    <button 
+      mat-raised-button 
+      color="primary"
+      (click)="abrirNuevoGasto()"
+      class="empty-action-btn"
+    >
+      <mat-icon>add</mat-icon>
+      Crear Primer Gasto

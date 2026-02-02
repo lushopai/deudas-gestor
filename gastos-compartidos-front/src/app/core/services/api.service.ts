@@ -1,0 +1,51 @@
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class ApiService {
+  private readonly apiUrl = environment.apiUrl;
+
+  constructor(private http: HttpClient) { }
+
+  // Auth
+  login(email: string, password: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/auth/login`, { email, password });
+  }
+
+  registro(data: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/auth/registro`, data);
+  }
+
+  loginConGoogle(tokenGoogle: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/auth/google-login`, { token: tokenGoogle });
+  }
+
+  refreshToken(token: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/auth/refresh`, {}, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+  }
+
+  // Categorías
+  getCategorias(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/public/categorias`);
+  }
+
+  // Gastos
+  crearGasto(gasto: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/gastos`, gasto);
+  }
+
+  getGastosPorPareja(parejaId: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/gastos/pareja/${parejaId}`);
+  }
+
+  // Reportes
+  getReporteMensual(parejaId: number, mes: number, anio: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/reportes/${parejaId}/${mes}/${anio}`);
+  }
+}

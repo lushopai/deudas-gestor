@@ -1,0 +1,163 @@
+<!-- Header -->
+<mat-toolbar color="primary" class="header">
+  <div class="toolbar-content">
+    <button mat-icon-button routerLink="/dashboard" class="back-button">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <span class="logo">Mi Perfil</span>
+    <span class="spacer"></span>
+    <button mat-icon-button [matMenuTriggerFor]="menu" class="menu-button">
+      <mat-icon>more_vert</mat-icon>
+    </button>
+    <mat-menu #menu="matMenu">
+      <button mat-menu-item (click)="cerrarSesion()">
+        <mat-icon>logout</mat-icon>
+        <span>Cerrar Sesión</span>
+      </button>
+    </mat-menu>
+  </div>
+</mat-toolbar>
+
+<!-- Main Content -->
+<div class="perfil-container">
+  <!-- Loading State -->
+  <div class="loading-state" *ngIf="cargando">
+    <mat-spinner></mat-spinner>
+  </div>
+
+  <!-- Error State -->
+  <mat-card class="error-card" *ngIf="error && !cargando">
+    <mat-card-content>
+      <mat-icon class="error-icon">error_outline</mat-icon>
+      <div class="error-message">{{ error }}</div>
+      <button mat-button class="retry-btn" (click)="cargarPerfil()"
+        style="margin-top: 10px; color: white; border: 1px solid white;">Reintentar</button>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Empty State fallback -->
+  <mat-card class="error-card" *ngIf="!usuario && !cargando && !error">
+    <mat-card-content>
+      <div class="error-message">No hay datos de usuario disponibles.</div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Perfil Form -->
+  <form [formGroup]="perfilForm" *ngIf="usuario && !cargando">
+    <!-- Avatar Section -->
+    <mat-card class="avatar-card">
+      <mat-card-content class="avatar-content">
+        <div class="avatar-container">
+          <img [src]="previewFoto || 'assets/default-avatar.png'" alt="Avatar del usuario" class="avatar-image" />
+          <button type="button" mat-fab color="primary" class="change-avatar-btn" (click)="seleccionarFoto()"
+            title="Cambiar foto de perfil">
+            <mat-icon>camera_alt</mat-icon>
+          </button>
+        </div>
+        <div class="avatar-info">
+          <h2 class="usuario-nombre">{{ usuario.nombre || 'Usuario' }}</h2>
+          <p class="usuario-email">{{ usuario.email }}</p>
+          <p class="usuario-tipo" *ngIf="usuario.tipoAutenticacion">
+            <mat-icon *ngIf="usuario.tipoAutenticacion === 'GOOGLE'">verified_user</mat-icon>
+            Registrado con {{ usuario.tipoAutenticacion }}
+          </p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Información Personal -->
+    <mat-card class="info-card">
+      <mat-card-header>
+        <mat-card-title>Información Personal</mat-card-title>
+      </mat-card-header>
+      <mat-divider></mat-divider>
+      <mat-card-content class="form-content">
+        <!-- Nombre -->
+        <mat-form-field class="form-field">
+          <mat-label>Nombre</mat-label>
+          <input matInput formControlName="nombre" type="text" placeholder="Tu nombre completo" />
+          <mat-icon matPrefix>person</mat-icon>
+          <mat-error *ngIf="perfilForm.get('nombre')?.hasError('required')">
+            El nombre es requerido
+          </mat-error>
+          <mat-error *ngIf="perfilForm.get('nombre')?.hasError('minlength')">
+            Mínimo 3 caracteres
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Email (solo lectura) -->
+        <mat-form-field class="form-field">
+          <mat-label>Email</mat-label>
+          <input matInput formControlName="email" type="email" [disabled]="true" />
+          <mat-icon matPrefix>email</mat-icon>
+          <mat-hint>No se puede cambiar el email</mat-hint>
+        </mat-form-field>
+
+        <!-- Teléfono -->
+        <mat-form-field class="form-field">
+          <mat-label>Teléfono (opcional)</mat-label>
+          <input matInput formControlName="telefono" type="tel" placeholder="+56 9 1234 5678" />
+          <mat-icon matPrefix>phone</mat-icon>
+        </mat-form-field>
+
+        <!-- Biografía -->
+        <mat-form-field class="form-field form-field-textarea">
+          <mat-label>Biografía</mat-label>
+          <textarea matInput formControlName="bio" rows="4" placeholder="Cuéntanos un poco sobre ti"></textarea>
+          <mat-icon matPrefix>description</mat-icon>
+          <mat-hint align="end">{{ perfilForm.get('bio')?.value?.length || 0 }}/500</mat-hint>
+        </mat-form-field>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Información de Seguridad -->
+    <mat-card class="info-card">
+      <mat-card-header>
+        <mat-card-title>Seguridad</mat-card-title>
+      </mat-card-header>
+      <mat-divider></mat-divider>
+      <mat-card-content class="security-content">
+        <div class="security-item">
+          <div class="security-info">
+            <mat-icon>security</mat-icon>
+            <div class="security-text">
+              <div class="security-label">Contraseña</div>
+              <div class="security-detail">Última actualización: {{ usuario.ultimaActualizacion | date: 'dd/MM/yyyy' }}
+              </div>
+            </div>
+          </div>
+          <button mat-stroked-button type="button" [disabled]="true">
+            Cambiar
+          </button>
+        </div>
+        <mat-divider></mat-divider>
+        <div class="security-item">
+          <div class="security-info">
+            <mat-icon>verified_user</mat-icon>
+            <div class="security-text">
+              <div class="security-label">Autenticación de dos factores</div>
+              <div class="security-detail">No configurada</div>
+            </div>
+          </div>
+          <button mat-stroked-button type="button" [disabled]="true">
+            Configurar
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <button mat-raised-button color="primary" (click)="guardarCambios()" [disabled]="guardando || perfilForm.invalid"
+        class="save-btn">
+        <mat-icon *ngIf="!guardando">save</mat-icon>
+        <mat-progress-spinner *ngIf="guardando" diameter="20" mode="indeterminate"
+          class="spinner"></mat-progress-spinner>
+        {{ guardando ? 'Guardando...' : 'Guardar Cambios' }}
+      </button>
+      <button mat-stroked-button (click)="cancelar()" [disabled]="guardando" class="cancel-btn">
+        Cancelar
+      </button>
+    </div>
+  </form>
+</div>

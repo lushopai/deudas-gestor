@@ -1,0 +1,120 @@
+<div class="gastos-list-container">
+  <!-- Loading State -->
+  <div class="loading-state" *ngIf="cargando">
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+    <p>Cargando gastos...</p>
+  </div>
+
+  <!-- Error State -->
+  <mat-card class="error-card" *ngIf="error && !cargando">
+    <mat-card-content>
+      <div class="error-content">
+        <mat-icon class="error-icon">error_outline</mat-icon>
+        <div class="error-message">{{ error }}</div>
+        <button mat-stroked-button (click)="reintentar()" class="retry-btn">
+          <mat-icon>refresh</mat-icon>
+          Reintentar
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Gastos Table -->
+  <mat-card class="gastos-table-card" *ngIf="!cargando && gastos.length > 0">
+    <mat-card-header>
+      <mat-card-title>Todos los Gastos</mat-card-title>
+      <span class="spacer"></span>
+      <button mat-icon-button routerLink="/gastos/nuevo" title="Nuevo gasto">
+        <mat-icon>add</mat-icon>
+      </button>
+    </mat-card-header>
+    <mat-divider></mat-divider>
+    <div class="table-responsive">
+      <table mat-table [dataSource]="gastos" class="gastos-table">
+        <!-- Descripción Column -->
+        <ng-container matColumnDef="descripcion">
+          <th mat-header-cell *matHeaderCellDef>Descripción</th>
+          <td mat-cell *matCellDef="let gasto" class="descripcion-cell">
+            <div class="descripcion-content">
+              <span class="descripcion">{{ gasto.descripcion }}</span>
+              <span class="notas" *ngIf="gasto.notas">{{ gasto.notas }}</span>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Monto Column -->
+        <ng-container matColumnDef="monto">
+          <th mat-header-cell *matHeaderCellDef>Monto</th>
+          <td mat-cell *matCellDef="let gasto" class="monto-cell">
+            <span class="monto">${{ gasto.monto | number: '1.2-2' }}</span>
+          </td>
+        </ng-container>
+
+        <!-- Categoría Column -->
+        <ng-container matColumnDef="categoria">
+          <th mat-header-cell *matHeaderCellDef>Categoría</th>
+          <td mat-cell *matCellDef="let gasto" class="categoria-cell">
+            <mat-chip>
+              {{ gasto.categoriaId ? 'Categoría ' + gasto.categoriaId : 'Sin categoría' }}
+            </mat-chip>
+          </td>
+        </ng-container>
+
+        <!-- Fecha Column -->
+        <ng-container matColumnDef="fecha">
+          <th mat-header-cell *matHeaderCellDef>Fecha</th>
+          <td mat-cell *matCellDef="let gasto" class="fecha-cell">
+            {{ gasto.fechaCreacion | date: 'dd/MM/yyyy HH:mm' }}
+          </td>
+        </ng-container>
+
+        <!-- Acciones Column -->
+        <ng-container matColumnDef="acciones">
+          <th mat-header-cell *matHeaderCellDef>Acciones</th>
+          <td mat-cell *matCellDef="let gasto" class="acciones-cell">
+            <button 
+              mat-icon-button 
+              [matMenuTriggerFor]="menu"
+              class="action-menu-btn"
+            >
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #menu="matMenu">
+              <button mat-menu-item routerLink="/gastos/editar/{{ gasto.id }}">
+                <mat-icon>edit</mat-icon>
+                <span>Editar</span>
+              </button>
+              <button 
+                mat-menu-item 
+                (click)="eliminarGasto(gasto.id)"
+                class="delete-option"
+              >
+                <mat-icon>delete</mat-icon>
+                <span>Eliminar</span>
+              </button>
+            </mat-menu>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns" class="header-row"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="data-row"></tr>
+      </table>
+    </div>
+  </mat-card>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="!cargando && gastos.length === 0">
+    <mat-icon class="empty-icon">inbox</mat-icon>
+    <div class="empty-text">Sin gastos registrados</div>
+    <div class="empty-hint">Crea tu primer gasto para comenzar</div>
+    <button 
+      mat-raised-button 
+      color="primary"
+      routerLink="/gastos/nuevo"
+      class="empty-action-btn"
+    >
+      <mat-icon>add</mat-icon>
+      Crear Gasto
+    </button>
+  </div>
+</div>

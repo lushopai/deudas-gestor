@@ -1,0 +1,175 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+mat-sidenav-content {
+  min-width: 0 !important;
+  width: 100% !important;
+}
+
+.sidenav-container {
+  height: 100%;
+  display: flex;
+  flex-direction: row;
+}
+
+/* Header */
+.header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  display: flex;
+  align-items: center;
+  height: 64px;
+}
+
+.menu-button {
+  color: white;
+}
+
+.logo {
+  font-size: 18px;
+  font-weight: 700;
+  color: white;
+  letter-spacing: -0.5px;
+  margin-left: 12px;
+}
+
+.spacer {
+  flex: 1;
+}
+
+/* Sidenav */
+.sidenav {
+  width: 280px;
+  background: white;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+}
+
+.sidenav-user-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 16px;
+  background: linear-gradient(135deg, #667eea10 0%, #764ba210 100%);
+}
+
+.sidenav-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #667eea;
+}
+
+.sidenav-user-info {
+  text-align: center;
+  flex: 1;
+}
+
+.user-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #333;
+  line-height: 1.2;
+}
+
+.user-email {
+  font-size: 11px;
+  color: #999;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Navigation Items */
+mat-nav-list {
+  padding: 8px 0;
+}
+
+.nav-item {
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: #f5f5f5;
+  }
+
+  &.logout-item:hover {
+    background: #ffe0e0;
+
+    mat-icon {
+      color: #ff6b6b;
+    }
+
+    span {
+      color: #ff6b6b;
+    }
+  }
+
+  mat-icon {
+    color: #667eea;
+  }
+}
+
+.nav-badge {
+  background: #ff6b6b;
+  color: white;
+  border-radius: 12px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  min-width: 24px;
+  text-align: center;
+}
+
+/* Content Wrapper */
+.content-wrapper {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  position: relative;
+  height: 100%;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .sidenav {
+    width: 240px;
+  }
+
+  .sidenav-user-section {
+    padding: 16px 12px;
+  }
+
+  .sidenav-avatar {
+    width: 56px;
+    height: 56px;
+  }
+
+  .user-name {
+    font-size: 13px;
+  }
+
+  .user-email {
+    font-size: 10px;
+  }
+
+  .logo {
+    font-size: 16px;
+    margin-left: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .sidenav {
+    position: fixed;
+    z-index: 1000;
+  }
+
+  .logo {
+    display: none;
+  }
+}

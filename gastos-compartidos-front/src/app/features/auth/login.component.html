@@ -1,0 +1,54 @@
+<div class="login-container">
+  <!-- Logo/Header -->
+  <div class="header-section">
+    <div class="logo">💰</div>
+    <h1 class="app-title">Gastos Compartidos</h1>
+    <p class="app-subtitle">Gestiona tus gastos de forma fácil</p>
+  </div>
+
+  <!-- Login Card -->
+  <mat-card class="login-card">
+    <mat-card-content>
+      <!-- Email/Password Section -->
+      <h2 class="section-title">Inicia Sesión</h2>
+
+      <form [formGroup]="formulario" (ngSubmit)="iniciarSesion()">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Email</mat-label>
+          <input matInput type="email" formControlName="email" required>
+          <mat-icon matPrefix>email</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Contraseña</mat-label>
+          <input matInput type="password" formControlName="password" required>
+          <mat-icon matPrefix>lock</mat-icon>
+        </mat-form-field>
+
+        <button mat-raised-button color="primary" type="submit" class="full-width login-button" [disabled]="cargando">
+          <mat-progress-spinner *ngIf="cargando" diameter="20" mode="indeterminate"></mat-progress-spinner>
+          <span *ngIf="!cargando">Iniciar Sesión</span>
+        </button>
+      </form>
+
+      <!-- Divider -->
+      <div class="divider">
+        <span>O continúa con</span>
+      </div>
+
+      <!-- Google Login -->
+      <app-google-login></app-google-login>
+
+      <!-- Register Link -->
+      <div class="register-section">
+        <p class="register-text">¿No tienes cuenta? <a routerLink="/registro" class="register-link">Regístrate aquí</a>
+        </p>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Footer -->
+  <div class="footer">
+    <p class="footer-text">© 2026 Gastos Compartidos. Todos los derechos reservados.</p>
+  </div>
+</div>
