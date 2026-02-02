@@ -81,7 +81,9 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         // Dividir por comas y limpiar espacios
         String[] origins = allowedOrigins.split(",");
-        configuration.setAllowedOrigins(Arrays.asList(origins));
+
+        // Usar patterns permite comodines como '*' y funciona con credenciales
+        configuration.setAllowedOriginPatterns(Arrays.asList(origins));
 
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
