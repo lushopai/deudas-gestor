@@ -13,9 +13,9 @@ services:
       - "9150:8080"
     environment:
       # CONECTAR A BASE DE DATOS EXTERNA
-      SPRING_DATASOURCE_URL: jdbc:postgresql://192.168.1.18:5432/gastos_compartidos
-      SPRING_DATASOURCE_USERNAME: gastos_admin
-      SPRING_DATASOURCE_PASSWORD: GastosSuperSecuro123!
+      SPRING_DATASOURCE_URL: jdbc:postgresql://192.168.1.18:5432/mi_basedatos
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: admin123
 
       # Autenticación y Secretos (Se inyectan desde el servidor/Jenkins)
       APP_JWT_SECRET: ${JWT_SECRET}
