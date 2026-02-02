@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import Tesseract from 'tesseract.js';
+import { GeminiOcrService, OcrResult as GeminiOcrResult } from './gemini-ocr.service';
 
 interface OcrResult {
   texto: string;
@@ -9,7 +10,9 @@ interface OcrResult {
     descripcion?: string;
     fecha?: string;
     tipoDocumento?: string;
+    comercio?: string;
   };
+  motor?: 'gemini' | 'tesseract';
 }
 
 interface ImagenProcesada {
@@ -22,12 +25,44 @@ interface ImagenProcesada {
 })
 export class OcrService {
 
+  constructor(private geminiOcrService: GeminiOcrService) { }
+
   /**
-   * Procesa un recibo con pre-procesamiento de imagen mejorado
+   * Procesa un recibo usando Gemini (principal) o Tesseract (fallback)
    */
   async procesarRecibo(imagenFile: File): Promise<OcrResult> {
+    console.log('🔍 [OCR] Iniciando procesamiento de recibo...');
+
+    // Intentar primero con Gemini Vision (más preciso)
+    if (this.geminiOcrService.isAvailable()) {
+      try {
+        console.log('🤖 [OCR] Usando Gemini Vision AI...');
+        const resultadoGemini = await this.geminiOcrService.procesarRecibo(imagenFile);
+
+        return {
+          texto: resultadoGemini.texto,
+          confianza: resultadoGemini.confianza,
+          datos: resultadoGemini.datos,
+          motor: 'gemini'
+        };
+      } catch (geminiError) {
+        console.warn('⚠️ [OCR] Gemini falló, usando Tesseract como fallback:', geminiError);
+        // Continuar con Tesseract como fallback
+      }
+    } else {
+      console.log('⚠️ [OCR] Gemini no disponible, usando Tesseract...');
+    }
+
+    // Fallback a Tesseract
+    return this.procesarConTesseract(imagenFile);
+  }
+
+  /**
+   * Procesa con Tesseract (fallback)
+   */
+  private async procesarConTesseract(imagenFile: File): Promise<OcrResult> {
     try {
-      console.log('🔍 [OCR] Iniciando procesamiento mejorado de recibo...');
+      console.log('🔧 [OCR] Procesando con Tesseract...');
 
       // 1. Pre-procesar la imagen para mejorar OCR
       const imagenMejorada = await this.preprocesarImagen(imagenFile);
@@ -38,15 +73,16 @@ export class OcrService {
       // 3. Post-procesar y extraer datos estructurados
       const datos = this.extraerDatosAvanzado(resultado.texto);
 
-      console.log('✅ [OCR] Procesamiento completado:', datos);
+      console.log('✅ [OCR] Procesamiento Tesseract completado:', datos);
 
       return {
         texto: resultado.texto,
         confianza: resultado.confianza,
-        datos
+        datos,
+        motor: 'tesseract'
       };
     } catch (error) {
-      console.error('❌ [OCR] Error en OCR:', error);
+      console.error('❌ [OCR] Error en Tesseract:', error);
       throw error;
     }
   }

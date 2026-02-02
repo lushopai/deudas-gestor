@@ -99,21 +99,34 @@
 
               <div *ngIf="procesandoOcr" class="processing-indicator">
                 <mat-progress-spinner diameter="32" mode="indeterminate"></mat-progress-spinner>
-                <span>Procesando recibo...</span>
-                <small class="processing-hint">Mejorando imagen y extrayendo datos...</small>
+                <span>🤖 Procesando con Llama Vision AI...</span>
+                <small class="processing-hint">Analizando imagen con inteligencia artificial...</small>
               </div>
 
               <!-- Resultado del OCR -->
               <div *ngIf="resultadoOcr" class="ocr-result">
-                <h3 class="result-title">✓ Datos Extraídos del Recibo</h3>
+                <div class="result-header">
+                  <h3 class="result-title">✓ Datos Extraídos del Recibo</h3>
+                  <span class="motor-badge" [class.gemini]="resultadoOcr.motor === 'gemini'" [class.tesseract]="resultadoOcr.motor === 'tesseract'">
+                    {{ resultadoOcr.motor === 'gemini' ? '🦙 Llama AI' : '📝 Tesseract' }}
+                  </span>
+                </div>
                 <div class="resultado-items">
                   <div class="resultado-item">
                     <strong>Monto detectado:</strong>
                     <span class="monto">\${{ resultadoOcr.datos?.cantidad || 'N/A' }}</span>
                   </div>
+                  <div class="resultado-item" *ngIf="resultadoOcr.datos?.comercio">
+                    <strong>Comercio:</strong>
+                    <span>{{ resultadoOcr.datos.comercio }}</span>
+                  </div>
                   <div class="resultado-item">
                     <strong>Descripción:</strong>
                     <span>{{ resultadoOcr.datos?.descripcion || 'No especificada' }}</span>
+                  </div>
+                  <div class="resultado-item" *ngIf="resultadoOcr.datos?.tipoDocumento">
+                    <strong>Tipo:</strong>
+                    <span>{{ resultadoOcr.datos.tipoDocumento }}</span>
                   </div>
                   <div class="resultado-item">
                     <strong>Confianza:</strong>
