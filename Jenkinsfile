@@ -3,7 +3,9 @@ pipeline {
 
     environment {
         // Definir variables de entorno si es necesario
-        DOCKER_COMPOSE_CMD = 'docker compose' // O 'docker-compose' dependiendo de la versión
+        DOCKER_COMPOSE_CMD = 'docker compose' // O 'docker-compose' dependiendo de la version
+        // Asegúrate de crear esta credencial en Jenkins (Dashboard -> Manage Jenkins -> Credentials)
+        CLOUDFLARE_API_TOKEN = credentials('cloudflare-api-token')
     }
 
     stages {

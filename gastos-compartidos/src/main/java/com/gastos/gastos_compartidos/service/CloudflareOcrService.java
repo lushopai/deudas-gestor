@@ -49,21 +49,24 @@ public class CloudflareOcrService {
             // 1. Convertir imagen a array de enteros para Cloudflare
             List<Integer> imageIntArray = convertFileToIntArray(file);
 
-            // 2. Construir cuerpo de la petición
+            // 2. Prompt Optimizado: Pedir explícitamente la lista de items
+            String prompt = "You are a receipt scanner API. Output ONLY a valid JSON object matching this structure: {\"montoTotal\": number, \"comercio\": \"string\", \"fecha\": \"DD/MM/YYYY\", \"descripcion\": \"string\", \"tipoDocumento\": \"Boleta|Factura|Voucher\", \"items\": [{\"nombre\": \"string\", \"precio\": number}]}. Extract all purchase items with their individual prices if visible. Identify the total amount to pay. Do not add markdown formatting. Do not add explanations.";
+
+            // 3. Request Body
             Map<String, Object> requestBody = new HashMap<>();
             requestBody.put("image", imageIntArray);
-            requestBody.put("prompt",
-                    "Analiza esta imagen de un recibo o boleta. Responde SOLAMENTE con un JSON válido con esta estructura: {\"montoTotal\": numero, \"comercio\": \"nombre\", \"fecha\": \"DD/MM/YYYY\", \"descripcion\": \"breve descripcion\", \"tipoDocumento\": \"Boleta|Factura|Voucher\"}. No incluyas markdown.");
-            requestBody.put("max_tokens", 512);
+            requestBody.put("prompt", prompt);
+            requestBody.put("max_tokens", 800);
+            requestBody.put("temperature", 0.1);
 
-            // 3. Configurar headers
+            // 4. Headers
             HttpHeaders headers = new HttpHeaders();
             headers.setBearerAuth(apiToken);
             headers.setContentType(MediaType.APPLICATION_JSON);
 
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
 
-            // 4. Llamar a la API
+            // 5. Call API
             String url = String.format("https://api.cloudflare.com/client/v4/accounts/%s/ai/run/%s", accountId, model);
 
             log.info("Llamando a Cloudflare API: {}", url);
@@ -73,7 +76,7 @@ public class CloudflareOcrService {
                 throw new BadRequestException("Error al llamar a Cloudflare API: " + response.getStatusCode());
             }
 
-            // 5. Parsear respuesta
+            // 6. Parse response
             return parsearRespuesta(response.getBody());
 
         } catch (Exception e) {
@@ -84,100 +87,156 @@ public class CloudflareOcrService {
 
     private List<Integer> convertFileToIntArray(MultipartFile file) throws IOException {
         byte[] bytes = file.getBytes();
+        if (bytes.length > 5 * 1024 * 1024) {
+            log.warn("Imagen muy grande ({} bytes), podría fallar en Cloudflare.", bytes.length);
+        }
         List<Integer> integers = new ArrayList<>(bytes.length);
         for (byte b : bytes) {
-            integers.add(b & 0xFF); // Convertir byte signado a entero no signado (0-255)
+            integers.add(b & 0xFF);
         }
         return integers;
     }
 
     private OcrResponseDTO parsearRespuesta(String responseBody) {
+        String textoGenerado = "";
         try {
             JsonNode rootResponse = objectMapper.readTree(responseBody);
 
-            // Cloudflare devuelve { "result": { "response": "texto..." }, "success": true }
             if (!rootResponse.path("success").asBoolean(true)) {
+                log.error("Cloudflare respondió success:false. Errores: {}", rootResponse.path("errors"));
                 throw new BadRequestException("La API de Cloudflare indicó error");
             }
 
-            String textoGenerado = rootResponse.path("result").path("response").asText();
-            log.info("Texto generado por Llama: {}", textoGenerado);
+            textoGenerado = rootResponse.path("result").path("response").asText();
+            log.info("Texto generado por Llama RAW: {}", textoGenerado);
 
-            // Limpiar JSON (quitar markdown ```json ... ```)
-            String jsonLimpio = limpiarJson(textoGenerado);
+            // Intentar extraer JSON del texto
+            String jsonLimpio = extraerJsonDelTexto(textoGenerado);
 
-            // Parsear el JSON interno generado por la IA
-            JsonNode datosIa = objectMapper.readTree(jsonLimpio);
+            JsonNode datosIa = null;
+            try {
+                datosIa = objectMapper.readTree(jsonLimpio);
+            } catch (Exception e) {
+                log.warn("No se pudo parsear el JSON limpio. Intentando extracción manual con Regex.");
+            }
+
+            if (datosIa == null) {
+                datosIa = objectMapper.createObjectNode();
+            }
+
+            // Datos básicos
+            BigDecimal monto = parseMonto(datosIa.path("montoTotal").asText(null));
+            if (monto == null)
+                monto = extraerMontoRegex(textoGenerado);
+
+            String fecha = datosIa.path("fecha").asText(null);
+            if (fecha == null || fecha.equals("null"))
+                fecha = extraerFechaRegex(textoGenerado);
+
+            String comercio = datosIa.path("comercio").asText(null);
+            if (comercio == null || comercio.equals("null"))
+                comercio = "Comercio Detectado";
+
+            // Parsear ITEMS
+            List<OcrResponseDTO.Item> listaItems = new ArrayList<>();
+            if (datosIa.has("items") && datosIa.get("items").isArray()) {
+                for (JsonNode itemNode : datosIa.get("items")) {
+                    String nombre = itemNode.path("nombre").asText("Item");
+                    // Intentar extraer precio como number o string
+                    String precioStr = itemNode.path("precio").asText("0");
+                    BigDecimal precio = parseMonto(precioStr);
+                    if (precio != null) {
+                        listaItems.add(OcrResponseDTO.Item.builder().nombre(nombre).precio(precio).build());
+                    }
+                }
+            }
 
             return OcrResponseDTO.builder()
                     .texto(textoGenerado)
-                    .confianza(90)
+                    .confianza(monto != null ? 85 : 40)
                     .motor("llama-vision-backend")
                     .datos(OcrResponseDTO.OcrData.builder()
-                            .cantidad(parseMonto(datosIa.path("montoTotal").asText(null)))
-                            .comercio(datosIa.path("comercio").asText("Desconocido"))
+                            .cantidad(monto)
+                            .comercio(comercio)
                             .descripcion(datosIa.path("descripcion").asText("Gasto escaneado"))
-                            .fecha(datosIa.path("fecha").asText(null))
+                            .fecha(fecha)
                             .tipoDocumento(datosIa.path("tipoDocumento").asText("Boleta"))
+                            .items(listaItems)
                             .build())
                     .build();
 
         } catch (Exception e) {
-            log.warn("No se pudo parsear el JSON de la IA, devolviendo texto plano", e);
-            // Fallback si la IA no devuelve JSON válido
+            log.error("Error fatal parseando respuesta de Cloudflare", e);
             return OcrResponseDTO.builder()
-                    .texto("Error parseando: " + e.getMessage())
+                    .texto("Error: " + e.getMessage() + " | Raw: " + textoGenerado)
                     .confianza(0)
-                    .motor("llama-vision-error")
+                    .motor("error")
+                    .datos(new OcrResponseDTO.OcrData())
                     .build();
         }
     }
 
-    private String limpiarJson(String texto) {
+    private String extraerJsonDelTexto(String texto) {
         if (texto == null)
             return "{}";
-        String limpio = texto.trim();
-
-        // Quitar bloques de código
-        if (limpio.contains("```json")) {
-            limpio = limpio.substring(limpio.indexOf("```json") + 7);
-            if (limpio.contains("```")) {
-                limpio = limpio.substring(0, limpio.indexOf("```"));
-            }
-        } else if (limpio.contains("```")) {
-            limpio = limpio.substring(limpio.indexOf("```") + 3);
-            if (limpio.contains("```")) {
-                limpio = limpio.substring(0, limpio.indexOf("```"));
-            }
+        int firstBrace = texto.indexOf('{');
+        int lastBrace = texto.lastIndexOf('}');
+        if (firstBrace >= 0 && lastBrace > firstBrace) {
+            return texto.substring(firstBrace, lastBrace + 1);
         }
+        return texto;
+    }
 
-        return limpio.trim();
+    private BigDecimal extraerMontoRegex(String texto) {
+        try {
+            Pattern pTotal = Pattern.compile("(?:total|monto|pagar|suma)[:\\s]*\\$?([\\d.,]+)",
+                    Pattern.CASE_INSENSITIVE);
+            Matcher mTotal = pTotal.matcher(texto);
+            if (mTotal.find())
+                return parseMonto(mTotal.group(1));
+
+            Pattern pMoneda = Pattern.compile("\\$\\s*([\\d.,]+)");
+            Matcher mMoneda = pMoneda.matcher(texto);
+            if (mMoneda.find())
+                return parseMonto(mMoneda.group(1));
+        } catch (Exception e) {
+        }
+        return null;
+    }
+
+    private String extraerFechaRegex(String texto) {
+        try {
+            Pattern pFecha = Pattern.compile("(\\d{1,2}[-/]\\d{1,2}[-/]\\d{2,4})");
+            Matcher mFecha = pFecha.matcher(texto);
+            if (mFecha.find())
+                return mFecha.group(1);
+        } catch (Exception e) {
+        }
+        return null;
     }
 
     private BigDecimal parseMonto(String montoStr) {
-        if (montoStr == null || montoStr.equals("null") || montoStr.isEmpty())
+        if (montoStr == null || montoStr.equals("null") || montoStr.trim().isEmpty())
             return null;
         try {
-            // Limpiar string de símbolos ($ , .)
             String limpio = montoStr.replaceAll("[^0-9,.]", "");
+            if (limpio.isEmpty())
+                return null;
 
-            // Normalizar decimales (asumiendo formato 1.000,00 o 1,000.00)
-            // Si tiene coma y punto, asumimos que el último es el decimal
-            if (limpio.contains(",") && limpio.contains(".")) {
-                if (limpio.lastIndexOf(",") > limpio.lastIndexOf(".")) {
+            int lastDot = limpio.lastIndexOf('.');
+            int lastComma = limpio.lastIndexOf(',');
+
+            if (lastDot > -1 && lastComma > -1) {
+                if (lastDot > lastComma)
+                    limpio = limpio.replace(",", "");
+                else
                     limpio = limpio.replace(".", "").replace(",", ".");
-                } else {
-                    limpio = limpio.replace(",", "");
-                }
-            } else if (limpio.contains(",")) {
-                // Solo comas -> probable decimal si son 2 digitos al final, o miles si son 3
-                if (limpio.matches(".*,\\d{2}")) {
+            } else if (lastComma > -1) {
+                if (limpio.length() - lastComma == 3)
                     limpio = limpio.replace(",", ".");
-                } else {
+                else
                     limpio = limpio.replace(",", "");
-                }
             }
-
             return new BigDecimal(limpio);
         } catch (Exception e) {
             return null;

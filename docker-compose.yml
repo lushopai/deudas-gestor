@@ -24,6 +24,9 @@ services:
 
       # Configuración de CORS (Permitir todo origen para facilitar VPN/Tailscale)
       CORS_ALLOWED_ORIGINS: "*"
+
+      # Cloudflare OCR
+      CLOUDFLARE_API_TOKEN: ${CLOUDFLARE_API_TOKEN}
     networks:
       - app_network
     restart: unless-stopped
