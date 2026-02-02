@@ -39,6 +39,8 @@ services:
       APP_JWT_SECRET: ${JWT_SECRET:-tu_super_secreto_jwt_muy_largo_y_seguro_con_minimo_32_caracteres_1234567890abcdef}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      # Permitir todo origen para evitar problemas con Tailscale
+      CORS_ALLOWED_ORIGINS: "*"
     depends_on:
       postgres:
         condition: service_healthy
