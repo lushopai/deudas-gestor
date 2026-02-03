@@ -74,11 +74,9 @@ mat-card-content {
     .mat-mdc-tab-labels {
       background: white;
     }
-
     .mat-mdc-tab {
       min-width: 160px;
     }
-
     .mdc-tab-indicator__content--underline {
       border-color: #1976d2;
     }
@@ -193,8 +191,6 @@ mat-form-field {
   }
 }
 
-
-
 .result-title {
   color: rgba(0, 0, 0, 0.87);
   margin: 0 0 12px 0;
@@ -240,22 +236,84 @@ mat-form-field {
     font-weight: 700;
     font-size: 14px;
 
-    &.alta {
-      color: #27ae60;
-    }
-
-    &.media {
-      color: #f39c12;
-    }
-
-    &.baja {
-      color: #e74c3c;
-    }
+    &.alta { color: #27ae60; }
+    &.media { color: #f39c12; }
+    &.baja { color: #e74c3c; }
   }
 }
 
 .result-divider {
   margin: 16px 0 !important;
+}
+
+/* --- ESTILOS DE LA TABLA DE ITEMS (NUEVO) --- */
+.items-container {
+  margin-bottom: 20px;
+}
+
+.section-title {
+  color: #1976d2;
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.table-responsive {
+  max-height: 250px;
+  overflow-y: auto;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  background: white;
+}
+
+.items-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+
+  th {
+    background: #f5f5f5;
+    color: rgba(0,0,0,0.6);
+    text-align: left;
+    padding: 8px 12px;
+    position: sticky;
+    top: 0;
+    font-weight: 500;
+    z-index: 1;
+    border-bottom: 1px solid #e0e0e0;
+  }
+
+  td {
+    padding: 8px 12px;
+    border-bottom: 1px solid #f0f0f0;
+    color: rgba(0,0,0,0.87);
+  }
+
+  .item-name {
+    width: 60%;
+  }
+
+  .item-price {
+    font-weight: 500;
+    color: #4caf50;
+    text-align: right;
+  }
+
+  .item-actions {
+    text-align: center;
+    width: 40px;
+  }
+
+  .total-row {
+    background: #f9f9f9;
+    
+    td {
+      border-top: 2px solid #e0e0e0;
+      color: #1976d2;
+      font-weight: bold;
+    }
+  }
 }
 
 .edit-title {
@@ -368,19 +426,36 @@ mat-form-field {
 
   .resultado-item {
     background: #333333;
-
-    strong {
-      color: #aaa;
-    }
-
-    span {
-      color: #fff;
-    }
+    strong { color: #aaa; }
+    span { color: #fff; }
   }
 
-  .result-title,
-  .edit-title {
+  .result-title, .edit-title {
     color: #fff;
+  }
+
+  /* Dark mode para la tabla */
+  .table-responsive {
+    background: #333;
+    border-color: #444;
+  }
+  
+  .items-table {
+    th {
+      background: #2c2c2c;
+      color: #ccc;
+      border-bottom-color: #444;
+    }
+    
+    td {
+      border-bottom-color: #444;
+      color: #eee;
+    }
+    
+    .total-row {
+      background: #2a2a2a;
+      td { border-top-color: #555; }
+    }
   }
 }
 
@@ -445,15 +520,12 @@ mat-form-field {
   color: rgba(0, 0, 0, 0.6);
 }
 
-
-/* Fix for mat-select transparency issue */
 ::ng-deep .mat-mdc-select-panel {
   background-color: white !important;
   border-radius: 4px !important;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3) !important;
 }
 
-/* Dark Mode overrides for select panel */
 @media (prefers-color-scheme: dark) {
   ::ng-deep .mat-mdc-select-panel {
     background-color: #242424 !important;

@@ -179,11 +179,15 @@ export class GastoFormComponent implements OnInit {
     });
   }
 
+  itemsDetalle: any[] = [];
+
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files[0]) {
       const file = input.files[0];
       this.procesandoOcr = true;
+      this.resultadoOcr = null;
+      this.itemsDetalle = [];
 
       this.ocrService.procesarRecibo(file).then(resultado => {
         this.resultadoOcr = resultado;
@@ -193,8 +197,14 @@ export class GastoFormComponent implements OnInit {
             descripcion: resultado.datos.descripcion || '',
             monto: resultado.datos.cantidad || ''
           });
+
+          // Cargar items si existen
+          if (resultado.datos.items && Array.isArray(resultado.datos.items)) {
+            this.itemsDetalle = resultado.datos.items;
+          }
         }
         this.procesandoOcr = false;
+        this.cdRef.detectChanges();
       }).catch(err => {
         console.error('Error en OCR:', err);
         this.alertService.error(
@@ -203,7 +213,27 @@ export class GastoFormComponent implements OnInit {
           'Intenta con otra imagen más clara'
         );
         this.procesandoOcr = false;
+        this.cdRef.detectChanges();
       });
+    }
+  }
+
+  eliminarItem(index: number): void {
+    if (index >= 0 && index < this.itemsDetalle.length) {
+      this.itemsDetalle.splice(index, 1);
+      this.recalcularTotal();
+    }
+  }
+
+  recalcularTotal(): void {
+    const nuevoTotal = this.itemsDetalle.reduce((sum, item) => sum + (Number(item.precio) || 0), 0);
+    this.formulario.patchValue({
+      monto: nuevoTotal
+    });
+
+    // Actualizar también en la vista del resultado OCR para consistencia visual
+    if (this.resultadoOcr && this.resultadoOcr.datos) {
+      this.resultadoOcr.datos.cantidad = nuevoTotal;
     }
   }
 

@@ -11,6 +11,7 @@ interface OcrResult {
     fecha?: string;
     tipoDocumento?: string;
     comercio?: string;
+    items?: Array<{ nombre: string; precio: number }>;
   };
   motor?: 'gemini' | 'tesseract';
 }

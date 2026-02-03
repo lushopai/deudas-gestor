@@ -56,7 +56,7 @@ public class CloudflareOcrService {
             Map<String, Object> requestBody = new HashMap<>();
             requestBody.put("image", imageIntArray);
             requestBody.put("prompt", prompt);
-            requestBody.put("max_tokens", 800);
+            requestBody.put("max_tokens", 2500);
             requestBody.put("temperature", 0.1);
 
             // 4. Headers

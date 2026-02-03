@@ -143,6 +143,40 @@
 
                 <mat-divider class="result-divider"></mat-divider>
 
+                <mat-divider class="result-divider"></mat-divider>
+
+                <!-- TABLA DE ITEMS (Nuevo) -->
+                <div class="items-container" *ngIf="itemsDetalle && itemsDetalle.length > 0">
+                  <h4 class="section-title">🛒 Detalle de Productos</h4>
+                  <div class="table-responsive">
+                    <table class="items-table">
+                      <thead>
+                        <tr>
+                          <th>Item</th>
+                          <th>Precio</th>
+                          <th></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr *ngFor="let item of itemsDetalle; let i = index">
+                          <td class="item-name">{{ item.nombre }}</td>
+                          <td class="item-price">\${{ item.precio | number:'1.0-0' }}</td>
+                          <td class="item-actions">
+                            <button mat-icon-button color="warn" (click)="eliminarItem(i)" matTooltip="Eliminar item">
+                              <mat-icon>delete</mat-icon>
+                            </button>
+                          </td>
+                        </tr>
+                        <tr class="total-row">
+                          <td><strong>TOTAL CALCULADO</strong></td>
+                          <td><strong>\${{ formulario.get('monto')?.value | number:'1.0-0' }}</strong></td>
+                          <td></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
                 <h4 class="edit-title">Edita los datos antes de guardar:</h4>
                 <form [formGroup]="formulario" (ngSubmit)="guardarGasto()">
                   <mat-form-field appearance="outline" class="full-width">
