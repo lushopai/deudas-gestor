@@ -239,6 +239,7 @@ export class GastoFormComponent implements OnInit {
 
   limpiarOCR(): void {
     this.resultadoOcr = null;
+    this.itemsDetalle = [];
     this.formulario.reset();
   }
 

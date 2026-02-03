@@ -111,82 +111,107 @@
                     {{ resultadoOcr.motor === 'gemini' ? '🦙 Llama AI' : '📝 Tesseract' }}
                   </span>
                 </div>
-                <div class="resultado-items">
-                  <div class="resultado-item">
-                    <strong>Monto detectado:</strong>
-                    <span class="monto">\${{ resultadoOcr.datos?.cantidad || 'N/A' }}</span>
-                  </div>
-                  <div class="resultado-item" *ngIf="resultadoOcr.datos?.comercio">
-                    <strong>Comercio:</strong>
-                    <span>{{ resultadoOcr.datos.comercio }}</span>
-                  </div>
-                  <div class="resultado-item">
-                    <strong>Descripción:</strong>
-                    <span>{{ resultadoOcr.datos?.descripcion || 'No especificada' }}</span>
-                  </div>
-                  <div class="resultado-item" *ngIf="resultadoOcr.datos?.tipoDocumento">
-                    <strong>Tipo:</strong>
-                    <span>{{ resultadoOcr.datos.tipoDocumento }}</span>
-                  </div>
-                  <div class="resultado-item">
-                    <strong>Confianza:</strong>
-                    <span 
-                      class="confianza"
-                      [class.alta]="resultadoOcr.confianza > 70"
-                      [class.media]="resultadoOcr.confianza > 40 && resultadoOcr.confianza <= 70"
-                      [class.baja]="resultadoOcr.confianza <= 40"
-                    >
-                      {{ resultadoOcr.confianza }}%
-                    </span>
-                  </div>
-                </div>
 
-                <mat-divider class="result-divider"></mat-divider>
-
-                <mat-divider class="result-divider"></mat-divider>
-
-                <!-- TABLA DE ITEMS (Nuevo) -->
-                <div class="items-container" *ngIf="itemsDetalle && itemsDetalle.length > 0">
-                  <h4 class="section-title">🛒 Detalle de Productos</h4>
-                  <div class="table-responsive">
+                <!-- TABLA DE ITEMS PRIMERO (más prominente) -->
+                <div class="items-section" *ngIf="itemsDetalle && itemsDetalle.length > 0">
+                  <div class="section-header">
+                    <h4>🛒 Productos Detectados</h4>
+                    <small>Elimina los que no correspondan</small>
+                  </div>
+                  
+                  <div class="items-table-wrapper">
                     <table class="items-table">
                       <thead>
                         <tr>
-                          <th>Item</th>
-                          <th>Precio</th>
-                          <th></th>
+                          <th>Producto</th>
+                          <th class="text-right">Precio</th>
+                          <th class="text-center">Acción</th>
                         </tr>
                       </thead>
                       <tbody>
-                        <tr *ngFor="let item of itemsDetalle; let i = index">
+                        <tr *ngFor="let item of itemsDetalle; let i = index" class="item-row">
                           <td class="item-name">{{ item.nombre }}</td>
-                          <td class="item-price">\${{ item.precio | number:'1.0-0' }}</td>
-                          <td class="item-actions">
-                            <button mat-icon-button color="warn" (click)="eliminarItem(i)" matTooltip="Eliminar item">
-                              <mat-icon>delete</mat-icon>
+                          <td class="item-price text-right">\${{ item.precio | number:'1.0-2' }}</td>
+                          <td class="item-actions text-center">
+                            <button 
+                              mat-icon-button 
+                              color="warn" 
+                              (click)="eliminarItem(i)" 
+                              matTooltip="Eliminar"
+                              class="delete-btn">
+                              <mat-icon>close</mat-icon>
                             </button>
                           </td>
                         </tr>
+                      </tbody>
+                      <tfoot>
                         <tr class="total-row">
-                          <td><strong>TOTAL CALCULADO</strong></td>
-                          <td><strong>\${{ formulario.get('monto')?.value | number:'1.0-0' }}</strong></td>
+                          <td><strong>TOTAL</strong></td>
+                          <td class="text-right"><strong>\${{ formulario.get('monto')?.value | number:'1.0-2' }}</strong></td>
                           <td></td>
                         </tr>
-                      </tbody>
+                      </tfoot>
                     </table>
                   </div>
                 </div>
 
-                <h4 class="edit-title">Edita los datos antes de guardar:</h4>
+                <!-- Datos adicionales (colapsados visualmente) -->
+                <details class="additional-data" open>
+                  <summary>📋 Información Adicional</summary>
+                  <div class="data-grid">
+                    <div class="data-item" *ngIf="resultadoOcr.datos?.comercio">
+                      <mat-icon>store</mat-icon>
+                      <div>
+                        <small>Comercio</small>
+                        <p>{{ resultadoOcr.datos.comercio }}</p>
+                      </div>
+                    </div>
+                    <div class="data-item" *ngIf="resultadoOcr.datos?.fecha">
+                      <mat-icon>calendar_today</mat-icon>
+                      <div>
+                        <small>Fecha</small>
+                        <p>{{ resultadoOcr.datos.fecha }}</p>
+                      </div>
+                    </div>
+                    <div class="data-item" *ngIf="resultadoOcr.datos?.tipoDocumento">
+                      <mat-icon>receipt</mat-icon>
+                      <div>
+                        <small>Tipo</small>
+                        <p>{{ resultadoOcr.datos.tipoDocumento }}</p>
+                      </div>
+                    </div>
+                    <div class="data-item">
+                      <mat-icon>analytics</mat-icon>
+                      <div>
+                        <small>Confianza</small>
+                        <p 
+                          [class.alta]="resultadoOcr.confianza > 70"
+                          [class.media]="resultadoOcr.confianza > 40 && resultadoOcr.confianza <= 70"
+                          [class.baja]="resultadoOcr.confianza <= 40">
+                          {{ resultadoOcr.confianza }}%
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </details>
+
+                <mat-divider class="result-divider"></mat-divider>
+
+                <h4 class="edit-title">✏️ Revisa y Guarda</h4>
                 <form [formGroup]="formulario" (ngSubmit)="guardarGasto()">
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>Descripción</mat-label>
                     <input matInput formControlName="descripcion" required>
+                    <mat-icon matPrefix>description</mat-icon>
                   </mat-form-field>
 
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>Monto</mat-label>
                     <input matInput type="number" step="0.01" formControlName="monto" required>
+                    <mat-icon matPrefix>attach_money</mat-icon>
+                    <mat-hint *ngIf="itemsDetalle && itemsDetalle.length > 0">
+                      Calculado automáticamente desde los items
+                    </mat-hint>
                   </mat-form-field>
 
                   <mat-form-field appearance="outline" class="full-width">
@@ -196,17 +221,18 @@
                         {{ cat.icono }} {{ cat.nombre }}
                       </mat-option>
                     </mat-select>
+                    <mat-icon matPrefix>category</mat-icon>
                   </mat-form-field>
 
                   <div class="button-group">
-                    <button mat-raised-button color="primary" type="submit" class="full-width submit-btn" [disabled]="cargando">
+                    <button mat-raised-button color="primary" type="submit" class="save-btn" [disabled]="cargando || formulario.invalid">
                       <mat-icon *ngIf="!cargando">save</mat-icon>
-                      <mat-progress-spinner *ngIf="cargando" diameter="24" mode="indeterminate"></mat-progress-spinner>
-                      {{ cargando ? 'Guardando...' : (modoEdicion ? 'ACTUALIZAR GASTO' : 'GUARDAR GASTO') }}
+                      <mat-progress-spinner *ngIf="cargando" diameter="20" mode="indeterminate"></mat-progress-spinner>
+                      {{ cargando ? 'Guardando...' : 'GUARDAR GASTO' }}
                     </button>
                     <button mat-stroked-button (click)="limpiarOCR()" type="button" class="clear-btn">
-                      <mat-icon>close</mat-icon>
-                      Limpiar
+                      <mat-icon>refresh</mat-icon>
+                      Escanear Otro
                     </button>
                   </div>
                 </form>

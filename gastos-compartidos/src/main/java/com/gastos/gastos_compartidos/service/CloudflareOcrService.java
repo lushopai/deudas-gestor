@@ -219,6 +219,7 @@ public class CloudflareOcrService {
         if (montoStr == null || montoStr.equals("null") || montoStr.trim().isEmpty())
             return null;
         try {
+            // Limpiar todo excepto números, puntos y comas
             String limpio = montoStr.replaceAll("[^0-9,.]", "");
             if (limpio.isEmpty())
                 return null;
@@ -226,19 +227,41 @@ public class CloudflareOcrService {
             int lastDot = limpio.lastIndexOf('.');
             int lastComma = limpio.lastIndexOf(',');
 
+            // Caso 1: Tiene ambos separadores (ej: 1.000,50 o 1,000.50)
             if (lastDot > -1 && lastComma > -1) {
-                if (lastDot > lastComma)
+                if (lastDot > lastComma) {
+                    // Formato: 1,000.50 -> quitar comas
                     limpio = limpio.replace(",", "");
-                else
+                } else {
+                    // Formato: 1.000,50 -> quitar puntos, cambiar coma por punto
                     limpio = limpio.replace(".", "").replace(",", ".");
-            } else if (lastComma > -1) {
-                if (limpio.length() - lastComma == 3)
-                    limpio = limpio.replace(",", ".");
-                else
-                    limpio = limpio.replace(",", "");
+                }
             }
+            // Caso 2: Solo tiene comas
+            else if (lastComma > -1) {
+                int digitosDesp = limpio.length() - lastComma - 1;
+                // Si tiene 2 dígitos después de la coma, es decimal (ej: 10,50)
+                // Si tiene 1 o 3+ dígitos, podría ser miles (ej: 1,000) o error
+                if (digitosDesp == 2) {
+                    limpio = limpio.replace(",", ".");
+                } else {
+                    limpio = limpio.replace(",", "");
+                }
+            }
+            // Caso 3: Solo tiene puntos
+            else if (lastDot > -1) {
+                int digitosDesp = limpio.length() - lastDot - 1;
+                // Si tiene 1-2 dígitos después del punto, es decimal (ej: 1111.0 o 10.50)
+                // Si tiene 3 dígitos, es separador de miles (ej: 1.000)
+                if (digitosDesp >= 3) {
+                    limpio = limpio.replace(".", "");
+                }
+                // Si tiene 1-2 dígitos, ya está en formato correcto para BigDecimal
+            }
+
             return new BigDecimal(limpio);
         } catch (Exception e) {
+            log.warn("Error parseando monto: {}", montoStr, e);
             return null;
         }
     }
