@@ -16,6 +16,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { GastoService, Gasto, ResumenGastos } from '../../core/services/gasto.service';
 import { BalanceCard } from '../deudas/balance-card/balance-card';
 
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
