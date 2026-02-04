@@ -3,11 +3,26 @@
   <mat-sidenav #sidenav [(opened)]="sidenavAberto" [mode]="(isMobile$ | async) ? 'over' : 'side'" class="sidenav">
     <!-- User Profile Section -->
     <div class="sidenav-user-section">
-      <img [src]="(usuario$ | async)?.fotoPerfil | defaultAvatar" alt="Avatar" class="sidenav-avatar" />
-      <div class="sidenav-user-info">
-        <div class="user-name">{{ (usuario$ | async)?.nombre || 'Usuario' }}</div>
-        <div class="user-email">{{ (usuario$ | async)?.email }}</div>
-      </div>
+      <!-- Avatar con foto o iniciales -->
+      @if (usuario$ | async; as usuario) {
+        <div class="sidenav-avatar-container">
+          @if (usuario.fotoPerfil) {
+            <img
+              [src]="usuario.fotoPerfil"
+              alt="Avatar"
+              class="sidenav-avatar"
+            />
+          } @else {
+            <div class="sidenav-avatar-initials">
+              {{ getInitials(usuario.nombre) }}
+            </div>
+          }
+        </div>
+        <div class="sidenav-user-info">
+          <div class="user-name">{{ usuario.nombre || 'Usuario' }}</div>
+          <div class="user-email">{{ usuario.email }}</div>
+        </div>
+      }
     </div>
 
     <mat-divider></mat-divider>

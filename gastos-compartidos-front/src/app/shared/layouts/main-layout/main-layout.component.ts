@@ -46,27 +46,37 @@ export class MainLayoutComponent implements OnInit {
   menuItems: NavItem[] = [
     {
       label: 'Dashboard',
-      icon: 'dashboard',
+      icon: 'dashboard_outlined',
       route: '/dashboard'
     },
     {
       label: 'Nuevo Gasto',
-      icon: 'add_circle',
+      icon: 'add_circle_outline',
       route: '/gastos/nuevo'
     },
     {
       label: 'Escanear Recibo',
-      icon: 'receipt',
+      icon: 'receipt_long',
       route: '/gastos/ocr'
     },
     {
       label: 'Ver Gastos',
-      icon: 'list',
+      icon: 'list_alt',
       route: '/gastos'
     },
     {
+      label: 'Abonar Pago',
+      icon: 'payment',
+      route: '/deudas/abonar'
+    },
+    {
+      label: 'Historial Pagos',
+      icon: 'history',
+      route: '/deudas/historial'
+    },
+    {
       label: 'Reportes',
-      icon: 'bar_chart',
+      icon: 'assessment',
       route: '/reportes'
     }
   ];
@@ -107,6 +117,17 @@ export class MainLayoutComponent implements OnInit {
 
   navigateTo(route: string) {
     this.router.navigate([route]);
+  }
+
+  // Obtener iniciales del usuario para avatar
+  getInitials(nombre: string | undefined, apellido?: string): string {
+    if (!nombre) return 'U';
+
+    const nombreParts = nombre.trim().split(' ');
+    if (nombreParts.length >= 2) {
+      return (nombreParts[0][0] + nombreParts[1][0]).toUpperCase();
+    }
+    return nombre.substring(0, 2).toUpperCase();
     this.cerrarSidenav();
   }
 

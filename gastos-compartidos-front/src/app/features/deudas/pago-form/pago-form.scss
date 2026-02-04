@@ -1,0 +1,130 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #fafafa;
+}
+
+mat-toolbar {
+  flex-shrink: 0;
+  background: #1976d2;
+  color: white;
+  box-shadow: var(--shadow-sm);
+  height: 56px;
+
+  button {
+    color: white;
+  }
+
+  span {
+    font-weight: 500;
+    font-size: 18px;
+    margin-left: var(--spacing-md);
+  }
+}
+
+.form-container {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: var(--spacing-lg) var(--spacing-md);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.form-card {
+  width: 100%;
+  max-width: 500px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.loading-resumen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xl);
+  color: #666;
+}
+
+/* Resumen de deuda */
+.deuda-resumen {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: var(--spacing-lg);
+  text-align: center;
+
+  .resumen-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    opacity: 0.8;
+    margin-bottom: var(--spacing-xs);
+  }
+
+  .resumen-mensaje {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .resumen-monto {
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1;
+  }
+}
+
+mat-card-content {
+  padding: var(--spacing-lg) !important;
+}
+
+.receptor-info {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  background: #e3f2fd;
+  border-radius: var(--radius);
+  margin-bottom: var(--spacing-lg);
+  font-size: 14px;
+  color: #333;
+
+  mat-icon {
+    color: var(--primary-color);
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.full-width {
+  width: 100%;
+  margin-bottom: var(--spacing-md);
+}
+
+.submit-btn {
+  height: 48px !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  margin-top: var(--spacing-md);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .form-container {
+    padding: 0;
+  }
+
+  .form-card {
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  mat-card-content {
+    padding: var(--spacing-md) !important;
+  }
+}

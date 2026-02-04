@@ -9,7 +9,7 @@
   <mat-card class="form-card">
     <mat-card-header>
       <mat-card-title>{{ modoEdicion ? 'Editar Gasto' : 'Nuevo Gasto' }}</mat-card-title>
-      <mat-card-subtitle>{{ modoEdicion ? 'Modifica los datos del gasto' : 'Ingresa un gasto manualmente o escanea un recibo' }}</mat-card-subtitle>
+      <mat-card-subtitle>{{ modoEdicion ? 'Actualiza la información' : 'Manual o con OCR' }}</mat-card-subtitle>
     </mat-card-header>
 
     <mat-card-content>
@@ -56,18 +56,16 @@
         <mat-tab label="Escanear Recibo">
           <div class="tab-content">
             <div class="ocr-container">
-              <!-- Consejos para mejor escaneo -->
+              <!-- Consejos para mejor escaneo - Versión minimalista -->
               <mat-card class="tips-card">
                 <mat-card-content>
                   <div class="tips-header">
-                    <mat-icon color="primary">tips_and_updates</mat-icon>
-                    <span class="tips-title">Consejos para mejor resultado</span>
+                    <mat-icon color="primary">lightbulb_outline</mat-icon>
+                    <span class="tips-title">Tips</span>
                   </div>
                   <ul class="tips-list">
-                    <li>📸 Usa buena iluminación (luz natural o blanca)</li>
-                    <li>📐 Coloca el recibo sobre superficie plana</li>
-                    <li>🎯 Centra el documento y enfoca bien</li>
-                    <li>✨ Evita sombras y reflejos</li>
+                    <li>Buena iluminación y superficie plana</li>
+                    <li>Centra y enfoca el recibo</li>
                   </ul>
                 </mat-card-content>
               </mat-card>

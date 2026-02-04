@@ -154,6 +154,17 @@ export class PerfilComponent implements OnInit {
     this.router.navigate(['/dashboard']);
   }
 
+  // Obtener iniciales del usuario para avatar
+  getInitials(nombre: string | undefined): string {
+    if (!nombre) return 'U';
+
+    const nombreParts = nombre.trim().split(' ');
+    if (nombreParts.length >= 2) {
+      return (nombreParts[0][0] + nombreParts[1][0]).toUpperCase();
+    }
+    return nombre.substring(0, 2).toUpperCase();
+  }
+
   cerrarSesion() {
     this.authService.logout();
     this.router.navigate(['/login']);

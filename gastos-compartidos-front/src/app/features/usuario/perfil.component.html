@@ -39,7 +39,14 @@
     <mat-card class="avatar-card">
       <mat-card-content class="avatar-content">
         <div class="avatar-container">
-          <img [src]="previewFoto || 'assets/default-avatar.png'" alt="Avatar del usuario" class="avatar-image" />
+          <!-- Avatar con foto o iniciales -->
+          @if (previewFoto) {
+            <img [src]="previewFoto" alt="Avatar del usuario" class="avatar-image" />
+          } @else {
+            <div class="avatar-initials">
+              {{ getInitials(usuario?.nombre) }}
+            </div>
+          }
           <button type="button" mat-fab color="primary" class="change-avatar-btn" (click)="seleccionarFoto()"
             title="Cambiar foto de perfil">
             <mat-icon>camera_alt</mat-icon>
@@ -48,10 +55,14 @@
         <div class="avatar-info">
           <h2 class="usuario-nombre">{{ usuario.nombre || 'Usuario' }}</h2>
           <p class="usuario-email">{{ usuario.email }}</p>
-          <p class="usuario-tipo" *ngIf="usuario.tipoAutenticacion">
-            <mat-icon *ngIf="usuario.tipoAutenticacion === 'GOOGLE'">verified_user</mat-icon>
-            Registrado con {{ usuario.tipoAutenticacion }}
-          </p>
+          @if (usuario.tipoAutenticacion) {
+            <p class="usuario-tipo">
+              @if (usuario.tipoAutenticacion === 'GOOGLE') {
+                <mat-icon>verified_user</mat-icon>
+              }
+              Registrado con {{ usuario.tipoAutenticacion }}
+            </p>
+          }
         </div>
       </mat-card-content>
     </mat-card>

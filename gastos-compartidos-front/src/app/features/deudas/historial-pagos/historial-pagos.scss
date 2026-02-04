@@ -1,0 +1,244 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #fafafa;
+}
+
+mat-toolbar {
+  flex-shrink: 0;
+  background: #1976d2;
+  color: white;
+  box-shadow: var(--shadow-sm);
+  height: 56px;
+
+  button {
+    color: white;
+  }
+
+  span {
+    font-weight: 500;
+    font-size: 18px;
+    margin-left: var(--spacing-md);
+  }
+
+  .spacer {
+    flex: 1;
+  }
+}
+
+.historial-container {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: var(--spacing-md);
+  max-width: 600px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* States */
+.loading-state,
+.error-state,
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xxl) var(--spacing-md);
+  text-align: center;
+  color: #666;
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    opacity: 0.4;
+  }
+}
+
+.empty-text {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.empty-hint {
+  font-size: 14px;
+  color: #999;
+  margin-bottom: var(--spacing-md);
+}
+
+/* Lista de pagos */
+.pagos-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.pago-card {
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  padding: var(--spacing-md);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+  }
+
+  &.cancelado {
+    opacity: 0.5;
+  }
+
+  // Indicador lateral
+  &.enviado::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: #ff6b6b;
+  }
+
+  &.recibido::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: #51cf66;
+  }
+}
+
+.pago-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.pago-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  &.enviado {
+    background: rgba(255, 107, 107, 0.1);
+    color: #ff6b6b;
+  }
+
+  &.recibido {
+    background: rgba(81, 207, 102, 0.1);
+    color: #51cf66;
+  }
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.pago-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.pago-persona {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 2px;
+}
+
+.pago-concepto {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pago-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  font-size: 12px;
+  color: #999;
+}
+
+.pago-metodo {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+
+  mat-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+  }
+}
+
+.pago-monto {
+  font-size: 18px;
+  font-weight: 700;
+  flex-shrink: 0;
+
+  &.enviado {
+    color: #ff6b6b;
+  }
+
+  &.recibido {
+    color: #51cf66;
+  }
+}
+
+.pago-cancelado-badge {
+  display: inline-block;
+  margin-top: var(--spacing-sm);
+  padding: 2px 8px;
+  background: #fecdd3;
+  color: #e11d48;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.pago-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--spacing-sm);
+  padding-top: var(--spacing-sm);
+  border-top: 1px solid #f0f0f0;
+
+  button {
+    font-size: 12px;
+
+    mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+    }
+  }
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .historial-container {
+    padding: var(--spacing-sm);
+  }
+
+  .pago-monto {
+    font-size: 16px;
+  }
+}

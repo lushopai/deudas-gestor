@@ -1,0 +1,56 @@
+<mat-card class="balance-card" [class]="getColorBalance()">
+  <!-- Loading State -->
+  @if (cargando) {
+    <div class="loading-state">
+      <mat-progress-spinner diameter="40" mode="indeterminate"></mat-progress-spinner>
+      <span>Cargando balance...</span>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (error && !cargando) {
+    <mat-card-content class="error-content">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ error }}</span>
+      <button mat-button (click)="cargarResumen()">
+        <mat-icon>refresh</mat-icon>
+        Reintentar
+      </button>
+    </mat-card-content>
+  }
+
+  <!-- Balance Content -->
+  @if (resumen && !cargando) {
+    <mat-card-content class="balance-content">
+      <!-- Header -->
+      <div class="balance-header">
+        <mat-icon class="balance-icon">account_balance_wallet</mat-icon>
+        <div class="balance-title">Balance de Deudas</div>
+      </div>
+
+      <!-- Balance Info -->
+      <div class="balance-info">
+        <div class="balance-message">{{ resumen.mensajeBalance }}</div>
+        @if (resumen.saldoPendiente > 0) {
+          <div class="balance-amount">
+            ${{ resumen.saldoPendiente | number: '1.2-2' }}
+          </div>
+        }
+      </div>
+
+      <!-- Actions -->
+      <div class="balance-actions">
+        @if (resumen.saldoPendiente > 0) {
+          <button mat-raised-button color="primary" (click)="abonarPago()">
+            <mat-icon>payment</mat-icon>
+            Abonar Pago
+          </button>
+        }
+        <button mat-stroked-button (click)="verHistorial()">
+          <mat-icon>history</mat-icon>
+          Ver Historial
+        </button>
+      </div>
+    </mat-card-content>
+  }
+</mat-card>

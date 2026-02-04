@@ -1,0 +1,96 @@
+<mat-toolbar color="primary">
+  <button mat-icon-button (click)="volver()">
+    <mat-icon>arrow_back</mat-icon>
+  </button>
+  <span>Historial de Pagos</span>
+  <span class="spacer"></span>
+  <button mat-icon-button (click)="abonarPago()">
+    <mat-icon>add</mat-icon>
+  </button>
+</mat-toolbar>
+
+<div class="historial-container">
+  <!-- Loading -->
+  @if (cargando) {
+    <div class="loading-state">
+      <mat-progress-spinner diameter="40" mode="indeterminate"></mat-progress-spinner>
+      <span>Cargando historial...</span>
+    </div>
+  }
+
+  <!-- Error -->
+  @if (error && !cargando) {
+    <div class="error-state">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ error }}</span>
+      <button mat-button (click)="cargarHistorial()">
+        <mat-icon>refresh</mat-icon>
+        Reintentar
+      </button>
+    </div>
+  }
+
+  <!-- Empty State -->
+  @if (!cargando && !error && pagos.length === 0) {
+    <div class="empty-state">
+      <mat-icon>receipt_long</mat-icon>
+      <div class="empty-text">Sin pagos registrados</div>
+      <div class="empty-hint">Registra tu primer pago para comenzar a llevar el historial</div>
+      <button mat-raised-button color="primary" (click)="abonarPago()">
+        <mat-icon>add</mat-icon>
+        Registrar Pago
+      </button>
+    </div>
+  }
+
+  <!-- Lista de pagos -->
+  @if (!cargando && pagos.length > 0) {
+    <div class="pagos-list">
+      @for (pago of pagos; track pago.id) {
+        <mat-card class="pago-card" [class.enviado]="esPagadorActual(pago)" [class.recibido]="!esPagadorActual(pago)" [class.cancelado]="pago.estado === 'CANCELADO'">
+          <div class="pago-row">
+            <!-- Icono dirección -->
+            <div class="pago-icon" [class.enviado]="esPagadorActual(pago)" [class.recibido]="!esPagadorActual(pago)">
+              <mat-icon>{{ esPagadorActual(pago) ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
+            </div>
+
+            <!-- Info -->
+            <div class="pago-info">
+              <div class="pago-persona">
+                {{ esPagadorActual(pago) ? 'Pagaste a ' + pago.receptor.nombre : pago.pagador.nombre + ' te pagó' }}
+              </div>
+              @if (pago.concepto) {
+                <div class="pago-concepto">{{ pago.concepto }}</div>
+              }
+              <div class="pago-meta">
+                <span class="pago-fecha">{{ pago.fechaPago | date: 'dd/MM/yyyy' }}</span>
+                <span class="pago-metodo">
+                  <mat-icon>{{ getMetodoPagoIcon(pago.metodoPago) }}</mat-icon>
+                  {{ getMetodoPagoLabel(pago.metodoPago) }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Monto -->
+            <div class="pago-monto" [class.enviado]="esPagadorActual(pago)" [class.recibido]="!esPagadorActual(pago)">
+              {{ esPagadorActual(pago) ? '-' : '+' }}${{ pago.monto | number: '1.2-2' }}
+            </div>
+          </div>
+
+          @if (pago.estado === 'CANCELADO') {
+            <div class="pago-cancelado-badge">Cancelado</div>
+          }
+
+          @if (pago.estado !== 'CANCELADO' && esPagadorActual(pago)) {
+            <div class="pago-actions">
+              <button mat-button color="warn" (click)="cancelarPago(pago)">
+                <mat-icon>cancel</mat-icon>
+                Cancelar
+              </button>
+            </div>
+          }
+        </mat-card>
+      }
+    </div>
+  }
+</div>

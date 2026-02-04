@@ -14,6 +14,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatTabsModule } from '@angular/material/tabs';
 import { AuthService } from '../../core/services/auth.service';
 import { GastoService, Gasto, ResumenGastos } from '../../core/services/gasto.service';
+import { BalanceCard } from '../deudas/balance-card/balance-card';
 
 @Component({
   selector: 'app-dashboard',
@@ -30,7 +31,8 @@ import { GastoService, Gasto, ResumenGastos } from '../../core/services/gasto.se
     MatDividerModule,
     MatProgressBarModule,
     MatChipsModule,
-    MatTabsModule
+    MatTabsModule,
+    BalanceCard
   ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']

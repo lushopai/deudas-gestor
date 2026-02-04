@@ -1,0 +1,78 @@
+<mat-toolbar color="primary">
+  <button mat-icon-button (click)="volver()">
+    <mat-icon>arrow_back</mat-icon>
+  </button>
+  <span>Registrar Pago</span>
+</mat-toolbar>
+
+<div class="form-container">
+  <mat-card class="form-card">
+    <!-- Resumen de deuda actual -->
+    @if (cargandoResumen) {
+      <div class="loading-resumen">
+        <mat-progress-spinner diameter="32" mode="indeterminate"></mat-progress-spinner>
+        <span>Cargando información...</span>
+      </div>
+    }
+
+    @if (resumen && !cargandoResumen) {
+      <div class="deuda-resumen">
+        <div class="resumen-label">Deuda actual</div>
+        <div class="resumen-mensaje">{{ resumen.mensajeBalance }}</div>
+        @if (resumen.saldoPendiente > 0) {
+          <div class="resumen-monto">${{ resumen.saldoPendiente | number: '1.2-2' }}</div>
+        }
+      </div>
+
+      <mat-card-content>
+        <form [formGroup]="formulario" (ngSubmit)="registrarPago()">
+          <!-- Receptor (informativo) -->
+          <div class="receptor-info">
+            <mat-icon>person</mat-icon>
+            <span>Pago para: <strong>{{ getReceptorNombre() }}</strong></span>
+          </div>
+
+          <!-- Monto -->
+          <mat-form-field appearance="fill" class="full-width">
+            <mat-label>Monto a pagar</mat-label>
+            <input matInput type="number" step="0.01" formControlName="monto" placeholder="0.00" required>
+            <mat-icon matPrefix>attach_money</mat-icon>
+            @if (resumen.saldoPendiente > 0) {
+              <mat-hint>Deuda pendiente: ${{ resumen.saldoPendiente | number: '1.2-2' }}</mat-hint>
+            }
+          </mat-form-field>
+
+          <!-- Concepto -->
+          <mat-form-field appearance="fill" class="full-width">
+            <mat-label>Concepto (opcional)</mat-label>
+            <input matInput formControlName="concepto" placeholder="Ej: Abono deudas febrero">
+            <mat-icon matPrefix>notes</mat-icon>
+          </mat-form-field>
+
+          <!-- Método de pago -->
+          <mat-form-field appearance="fill" class="full-width">
+            <mat-label>Método de pago</mat-label>
+            <mat-select formControlName="metodoPago" required>
+              @for (metodo of metodosPago; track metodo.value) {
+                <mat-option [value]="metodo.value">
+                  {{ metodo.label }}
+                </mat-option>
+              }
+            </mat-select>
+            <mat-icon matPrefix>payment</mat-icon>
+          </mat-form-field>
+
+          <!-- Botón submit -->
+          <button mat-raised-button color="primary" type="submit" class="full-width submit-btn" [disabled]="cargando || formulario.invalid">
+            @if (!cargando) {
+              <mat-icon>send</mat-icon>
+            } @else {
+              <mat-progress-spinner diameter="24" mode="indeterminate"></mat-progress-spinner>
+            }
+            {{ cargando ? 'Registrando...' : 'REGISTRAR PAGO' }}
+          </button>
+        </form>
+      </mat-card-content>
+    }
+  </mat-card>
+</div>
