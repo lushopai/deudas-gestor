@@ -37,17 +37,30 @@ public class ParejaService {
         Pareja pareja = parejaRepository.findByCodigoInvitacion(codigoInvitacion)
             .orElseThrow(() -> new ResourceNotFoundException("Código de invitación inválido"));
 
-        // Verificar que la pareja tenga menos de 2 usuarios
+        // Verificar que la pareja destino tenga menos de 2 usuarios
         if (pareja.getUsuarios().size() >= 2) {
             throw new BadRequestException("La pareja ya tiene el máximo de miembros (2)");
         }
 
-        // Verificar que el usuario no esté ya en una pareja
-        if (usuario.getPareja() != null && !usuario.getPareja().getId().equals(pareja.getId())) {
-            throw new BadRequestException("El usuario ya está asociado a otra pareja");
+        // Verificar que no intente unirse a su propia pareja
+        if (usuario.getPareja() != null && usuario.getPareja().getId().equals(pareja.getId())) {
+            throw new BadRequestException("Ya perteneces a esta pareja");
         }
 
-        // Asociar el usuario a la pareja
+        // Si el usuario tiene una pareja previa con solo 1 miembro (él mismo),
+        // eliminar esa pareja vacía antes de unirse a la nueva
+        if (usuario.getPareja() != null) {
+            Pareja parejaAnterior = usuario.getPareja();
+            if (parejaAnterior.getUsuarios().size() <= 1) {
+                usuario.setPareja(null);
+                usuarioRepository.save(usuario);
+                parejaRepository.delete(parejaAnterior);
+            } else {
+                throw new BadRequestException("Ya estás asociado a una pareja con otro miembro");
+            }
+        }
+
+        // Asociar el usuario a la nueva pareja
         usuario.setPareja(pareja);
         usuarioRepository.save(usuario);
 

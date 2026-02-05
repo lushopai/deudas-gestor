@@ -39,8 +39,9 @@ export class ErrorInterceptor implements HttpInterceptor {
             case 400:
               errorMessage = error.error?.mensaje || error.error?.message || 'Solicitud inválida';
 
-              // No mostrar notificación para errores de pareja (manejados por componente)
-              if (errorMessage.includes('pareja')) {
+              // No mostrar notificación para errores de carga de pareja (manejados por componente)
+              // Pero sí mostrar para errores de acciones como unirse
+              if (request.url.includes('/mi-pareja') && errorMessage.includes('pareja')) {
                 showNotification = false;
               }
               break;

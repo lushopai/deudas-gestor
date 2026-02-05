@@ -113,7 +113,7 @@ export class ParejaSetup implements OnInit {
       error: (err) => {
         this.loadingService.hide();
         this.cargando = false;
-        // El error se maneja automáticamente en el interceptor
+        this.cdr.detectChanges();
       }
     });
   }
