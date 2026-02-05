@@ -7,9 +7,9 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
+import { NotificationService } from '../../core/services/notification.service';
 
 @Component({
   selector: 'app-registro',
@@ -24,7 +24,6 @@ import { AuthService } from '../../core/services/auth.service';
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
-    MatSnackBarModule,
     RouterLink
   ],
   templateUrl: './registro.component.html',
@@ -36,15 +35,11 @@ export class RegistroComponent implements OnInit {
   mostrarPassword = false;
   validacionesError: { [key: string]: string[] } = {};
 
-  // Regex patterns
-  private static regexNombre = /^[a-zA-ZáéíóúñÁÉÍÓÚÑ\s]+$/;
-  private static regexPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/;
-
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
     private router: Router,
-    private snackBar: MatSnackBar
+    private notificationService: NotificationService
   ) {
     this.formulario = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
@@ -62,7 +57,6 @@ export class RegistroComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Escuchar cambios en los campos para validar en tiempo real
     Object.keys(this.formulario.controls).forEach(key => {
       this.formulario.get(key)?.valueChanges.subscribe(() => {
         this.actualizarValidacionesError(key);
@@ -70,7 +64,6 @@ export class RegistroComponent implements OnInit {
     });
   }
 
-  // Validador personalizado para confirmar contraseña
   passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
     const password = control.get('password');
     const confirmPassword = control.get('confirmPassword');
@@ -82,7 +75,6 @@ export class RegistroComponent implements OnInit {
     return password.value === confirmPassword.value ? null : { 'passwordMismatch': true };
   }
 
-  // Validador personalizado para patrón de contraseña (debe coincidir con backend)
   static passwordPatternValidator(control: AbstractControl): ValidationErrors | null {
     if (!control.value) {
       return null;
@@ -175,10 +167,7 @@ export class RegistroComponent implements OnInit {
         this.formulario.get(key)?.markAsTouched();
         this.actualizarValidacionesError(key);
       });
-      this.snackBar.open('Por favor, completa todos los campos correctamente', 'Cerrar', {
-        duration: 5000,
-        panelClass: ['error-snackbar']
-      });
+      this.notificationService.warning('Por favor, completa todos los campos correctamente');
       return;
     }
 
@@ -186,22 +175,15 @@ export class RegistroComponent implements OnInit {
     const { confirmPassword, ...datos } = this.formulario.value;
 
     this.authService.registro(datos).subscribe({
-      next: (response) => {
+      next: () => {
         this.cargando = false;
-        this.snackBar.open('¡Cuenta creada exitosamente!', 'Cerrar', {
-          duration: 3000,
-          panelClass: ['success-snackbar']
-        });
+        this.notificationService.success('¡Cuenta creada exitosamente!');
         this.router.navigate(['/dashboard']);
       },
       error: (err) => {
         this.cargando = false;
-        const mensaje = err.error?.message || err.message || 'Error al crear la cuenta';
-        this.snackBar.open(mensaje, 'Cerrar', {
-          duration: 5000,
-          panelClass: ['error-snackbar']
-        });
-        console.error('Error:', err);
+        const mensaje = err.error?.mensaje || err.error?.message || 'Error al crear la cuenta';
+        this.notificationService.error(mensaje);
       }
     });
   }

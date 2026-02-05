@@ -25,6 +25,9 @@ export class ErrorInterceptor implements HttpInterceptor {
         let errorMessage = 'Ha ocurrido un error inesperado';
         let showNotification = true;
 
+        // Detectar si es ruta de autenticación (login/registro)
+        const isAuthRoute = request.url.includes('/auth/');
+
         // Manejar errores específicos
         if (error.error instanceof ErrorEvent) {
           // Error del cliente
@@ -40,17 +43,21 @@ export class ErrorInterceptor implements HttpInterceptor {
               errorMessage = error.error?.mensaje || error.error?.message || 'Solicitud inválida';
 
               // No mostrar notificación para errores de carga de pareja (manejados por componente)
-              // Pero sí mostrar para errores de acciones como unirse
               if (request.url.includes('/mi-pareja') && errorMessage.includes('pareja')) {
                 showNotification = false;
               }
               break;
 
             case 401:
-              // No autorizado - Sesión expirada
-              errorMessage = 'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.';
-              this.authService.logout();
-              this.router.navigate(['/login']);
+              if (isAuthRoute) {
+                // Error de credenciales en login
+                errorMessage = error.error?.mensaje || 'Credenciales incorrectas';
+              } else {
+                // Sesión expirada en otras rutas
+                errorMessage = 'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.';
+                this.authService.logout();
+                this.router.navigate(['/login']);
+              }
               break;
 
             case 403:
@@ -75,6 +82,11 @@ export class ErrorInterceptor implements HttpInterceptor {
             default:
               errorMessage = error.error?.mensaje || error.error?.message || errorMessage;
           }
+        }
+
+        // No mostrar notificación para rutas de auth (el componente lo maneja)
+        if (isAuthRoute) {
+          showNotification = false;
         }
 
         // Mostrar notificación de error (excepto casos especiales)

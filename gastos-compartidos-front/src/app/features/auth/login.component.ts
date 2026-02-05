@@ -8,8 +8,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { Router, RouterLink } from '@angular/router';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { AuthService } from '../../core/services/auth.service';
+import { NotificationService } from '../../core/services/notification.service';
 import { GoogleLoginComponent } from '../../core/components/google-login.component';
 
 @Component({
@@ -26,7 +26,6 @@ import { GoogleLoginComponent } from '../../core/components/google-login.compone
     RouterLink,
     MatProgressSpinnerModule,
     MatIconModule,
-    MatSnackBarModule,
     GoogleLoginComponent
   ],
   templateUrl: './login.component.html',
@@ -40,7 +39,7 @@ export class LoginComponent {
     private fb: FormBuilder,
     private authService: AuthService,
     private router: Router,
-    private snackBar: MatSnackBar
+    private notificationService: NotificationService
   ) {
     this.formulario = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
@@ -50,10 +49,7 @@ export class LoginComponent {
 
   iniciarSesion() {
     if (this.formulario.invalid) {
-      this.snackBar.open('Por favor, completa todos los campos correctamente', 'Cerrar', {
-        duration: 4000,
-        panelClass: ['error-snackbar']
-      });
+      this.notificationService.warning('Por favor, completa todos los campos correctamente');
       return;
     }
 
@@ -63,20 +59,13 @@ export class LoginComponent {
     this.authService.login(email, password).subscribe({
       next: () => {
         this.cargando = false;
-        this.snackBar.open('¡Inicio de sesión exitoso!', 'Cerrar', {
-          duration: 2000,
-          panelClass: ['success-snackbar']
-        });
+        this.notificationService.toast('¡Bienvenido!', 'success');
         this.router.navigate(['/dashboard']);
       },
       error: (err) => {
         this.cargando = false;
-        const mensaje = err.error?.message || err.message || 'Error al iniciar sesión. Verifica tus credenciales.';
-        this.snackBar.open(mensaje, 'Cerrar', {
-          duration: 5000,
-          panelClass: ['error-snackbar']
-        });
-        console.error('Error:', err);
+        const mensaje = err.error?.mensaje || err.error?.message || 'Credenciales incorrectas';
+        this.notificationService.error(mensaje);
       }
     });
   }
