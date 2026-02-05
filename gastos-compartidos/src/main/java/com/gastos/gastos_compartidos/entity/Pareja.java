@@ -29,7 +29,7 @@ public class Pareja {
     private String nombrePareja; // Nombre del grupo "Armando & María"
 
     @Builder.Default
-    @OneToMany(mappedBy = "pareja", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "pareja")
     private List<Usuario> usuarios = new ArrayList<>();
 
     @Builder.Default
