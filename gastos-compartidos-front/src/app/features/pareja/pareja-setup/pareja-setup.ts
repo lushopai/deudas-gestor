@@ -10,9 +10,10 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ParejaService, Pareja } from '../../../core/services/pareja.service';
 import { ClipboardModule } from '@angular/cdk/clipboard';
+import { NotificationService } from '../../../core/services/notification.service';
+import { LoadingService } from '../../../core/services/loading.service';
 
 @Component({
   selector: 'app-pareja-setup',
@@ -28,7 +29,6 @@ import { ClipboardModule } from '@angular/cdk/clipboard';
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
-    MatSnackBarModule,
     ClipboardModule
   ],
   templateUrl: './pareja-setup.html',
@@ -45,7 +45,8 @@ export class ParejaSetup implements OnInit {
     private fb: FormBuilder,
     private parejaService: ParejaService,
     private router: Router,
-    private snackBar: MatSnackBar
+    private notificationService: NotificationService,
+    private loadingService: LoadingService
   ) {}
 
   ngOnInit(): void {
@@ -85,25 +86,27 @@ export class ParejaSetup implements OnInit {
   }
 
   copiarCodigo(): void {
-    this.snackBar.open('Código copiado al portapapeles', 'OK', { duration: 2000 });
+    this.notificationService.toast('Código copiado al portapapeles', 'success');
   }
 
   unirseAPareja(): void {
     if (this.formularioUnirse.invalid) return;
 
     this.cargando = true;
+    this.loadingService.show('Uniéndose a la pareja...');
     const codigo = this.formularioUnirse.value.codigoInvitacion;
 
     this.parejaService.unirseAPareja(codigo).subscribe({
       next: (pareja) => {
-        this.snackBar.open('Te has unido exitosamente a la pareja', 'OK', { duration: 3000 });
+        this.loadingService.hide();
+        this.notificationService.success('Te has unido exitosamente a la pareja');
         this.cargando = false;
         this.router.navigate(['/dashboard']);
       },
       error: (err) => {
-        const msg = err.error?.mensaje || 'Código inválido o error al unirse';
-        this.snackBar.open(msg, 'Cerrar', { duration: 4000 });
+        this.loadingService.hide();
         this.cargando = false;
+        // El error se maneja automáticamente en el interceptor
       }
     });
   }

@@ -8,9 +8,10 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDividerModule } from '@angular/material/divider';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { PagoService, Pago } from '../../../core/services/pago.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { NotificationService } from '../../../core/services/notification.service';
+import { LoadingService } from '../../../core/services/loading.service';
 
 @Component({
   selector: 'app-historial-pagos',
@@ -23,8 +24,7 @@ import { AuthService } from '../../../core/services/auth.service';
     MatIconModule,
     MatProgressSpinnerModule,
     MatChipsModule,
-    MatDividerModule,
-    MatSnackBarModule
+    MatDividerModule
   ],
   templateUrl: './historial-pagos.html',
   styleUrl: './historial-pagos.scss',
@@ -40,7 +40,8 @@ export class HistorialPagos implements OnInit {
     private pagoService: PagoService,
     private authService: AuthService,
     private router: Router,
-    private snackBar: MatSnackBar
+    private notificationService: NotificationService,
+    private loadingService: LoadingService
   ) {}
 
   ngOnInit(): void {
@@ -66,6 +67,7 @@ export class HistorialPagos implements OnInit {
           this.error = null;
         } else {
           this.error = 'No se pudo cargar el historial de pagos';
+          // No mostramos notificación aquí, solo el mensaje en pantalla
         }
         this.cargando = false;
       }
@@ -76,16 +78,23 @@ export class HistorialPagos implements OnInit {
     return pago.pagador.id === this.usuarioActualId;
   }
 
-  cancelarPago(pago: Pago): void {
-    if (confirm('¿Estás seguro de cancelar este pago?')) {
+  async cancelarPago(pago: Pago): Promise<void> {
+    const confirmed = await this.notificationService.confirm(
+      'Esta acción no se puede deshacer',
+      '¿Estás seguro de cancelar este pago?'
+    );
+
+    if (confirmed) {
+      this.loadingService.show('Cancelando pago...');
       this.pagoService.cancelarPago(pago.id).subscribe({
         next: () => {
-          this.snackBar.open('Pago cancelado', 'OK', { duration: 3000 });
+          this.loadingService.hide();
+          this.notificationService.success('Pago cancelado exitosamente');
           this.cargarHistorial();
         },
         error: (err) => {
-          const msg = err.error?.message || 'Error al cancelar el pago';
-          this.snackBar.open(msg, 'Cerrar', { duration: 4000 });
+          this.loadingService.hide();
+          // El error se maneja automáticamente en el interceptor
         }
       });
     }
