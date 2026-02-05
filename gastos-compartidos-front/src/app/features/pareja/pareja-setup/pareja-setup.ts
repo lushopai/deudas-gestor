@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -46,7 +46,8 @@ export class ParejaSetup implements OnInit {
     private parejaService: ParejaService,
     private router: Router,
     private notificationService: NotificationService,
-    private loadingService: LoadingService
+    private loadingService: LoadingService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -68,6 +69,7 @@ export class ParejaSetup implements OnInit {
           this.codigoInvitacion = pareja.codigoInvitacion;
         }
         this.cargandoCodigo = false;
+        this.cdr.detectChanges();
       },
       error: () => {
         // Si no tiene pareja, cargar el código de invitación
@@ -81,10 +83,11 @@ export class ParejaSetup implements OnInit {
       next: (codigo) => {
         this.codigoInvitacion = codigo;
         this.cargandoCodigo = false;
+        this.cdr.detectChanges();
       },
-      error: (err) => {
-        console.error('Error al obtener código:', err);
+      error: () => {
         this.cargandoCodigo = false;
+        this.cdr.detectChanges();
       }
     });
   }

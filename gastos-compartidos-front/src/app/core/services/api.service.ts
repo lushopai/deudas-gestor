@@ -52,8 +52,19 @@ export class ApiService {
     return this.http.get(`${this.apiUrl}/gastos/pareja/${parejaId}`);
   }
 
+  // Usuarios
+  obtenerPerfil(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/usuarios/me`);
+  }
+
+  actualizarPerfil(datos: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/usuarios/me`, datos);
+  }
+
   // Reportes
-  getReporteMensual(parejaId: number, mes: number, anio: number): Observable<any> {
-    return this.http.get(`${this.apiUrl}/reportes/${parejaId}/${mes}/${anio}`);
+  getReporteMensual(mes: number, anio: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/reportes/mes`, {
+      params: { ano: anio.toString(), mes: mes.toString() }
+    });
   }
 }

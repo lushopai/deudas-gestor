@@ -18,8 +18,12 @@ public class UsuarioResponseDTO {
     private String nombre;
     private String apellido;
     private String fotoPerfil;
+    private String telefono;
+    private String bio;
+    private String provider;
     private Long parejaId;
     private LocalDateTime fechaCreacion;
+    private LocalDateTime fechaActualizacion;
 
     public static UsuarioResponseDTO fromEntity(Usuario usuario) {
         return UsuarioResponseDTO.builder()
@@ -28,8 +32,12 @@ public class UsuarioResponseDTO {
             .nombre(usuario.getNombre())
             .apellido(usuario.getApellido())
             .fotoPerfil(usuario.getFotoPerfil())
+            .telefono(usuario.getTelefono())
+            .bio(usuario.getBio())
+            .provider(usuario.getProvider() != null ? usuario.getProvider().name() : null)
             .parejaId(usuario.getPareja() != null ? usuario.getPareja().getId() : null)
             .fechaCreacion(usuario.getFechaCreacion())
+            .fechaActualizacion(usuario.getFechaActualizacion())
             .build();
     }
 }

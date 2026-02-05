@@ -7,6 +7,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.gastos.gastos_compartidos.dto.ActualizarPerfilDTO;
 import com.gastos.gastos_compartidos.dto.RegistroRequestDTO;
 import com.gastos.gastos_compartidos.dto.UsuarioResponseDTO;
 import com.gastos.gastos_compartidos.entity.Pareja;
@@ -108,19 +109,26 @@ public class UsuarioService {
         return UsuarioResponseDTO.fromEntity(usuario);
     }
 
-    public Usuario actualizarPerfil(Long usuarioId, String nombre, String apellido, String fotoPerfil) {
+    public UsuarioResponseDTO actualizarPerfil(Long usuarioId, ActualizarPerfilDTO dto) {
         Usuario usuario = obtenerPorId(usuarioId);
-        
-        if (nombre != null && !nombre.isBlank()) {
-            usuario.setNombre(nombre);
+
+        if (dto.getNombre() != null && !dto.getNombre().isBlank()) {
+            usuario.setNombre(dto.getNombre());
         }
-        if (apellido != null && !apellido.isBlank()) {
-            usuario.setApellido(apellido);
+        if (dto.getApellido() != null) {
+            usuario.setApellido(dto.getApellido());
         }
-        if (fotoPerfil != null && !fotoPerfil.isBlank()) {
-            usuario.setFotoPerfil(fotoPerfil);
+        if (dto.getTelefono() != null) {
+            usuario.setTelefono(dto.getTelefono());
+        }
+        if (dto.getBio() != null) {
+            usuario.setBio(dto.getBio());
+        }
+        if (dto.getFotoPerfil() != null) {
+            usuario.setFotoPerfil(dto.getFotoPerfil());
         }
 
-        return usuarioRepository.save(usuario);
+        usuarioRepository.save(usuario);
+        return UsuarioResponseDTO.fromEntity(usuario);
     }
 }

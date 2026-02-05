@@ -1,5 +1,6 @@
 package com.gastos.gastos_compartidos.controller;
 
+import com.gastos.gastos_compartidos.dto.ActualizarPerfilDTO;
 import com.gastos.gastos_compartidos.dto.UsuarioResponseDTO;
 import com.gastos.gastos_compartidos.security.CustomUserDetails;
 import com.gastos.gastos_compartidos.service.UsuarioService;
@@ -32,12 +33,9 @@ public class UsuarioController {
     @Operation(summary = "Actualizar mi perfil", description = "Actualiza los datos del usuario autenticado")
     public ResponseEntity<UsuarioResponseDTO> actualizarPerfil(
             @AuthenticationPrincipal CustomUserDetails currentUser,
-            @RequestParam(required = false) String nombre,
-            @RequestParam(required = false) String apellido,
-            @RequestParam(required = false) String fotoPerfil) {
-        
-        usuarioService.actualizarPerfil(currentUser.getId(), nombre, apellido, fotoPerfil);
-        UsuarioResponseDTO perfil = usuarioService.obtenerPerfil(currentUser.getId());
+            @RequestBody ActualizarPerfilDTO dto) {
+
+        UsuarioResponseDTO perfil = usuarioService.actualizarPerfil(currentUser.getId(), dto);
         return ResponseEntity.ok(perfil);
     }
 

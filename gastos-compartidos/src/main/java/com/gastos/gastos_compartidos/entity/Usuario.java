@@ -39,6 +39,12 @@ public class Usuario {
     @Column
     private String fotoPerfil;
 
+    @Column
+    private String telefono;
+
+    @Column(length = 500)
+    private String bio;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default

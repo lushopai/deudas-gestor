@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -15,11 +16,28 @@ public class ReporteDTO {
 
     private Long parejaId;
     private String nombrePareja;
+    private String nombreUsuario1;
+    private String nombreUsuario2;
     private BigDecimal gastoTotalMes;
     private BigDecimal gastoUsuario1;
     private BigDecimal gastoUsuario2;
     private BigDecimal pagadoUsuario1;
     private BigDecimal pagadoUsuario2;
-    private BigDecimal saldoQuienDebe; // Positivo = usuario 1 debe a usuario 2, negativo = usuario 2 debe a usuario 1
-    private String detalleDeuda; // "Usuario2 debe $X a Usuario1"
+    private BigDecimal saldoQuienDebe;
+    private String detalleDeuda;
+    private int cantidadGastos;
+    private List<CategoriaReporte> gastosPorCategoria;
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class CategoriaReporte {
+        private String nombre;
+        private String icono;
+        private String color;
+        private BigDecimal monto;
+        private int cantidad;
+        private double porcentaje;
+    }
 }

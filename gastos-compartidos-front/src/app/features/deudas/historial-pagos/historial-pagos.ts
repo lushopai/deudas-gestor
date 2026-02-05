@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -41,7 +41,8 @@ export class HistorialPagos implements OnInit {
     private authService: AuthService,
     private router: Router,
     private notificationService: NotificationService,
-    private loadingService: LoadingService
+    private loadingService: LoadingService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -59,6 +60,7 @@ export class HistorialPagos implements OnInit {
       next: (pagos) => {
         this.pagos = pagos;
         this.cargando = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error al cargar historial:', err);
@@ -67,9 +69,9 @@ export class HistorialPagos implements OnInit {
           this.error = null;
         } else {
           this.error = 'No se pudo cargar el historial de pagos';
-          // No mostramos notificación aquí, solo el mensaje en pantalla
         }
         this.cargando = false;
+        this.cdr.detectChanges();
       }
     });
   }

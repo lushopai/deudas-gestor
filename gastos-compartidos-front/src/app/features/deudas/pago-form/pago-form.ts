@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -10,9 +10,10 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { PagoService, MetodoPago, ResumenDeuda } from '../../../core/services/pago.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { NotificationService } from '../../../core/services/notification.service';
+import { LoadingService } from '../../../core/services/loading.service';
 
 @Component({
   selector: 'app-pago-form',
@@ -27,8 +28,7 @@ import { AuthService } from '../../../core/services/auth.service';
     MatSelectModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule,
-    MatSnackBarModule
+    MatProgressSpinnerModule
   ],
   templateUrl: './pago-form.html',
   styleUrl: './pago-form.scss',
@@ -52,7 +52,9 @@ export class PagoForm implements OnInit {
     private pagoService: PagoService,
     private authService: AuthService,
     private router: Router,
-    private snackBar: MatSnackBar
+    private notificationService: NotificationService,
+    private loadingService: LoadingService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -73,6 +75,7 @@ export class PagoForm implements OnInit {
       next: (resumen) => {
         this.resumen = resumen;
         this.cargandoResumen = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error al cargar resumen:', err);
@@ -82,6 +85,7 @@ export class PagoForm implements OnInit {
           this.errorPareja = true;
         }
         this.cargandoResumen = false;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -121,11 +125,12 @@ export class PagoForm implements OnInit {
 
     const receptorId = this.getReceptorId();
     if (!receptorId) {
-      this.snackBar.open('No se pudo determinar el receptor del pago', 'Cerrar', { duration: 3000 });
+      this.notificationService.error('No se pudo determinar el receptor del pago');
       return;
     }
 
     this.cargando = true;
+    this.loadingService.show('Registrando pago...');
 
     this.pagoService.registrarPago({
       receptorId,
@@ -134,14 +139,15 @@ export class PagoForm implements OnInit {
       metodoPago: this.formulario.value.metodoPago
     }).subscribe({
       next: () => {
-        this.snackBar.open('Pago registrado exitosamente', 'OK', { duration: 3000 });
+        this.loadingService.hide();
+        this.notificationService.success('Pago registrado exitosamente');
         this.cargando = false;
         this.router.navigate(['/dashboard']);
       },
-      error: (err) => {
-        console.error('Error al registrar pago:', err);
-        this.snackBar.open('Error al registrar el pago', 'Cerrar', { duration: 3000 });
+      error: () => {
+        this.loadingService.hide();
         this.cargando = false;
+        // El error se maneja automáticamente en el interceptor
       }
     });
   }

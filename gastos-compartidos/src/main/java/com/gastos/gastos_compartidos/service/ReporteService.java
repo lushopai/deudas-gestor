@@ -14,9 +14,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -49,6 +51,12 @@ public class ReporteService {
         BigDecimal pagadoUsuario1 = BigDecimal.ZERO;
         BigDecimal pagadoUsuario2 = BigDecimal.ZERO;
 
+        // Acumular por categoría
+        Map<String, BigDecimal> montosPorCategoria = new LinkedHashMap<>();
+        Map<String, Integer> cantidadPorCategoria = new LinkedHashMap<>();
+        Map<String, String> iconosPorCategoria = new LinkedHashMap<>();
+        Map<String, String> coloresPorCategoria = new LinkedHashMap<>();
+
         for (Gasto gasto : gastos) {
             gastoTotal = gastoTotal.add(gasto.getMonto());
 
@@ -58,7 +66,6 @@ public class ReporteService {
                 gastosUsuario2 = gastosUsuario2.add(gasto.getMonto());
             }
 
-            // Procesar splits para determinar quién pagó qué
             for (GastoSplit split : gasto.getSplits()) {
                 if (split.getTipo() == GastoSplit.TipoSplit.PAGO) {
                     if (split.getUsuario().getId().equals(usuario1.getId())) {
@@ -68,18 +75,24 @@ public class ReporteService {
                     }
                 }
             }
+
+            // Categoría
+            String catNombre = gasto.getCategoria() != null ? gasto.getCategoria().getNombre() : "Sin categoría";
+            String catIcono = gasto.getCategoria() != null ? gasto.getCategoria().getIcono() : "help_outline";
+            String catColor = gasto.getCategoria() != null && gasto.getCategoria().getColor() != null
+                ? gasto.getCategoria().getColor() : "#9e9e9e";
+
+            montosPorCategoria.merge(catNombre, gasto.getMonto(), BigDecimal::add);
+            cantidadPorCategoria.merge(catNombre, 1, Integer::sum);
+            iconosPorCategoria.putIfAbsent(catNombre, catIcono);
+            coloresPorCategoria.putIfAbsent(catNombre, catColor);
         }
 
-        // Calcular quién debe a quién
-        // Usuario 1 debería pagar su parte de los gastos
-        BigDecimal debeUsuario1 = gastosUsuario1.divide(new BigDecimal(2), 2, java.math.RoundingMode.HALF_UP);
-        BigDecimal debeUsuario2 = gastosUsuario2.divide(new BigDecimal(2), 2, java.math.RoundingMode.HALF_UP);
-
-        // El saldo es lo que pagó menos lo que debería pagar
+        // Calcular deuda
+        BigDecimal debeUsuario1 = gastosUsuario1.divide(new BigDecimal(2), 2, RoundingMode.HALF_UP);
+        BigDecimal debeUsuario2 = gastosUsuario2.divide(new BigDecimal(2), 2, RoundingMode.HALF_UP);
         BigDecimal saldoUsuario1 = pagadoUsuario1.subtract(debeUsuario1);
         BigDecimal saldoUsuario2 = pagadoUsuario2.subtract(debeUsuario2);
-
-        // Saldo final: si es positivo, usuario1 debe a usuario2
         BigDecimal saldoFinal = saldoUsuario2.subtract(saldoUsuario1);
 
         String detalleDeuda;
@@ -91,9 +104,30 @@ public class ReporteService {
             detalleDeuda = "Están al día";
         }
 
+        // Construir lista de categorías ordenada por monto descendente
+        final BigDecimal total = gastoTotal;
+        List<ReporteDTO.CategoriaReporte> categorias = montosPorCategoria.entrySet().stream()
+            .sorted(Map.Entry.<String, BigDecimal>comparingByValue().reversed())
+            .map(entry -> {
+                double porcentaje = total.compareTo(BigDecimal.ZERO) > 0
+                    ? entry.getValue().divide(total, 4, RoundingMode.HALF_UP).doubleValue() * 100
+                    : 0;
+                return ReporteDTO.CategoriaReporte.builder()
+                    .nombre(entry.getKey())
+                    .icono(iconosPorCategoria.get(entry.getKey()))
+                    .color(coloresPorCategoria.get(entry.getKey()))
+                    .monto(entry.getValue())
+                    .cantidad(cantidadPorCategoria.get(entry.getKey()))
+                    .porcentaje(Math.round(porcentaje * 10.0) / 10.0)
+                    .build();
+            })
+            .collect(Collectors.toList());
+
         return ReporteDTO.builder()
             .parejaId(parejaId)
             .nombrePareja(pareja.getNombrePareja())
+            .nombreUsuario1(usuario1.getNombre())
+            .nombreUsuario2(usuario2.getNombre())
             .gastoTotalMes(gastoTotal)
             .gastoUsuario1(gastosUsuario1)
             .gastoUsuario2(gastosUsuario2)
@@ -101,6 +135,8 @@ public class ReporteService {
             .pagadoUsuario2(pagadoUsuario2)
             .saldoQuienDebe(saldoFinal)
             .detalleDeuda(detalleDeuda)
+            .cantidadGastos(gastos.size())
+            .gastosPorCategoria(categorias)
             .build();
     }
 }

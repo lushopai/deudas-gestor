@@ -49,8 +49,20 @@ export class AuthService {
     return localStorage.getItem(this.tokenKey);
   }
 
+  /**
+   * Verifica si el usuario está autenticado y si el token no ha expirado
+   */
   estaAutenticado(): boolean {
-    return !!this.obtenerToken();
+    const token = this.obtenerToken();
+    if (!token) return false;
+
+    // Verificar si el token ha expirado
+    if (this.tokenExpirado(token)) {
+      this.logout();
+      return false;
+    }
+
+    return true;
   }
 
   logout(): void {
@@ -61,6 +73,38 @@ export class AuthService {
 
   obtenerUsuario(): any {
     return this.usuarioSubject.value;
+  }
+
+  /**
+   * Decodifica el payload del JWT y verifica si ha expirado
+   */
+  private tokenExpirado(token: string): boolean {
+    try {
+      const payload = this.decodificarToken(token);
+      if (!payload || !payload.exp) return true;
+
+      // exp está en segundos, Date.now() en milisegundos
+      const expiracion = payload.exp * 1000;
+      return Date.now() >= expiracion;
+    } catch {
+      return true;
+    }
+  }
+
+  /**
+   * Decodifica el payload de un JWT sin verificar la firma
+   */
+  private decodificarToken(token: string): any {
+    try {
+      const partes = token.split('.');
+      if (partes.length !== 3) return null;
+
+      const payload = partes[1];
+      const decoded = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
+      return JSON.parse(decoded);
+    } catch {
+      return null;
+    }
   }
 
   private guardarToken(token: string): void {

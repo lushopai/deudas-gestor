@@ -10,9 +10,11 @@ import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatMenuModule } from '@angular/material/menu';
 import { AuthService } from '../../core/services/auth.service';
+import { ApiService } from '../../core/services/api.service';
+import { NotificationService } from '../../core/services/notification.service';
+import { LoadingService } from '../../core/services/loading.service';
 
 @Component({
   selector: 'app-perfil',
@@ -29,7 +31,6 @@ import { AuthService } from '../../core/services/auth.service';
     MatIconModule,
     MatDividerModule,
     MatProgressSpinnerModule,
-    MatSnackBarModule,
     MatMenuModule
   ],
   templateUrl: './perfil.component.html',
@@ -45,9 +46,11 @@ export class PerfilComponent implements OnInit {
 
   constructor(
     private authService: AuthService,
+    private apiService: ApiService,
+    private notificationService: NotificationService,
+    private loadingService: LoadingService,
     private formBuilder: FormBuilder,
     private router: Router,
-    private snackBar: MatSnackBar,
     private cdRef: ChangeDetectorRef
   ) { }
 
@@ -58,21 +61,26 @@ export class PerfilComponent implements OnInit {
 
   cargarPerfil() {
     this.cargando = true;
-    this.authService.usuario$.subscribe({
+    this.error = null;
+    this.apiService.obtenerPerfil().subscribe({
       next: (usuario) => {
         this.usuario = usuario;
-        if (usuario) {
-          this.previewFoto = usuario.fotoPerfil;
-          this.actualizarFormulario(usuario);
-        } else {
-          this.error = "No se encontró información del usuario.";
-        }
+        this.previewFoto = usuario.fotoPerfil;
+        this.actualizarFormulario(usuario);
         this.cargando = false;
         this.cdRef.detectChanges();
       },
       error: (err) => {
         console.error('Error al cargar perfil:', err);
-        this.error = 'No se pudo cargar el perfil';
+        // Fallback: usar datos del localStorage
+        const usuarioLocal = this.authService.obtenerUsuario();
+        if (usuarioLocal) {
+          this.usuario = usuarioLocal;
+          this.previewFoto = usuarioLocal.fotoPerfil;
+          this.actualizarFormulario(usuarioLocal);
+        } else {
+          this.error = 'No se pudo cargar el perfil';
+        }
         this.cargando = false;
         this.cdRef.detectChanges();
       }
@@ -111,50 +119,67 @@ export class PerfilComponent implements OnInit {
   }
 
   procesarFoto(file: File) {
-    if (!file.type.match(/image\*/)) {
-      this.snackBar.open('Por favor selecciona una imagen válida', 'Cerrar', { duration: 3000 });
+    if (!file.type.startsWith('image/')) {
+      this.notificationService.warning('Por favor selecciona una imagen válida');
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) { // 5MB
-      this.snackBar.open('La imagen no debe superar 5MB', 'Cerrar', { duration: 3000 });
+    if (file.size > 5 * 1024 * 1024) {
+      this.notificationService.warning('La imagen no debe superar 5MB');
       return;
     }
 
     const reader = new FileReader();
     reader.onload = (e: any) => {
       this.previewFoto = e.target.result;
+      this.cdRef.detectChanges();
     };
     reader.readAsDataURL(file);
   }
 
   guardarCambios() {
     if (this.perfilForm.invalid) {
-      this.snackBar.open('Por favor completa el formulario correctamente', 'Cerrar', { duration: 3000 });
+      this.notificationService.warning('Por favor completa el formulario correctamente');
       return;
     }
 
     this.guardando = true;
-    const datosActualizados = {
-      ...this.perfilForm.getRawValue(),
+    this.loadingService.show('Guardando perfil...');
+
+    const datos = {
+      nombre: this.perfilForm.get('nombre')?.value,
+      telefono: this.perfilForm.get('telefono')?.value || null,
+      bio: this.perfilForm.get('bio')?.value || null,
       fotoPerfil: this.previewFoto
     };
 
-    // TODO: Implementar servicio de actualización de usuario
-    console.log('Guardando:', datosActualizados);
-
-    // Simulación
-    setTimeout(() => {
-      this.guardando = false;
-      this.snackBar.open('Perfil actualizado correctamente', 'Cerrar', { duration: 3000 });
-    }, 1000);
+    this.apiService.actualizarPerfil(datos).subscribe({
+      next: (usuarioActualizado) => {
+        this.usuario = usuarioActualizado;
+        // Actualizar datos en localStorage para mantener sincronización
+        const usuarioLocal = this.authService.obtenerUsuario();
+        if (usuarioLocal) {
+          const actualizado = { ...usuarioLocal, ...usuarioActualizado };
+          localStorage.setItem('gastos_usuario', JSON.stringify(actualizado));
+        }
+        this.guardando = false;
+        this.loadingService.hide();
+        this.notificationService.success('Perfil actualizado correctamente');
+        this.cdRef.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error al guardar perfil:', err);
+        this.guardando = false;
+        this.loadingService.hide();
+        this.cdRef.detectChanges();
+      }
+    });
   }
 
   cancelar() {
     this.router.navigate(['/dashboard']);
   }
 
-  // Obtener iniciales del usuario para avatar
   getInitials(nombre: string | undefined): string {
     if (!nombre) return 'U';
 

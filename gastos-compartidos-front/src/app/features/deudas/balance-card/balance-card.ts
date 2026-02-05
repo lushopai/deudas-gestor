@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -28,7 +28,8 @@ export class BalanceCard implements OnInit {
 
   constructor(
     private pagoService: PagoService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -44,6 +45,7 @@ export class BalanceCard implements OnInit {
       next: (resumen) => {
         this.resumen = resumen;
         this.cargando = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error al cargar resumen:', err);
@@ -56,6 +58,7 @@ export class BalanceCard implements OnInit {
           this.error = 'Error al cargar el balance de deudas';
         }
         this.cargando = false;
+        this.cdr.detectChanges();
       }
     });
   }

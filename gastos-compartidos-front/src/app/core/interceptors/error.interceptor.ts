@@ -5,12 +5,14 @@ import { catchError } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { NotificationService } from '../services/notification.service';
 import { LoadingService } from '../services/loading.service';
+import { AuthService } from '../services/auth.service';
 
 @Injectable()
 export class ErrorInterceptor implements HttpInterceptor {
   constructor(
     private notificationService: NotificationService,
     private loadingService: LoadingService,
+    private authService: AuthService,
     private router: Router
   ) {}
 
@@ -35,7 +37,6 @@ export class ErrorInterceptor implements HttpInterceptor {
               break;
 
             case 400:
-              // Bad Request - Mostrar mensaje del servidor
               errorMessage = error.error?.mensaje || error.error?.message || 'Solicitud inválida';
 
               // No mostrar notificación para errores de pareja (manejados por componente)
@@ -45,14 +46,17 @@ export class ErrorInterceptor implements HttpInterceptor {
               break;
 
             case 401:
-              // No autorizado - Redirigir al login
+              // No autorizado - Sesión expirada
               errorMessage = 'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.';
-              localStorage.removeItem('token');
+              this.authService.logout();
               this.router.navigate(['/login']);
               break;
 
             case 403:
-              errorMessage = 'No tienes permisos para realizar esta acción.';
+              // Prohibido - Token inválido o expirado
+              errorMessage = 'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.';
+              this.authService.logout();
+              this.router.navigate(['/login']);
               break;
 
             case 404:
@@ -77,11 +81,10 @@ export class ErrorInterceptor implements HttpInterceptor {
           this.notificationService.error(errorMessage);
         }
 
-        // Log del error para debugging
         console.error('HTTP Error:', {
           status: error.status,
           message: errorMessage,
-          error: error
+          url: error.url
         });
 
         return throwError(() => error);
