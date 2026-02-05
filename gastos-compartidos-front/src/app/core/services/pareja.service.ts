@@ -7,8 +7,8 @@ export interface Pareja {
   id: number;
   nombrePareja: string;
   codigoInvitacion: string;
-  cantidadUsuarios: number;
-  usuarios: ParejaUsuario[];
+  cantidadMiembros: number;
+  usuarios?: ParejaUsuario[];
   fechaCreacion: string;
 }
 

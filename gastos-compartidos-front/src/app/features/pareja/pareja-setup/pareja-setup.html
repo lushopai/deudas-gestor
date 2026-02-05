@@ -7,7 +7,7 @@
 
 <div class="setup-container">
   <!-- Ya tiene pareja completa -->
-  @if (pareja && pareja.cantidadUsuarios === 2 && !cargandoCodigo) {
+  @if (pareja && pareja.cantidadMiembros === 2 && !cargandoCodigo) {
     <mat-card class="pareja-card">
       <mat-card-header>
         <mat-icon mat-card-avatar>check_circle</mat-icon>
@@ -22,21 +22,23 @@
           </div>
           <div class="info-item">
             <mat-icon>person</mat-icon>
-            <span>{{ pareja.cantidadUsuarios }} usuarios</span>
+            <span>{{ pareja.cantidadMiembros }} usuarios</span>
           </div>
         </div>
 
-        <div class="usuarios-list">
-          @for (usuario of pareja.usuarios; track usuario.id) {
-            <div class="usuario-item">
-              <mat-icon>account_circle</mat-icon>
-              <div>
-                <div class="usuario-nombre">{{ usuario.nombre }}</div>
-                <div class="usuario-email">{{ usuario.email }}</div>
+        @if (pareja.usuarios && pareja.usuarios.length > 0) {
+          <div class="usuarios-list">
+            @for (usuario of pareja.usuarios; track usuario.id) {
+              <div class="usuario-item">
+                <mat-icon>account_circle</mat-icon>
+                <div>
+                  <div class="usuario-nombre">{{ usuario.nombre }}</div>
+                  <div class="usuario-email">{{ usuario.email }}</div>
+                </div>
               </div>
-            </div>
-          }
-        </div>
+            }
+          </div>
+        }
       </mat-card-content>
       <mat-card-actions>
         <button mat-raised-button color="primary" (click)="irADashboard()">
@@ -47,8 +49,8 @@
     </mat-card>
   }
 
-  <!-- Necesita configurar pareja -->
-  @if (!pareja && !cargandoCodigo) {
+  <!-- Necesita configurar pareja o tiene pareja incompleta (solo 1 miembro) -->
+  @if ((!pareja || (pareja && pareja.cantidadMiembros < 2)) && !cargandoCodigo) {
     <mat-card class="config-card">
       <mat-tab-group>
         <!-- Tab: Crear Pareja (Invitar) -->

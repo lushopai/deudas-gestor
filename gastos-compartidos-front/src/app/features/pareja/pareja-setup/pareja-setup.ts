@@ -63,6 +63,10 @@ export class ParejaSetup implements OnInit {
     this.parejaService.obtenerMiPareja().subscribe({
       next: (pareja) => {
         this.pareja = pareja;
+        // Si tiene pareja pero está incompleta (solo 1 miembro), mostrar el código
+        if (pareja.cantidadMiembros < 2) {
+          this.codigoInvitacion = pareja.codigoInvitacion;
+        }
         this.cargandoCodigo = false;
       },
       error: () => {
