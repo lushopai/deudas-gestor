@@ -1,0 +1,143 @@
+<mat-toolbar color="primary">
+  <button mat-icon-button (click)="volver()">
+    <mat-icon>arrow_back</mat-icon>
+  </button>
+  <span>Configurar Pareja</span>
+</mat-toolbar>
+
+<div class="setup-container">
+  <!-- Ya tiene pareja completa -->
+  @if (pareja && pareja.cantidadUsuarios === 2 && !cargandoCodigo) {
+    <mat-card class="pareja-card">
+      <mat-card-header>
+        <mat-icon mat-card-avatar>check_circle</mat-icon>
+        <mat-card-title>Pareja Configurada</mat-card-title>
+        <mat-card-subtitle>Ya estás en una pareja con otro usuario</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="pareja-info">
+          <div class="info-item">
+            <mat-icon>people</mat-icon>
+            <span>{{ pareja.nombrePareja }}</span>
+          </div>
+          <div class="info-item">
+            <mat-icon>person</mat-icon>
+            <span>{{ pareja.cantidadUsuarios }} usuarios</span>
+          </div>
+        </div>
+
+        <div class="usuarios-list">
+          @for (usuario of pareja.usuarios; track usuario.id) {
+            <div class="usuario-item">
+              <mat-icon>account_circle</mat-icon>
+              <div>
+                <div class="usuario-nombre">{{ usuario.nombre }}</div>
+                <div class="usuario-email">{{ usuario.email }}</div>
+              </div>
+            </div>
+          }
+        </div>
+      </mat-card-content>
+      <mat-card-actions>
+        <button mat-raised-button color="primary" (click)="irADashboard()">
+          <mat-icon>dashboard</mat-icon>
+          Ir al Dashboard
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  }
+
+  <!-- Necesita configurar pareja -->
+  @if (!pareja && !cargandoCodigo) {
+    <mat-card class="config-card">
+      <mat-tab-group>
+        <!-- Tab: Crear Pareja (Invitar) -->
+        <mat-tab label="Invitar a Alguien">
+          <div class="tab-content">
+            <div class="tab-header">
+              <mat-icon>person_add</mat-icon>
+              <h3>Invita a tu Pareja</h3>
+              <p>Comparte este código para que otra persona se una</p>
+            </div>
+
+            @if (codigoInvitacion) {
+              <div class="codigo-container">
+                <div class="codigo-display">
+                  <mat-icon>vpn_key</mat-icon>
+                  <div class="codigo-text">{{ codigoInvitacion }}</div>
+                </div>
+                <button
+                  mat-raised-button
+                  color="primary"
+                  [cdkCopyToClipboard]="codigoInvitacion"
+                  (click)="copiarCodigo()">
+                  <mat-icon>content_copy</mat-icon>
+                  Copiar Código
+                </button>
+              </div>
+
+              <div class="instrucciones">
+                <mat-icon>info_outline</mat-icon>
+                <div>
+                  <strong>¿Cómo funciona?</strong>
+                  <ol>
+                    <li>Copia el código de arriba</li>
+                    <li>Envíalo a la persona que quieres que se una</li>
+                    <li>Esa persona debe usar la pestaña "Unirse" e ingresar tu código</li>
+                  </ol>
+                </div>
+              </div>
+            }
+          </div>
+        </mat-tab>
+
+        <!-- Tab: Unirse a Pareja -->
+        <mat-tab label="Unirse con Código">
+          <div class="tab-content">
+            <div class="tab-header">
+              <mat-icon>group_add</mat-icon>
+              <h3>Únete a una Pareja</h3>
+              <p>Ingresa el código que te compartieron</p>
+            </div>
+
+            <form [formGroup]="formularioUnirse" (ngSubmit)="unirseAPareja()">
+              <mat-form-field appearance="fill" class="full-width">
+                <mat-label>Código de Invitación</mat-label>
+                <input
+                  matInput
+                  formControlName="codigoInvitacion"
+                  placeholder="Ej: ABC123XY"
+                  maxlength="8"
+                  required>
+                <mat-icon matPrefix>vpn_key</mat-icon>
+                <mat-hint>8 caracteres</mat-hint>
+              </mat-form-field>
+
+              <button
+                mat-raised-button
+                color="primary"
+                type="submit"
+                class="full-width submit-btn"
+                [disabled]="cargando || formularioUnirse.invalid">
+                @if (!cargando) {
+                  <mat-icon>login</mat-icon>
+                } @else {
+                  <mat-progress-spinner diameter="24" mode="indeterminate"></mat-progress-spinner>
+                }
+                {{ cargando ? 'Uniéndose...' : 'Unirse a Pareja' }}
+              </button>
+            </form>
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+    </mat-card>
+  }
+
+  <!-- Loading -->
+  @if (cargandoCodigo) {
+    <div class="loading-state">
+      <mat-progress-spinner diameter="40" mode="indeterminate"></mat-progress-spinner>
+      <span>Cargando...</span>
+    </div>
+  }
+</div>

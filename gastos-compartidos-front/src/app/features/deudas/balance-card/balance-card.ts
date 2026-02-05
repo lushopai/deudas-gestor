@@ -24,6 +24,7 @@ export class BalanceCard implements OnInit {
   resumen: ResumenDeuda | null = null;
   cargando = true;
   error: string | null = null;
+  necesitaPareja = false;
 
   constructor(
     private pagoService: PagoService,
@@ -37,6 +38,7 @@ export class BalanceCard implements OnInit {
   cargarResumen(): void {
     this.cargando = true;
     this.error = null;
+    this.necesitaPareja = false;
 
     this.pagoService.obtenerResumenDeuda().subscribe({
       next: (resumen) => {
@@ -44,8 +46,15 @@ export class BalanceCard implements OnInit {
         this.cargando = false;
       },
       error: (err) => {
-        this.error = 'Error al cargar el balance de deudas';
         console.error('Error al cargar resumen:', err);
+
+        // Detectar si el error es por falta de pareja
+        if (err.status === 400 && err.error?.mensaje?.includes('pareja')) {
+          this.necesitaPareja = true;
+          this.error = null;
+        } else {
+          this.error = 'Error al cargar el balance de deudas';
+        }
         this.cargando = false;
       }
     });
@@ -57,6 +66,10 @@ export class BalanceCard implements OnInit {
 
   verHistorial(): void {
     this.router.navigate(['/deudas/historial']);
+  }
+
+  configurarPareja(): void {
+    this.router.navigate(['/pareja/configurar']);
   }
 
   getColorBalance(): string {

@@ -18,8 +18,21 @@
     </div>
   }
 
+  <!-- Error Pareja -->
+  @if (errorPareja && !cargando) {
+    <div class="error-pareja-state">
+      <mat-icon>people_outline</mat-icon>
+      <div class="error-title">Configura tu Pareja Primero</div>
+      <div class="error-message">Para ver el historial de pagos, necesitas estar en una pareja con otro usuario</div>
+      <button mat-raised-button color="primary" (click)="configurarPareja()">
+        <mat-icon>add</mat-icon>
+        Configurar Pareja
+      </button>
+    </div>
+  }
+
   <!-- Error -->
-  @if (error && !cargando) {
+  @if (error && !cargando && !errorPareja) {
     <div class="error-state">
       <mat-icon>error_outline</mat-icon>
       <span>{{ error }}</span>
@@ -31,7 +44,7 @@
   }
 
   <!-- Empty State -->
-  @if (!cargando && !error && pagos.length === 0) {
+  @if (!cargando && !error && !errorPareja && pagos.length === 0) {
     <div class="empty-state">
       <mat-icon>receipt_long</mat-icon>
       <div class="empty-text">Sin pagos registrados</div>
@@ -44,7 +57,7 @@
   }
 
   <!-- Lista de pagos -->
-  @if (!cargando && pagos.length > 0) {
+  @if (!cargando && !errorPareja && pagos.length > 0) {
     <div class="pagos-list">
       @for (pago of pagos; track pago.id) {
         <mat-card class="pago-card" [class.enviado]="esPagadorActual(pago)" [class.recibido]="!esPagadorActual(pago)" [class.cancelado]="pago.estado === 'CANCELADO'">

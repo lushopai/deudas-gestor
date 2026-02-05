@@ -1,0 +1,261 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #fafafa;
+}
+
+mat-toolbar {
+  flex-shrink: 0;
+  background: #1976d2;
+  color: white;
+  box-shadow: var(--shadow-sm);
+  height: 56px;
+
+  button {
+    color: white;
+  }
+
+  span {
+    font-weight: 500;
+    font-size: 18px;
+    margin-left: var(--spacing-md);
+  }
+}
+
+.setup-container {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: var(--spacing-lg) var(--spacing-md);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.pareja-card,
+.config-card {
+  width: 100%;
+  max-width: 600px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+
+.pareja-card {
+  mat-card-header {
+    mat-icon[mat-card-avatar] {
+      background: #51cf66;
+      color: white;
+      font-size: 32px;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+    }
+  }
+
+  mat-card-content {
+    padding: var(--spacing-lg) !important;
+  }
+
+  mat-card-actions {
+    padding: var(--spacing-md) var(--spacing-lg) !important;
+  }
+}
+
+.pareja-info {
+  display: flex;
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+  padding: var(--spacing-md);
+  background: #f5f5f5;
+  border-radius: var(--radius);
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: 14px;
+  color: #666;
+
+  mat-icon {
+    color: var(--primary-color);
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.usuarios-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.usuario-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: var(--radius);
+
+  mat-icon {
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+    color: #999;
+  }
+}
+
+.usuario-nombre {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.usuario-email {
+  font-size: 12px;
+  color: #999;
+}
+
+.tab-content {
+  padding: var(--spacing-lg);
+}
+
+.tab-header {
+  text-align: center;
+  margin-bottom: var(--spacing-lg);
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    color: var(--primary-color);
+    margin-bottom: var(--spacing-sm);
+  }
+
+  h3 {
+    font-size: 20px;
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 var(--spacing-xs) 0;
+  }
+
+  p {
+    font-size: 14px;
+    color: #666;
+    margin: 0;
+  }
+}
+
+.codigo-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.codigo-display {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: var(--radius);
+  color: white;
+
+  mat-icon {
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+  }
+
+  .codigo-text {
+    flex: 1;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    font-family: 'Courier New', monospace;
+  }
+}
+
+.instrucciones {
+  display: flex;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: #e3f2fd;
+  border-radius: var(--radius);
+  border-left: 3px solid var(--primary-color);
+
+  mat-icon {
+    color: var(--primary-color);
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+
+  strong {
+    display: block;
+    margin-bottom: var(--spacing-xs);
+    color: #333;
+  }
+
+  ol {
+    margin: 0;
+    padding-left: 20px;
+    color: #666;
+
+    li {
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+  }
+}
+
+.full-width {
+  width: 100%;
+  margin-bottom: var(--spacing-md);
+}
+
+.submit-btn {
+  height: 48px !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  margin-top: var(--spacing-md);
+}
+
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xxl);
+  color: #666;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .setup-container {
+    padding: 0;
+  }
+
+  .pareja-card,
+  .config-card {
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .tab-content {
+    padding: var(--spacing-md);
+  }
+
+  .codigo-text {
+    font-size: 20px !important;
+  }
+}

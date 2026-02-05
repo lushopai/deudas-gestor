@@ -7,8 +7,21 @@
     </div>
   }
 
+  <!-- Necesita Pareja -->
+  @if (necesitaPareja && !cargando) {
+    <mat-card-content class="pareja-setup-content">
+      <mat-icon>people_outline</mat-icon>
+      <div class="setup-title">Configura tu Pareja</div>
+      <div class="setup-message">Para usar el sistema de pagos y deudas, necesitas estar en una pareja con otro usuario</div>
+      <button mat-raised-button color="primary" (click)="configurarPareja()">
+        <mat-icon>add</mat-icon>
+        Configurar Pareja
+      </button>
+    </mat-card-content>
+  }
+
   <!-- Error State -->
-  @if (error && !cargando) {
+  @if (error && !cargando && !necesitaPareja) {
     <mat-card-content class="error-content">
       <mat-icon>error_outline</mat-icon>
       <span>{{ error }}</span>

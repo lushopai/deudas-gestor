@@ -15,7 +15,19 @@
       </div>
     }
 
-    @if (resumen && !cargandoResumen) {
+    @if (errorPareja && !cargandoResumen) {
+      <mat-card-content class="error-pareja-content">
+        <mat-icon>people_outline</mat-icon>
+        <div class="error-title">Configura tu Pareja Primero</div>
+        <div class="error-message">Para registrar pagos, necesitas estar en una pareja con otro usuario</div>
+        <button mat-raised-button color="primary" (click)="configurarPareja()">
+          <mat-icon>add</mat-icon>
+          Configurar Pareja
+        </button>
+      </mat-card-content>
+    }
+
+    @if (resumen && !cargandoResumen && !errorPareja) {
       <div class="deuda-resumen">
         <div class="resumen-label">Deuda actual</div>
         <div class="resumen-mensaje">{{ resumen.mensajeBalance }}</div>

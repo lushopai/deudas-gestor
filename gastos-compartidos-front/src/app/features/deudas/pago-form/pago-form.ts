@@ -38,6 +38,7 @@ export class PagoForm implements OnInit {
   cargando = false;
   cargandoResumen = true;
   resumen: ResumenDeuda | null = null;
+  errorPareja = false;
 
   metodosPago = [
     { value: MetodoPago.EFECTIVO, label: 'Efectivo', icon: 'payments' },
@@ -66,15 +67,27 @@ export class PagoForm implements OnInit {
 
   cargarResumen(): void {
     this.cargandoResumen = true;
+    this.errorPareja = false;
+
     this.pagoService.obtenerResumenDeuda().subscribe({
       next: (resumen) => {
         this.resumen = resumen;
         this.cargandoResumen = false;
       },
-      error: () => {
+      error: (err) => {
+        console.error('Error al cargar resumen:', err);
+
+        // Detectar si el error es por falta de pareja
+        if (err.status === 400 && err.error?.mensaje?.includes('pareja')) {
+          this.errorPareja = true;
+        }
         this.cargandoResumen = false;
       }
     });
+  }
+
+  configurarPareja(): void {
+    this.router.navigate(['/pareja/configurar']);
   }
 
   getReceptorId(): number | null {

@@ -57,6 +57,44 @@ mat-toolbar {
   }
 }
 
+.error-pareja-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xl);
+  text-align: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: var(--radius);
+  margin: var(--spacing-lg);
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    opacity: 0.9;
+  }
+
+  .error-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-top: var(--spacing-xs);
+  }
+
+  .error-message {
+    font-size: 14px;
+    opacity: 0.9;
+    max-width: 300px;
+  }
+
+  button {
+    margin-top: var(--spacing-md);
+    background: white !important;
+    color: var(--primary-color) !important;
+  }
+}
+
 .empty-text {
   font-size: 18px;
   font-weight: 600;

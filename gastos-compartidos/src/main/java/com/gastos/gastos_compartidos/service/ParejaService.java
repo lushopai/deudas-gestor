@@ -65,8 +65,19 @@ public class ParejaService {
         Usuario usuario = usuarioRepository.findById(usuarioId)
             .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
 
+        // Si el usuario no tiene pareja, crear una nueva
         if (usuario.getPareja() == null) {
-            throw new BadRequestException("El usuario no está asociado a una pareja");
+            Pareja nuevaPareja = Pareja.builder()
+                .nombrePareja("Pareja de " + usuario.getNombre())
+                .build();
+
+            parejaRepository.save(nuevaPareja);
+
+            // Asociar el usuario a la nueva pareja
+            usuario.setPareja(nuevaPareja);
+            usuarioRepository.save(usuario);
+
+            return nuevaPareja.getCodigoInvitacion();
         }
 
         return usuario.getPareja().getCodigoInvitacion();

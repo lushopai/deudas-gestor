@@ -8,6 +8,7 @@ import { GastosListComponent } from './features/gasto/gastos-list.component';
 import { ReportesComponent } from './features/reportes/reportes.component';
 import { PagoForm } from './features/deudas/pago-form/pago-form';
 import { HistorialPagos } from './features/deudas/historial-pagos/historial-pagos';
+import { ParejaSetup } from './features/pareja/pareja-setup/pareja-setup';
 import { MainLayoutComponent } from './shared/layouts/main-layout/main-layout.component';
 import { AuthGuard } from './core/guards/auth.guard';
 
@@ -28,7 +29,8 @@ export const routes: Routes = [
       { path: 'gastos/ocr', component: GastoFormComponent },
       { path: 'reportes', component: ReportesComponent },
       { path: 'deudas/abonar', component: PagoForm },
-      { path: 'deudas/historial', component: HistorialPagos }
+      { path: 'deudas/historial', component: HistorialPagos },
+      { path: 'pareja/configurar', component: ParejaSetup }
     ]
   },
   { path: '**', redirectTo: '/login' }

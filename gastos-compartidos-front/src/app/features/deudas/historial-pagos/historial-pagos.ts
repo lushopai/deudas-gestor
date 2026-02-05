@@ -33,6 +33,7 @@ export class HistorialPagos implements OnInit {
   pagos: Pago[] = [];
   cargando = true;
   error: string | null = null;
+  errorPareja = false;
   usuarioActualId: number | null = null;
 
   constructor(
@@ -51,6 +52,7 @@ export class HistorialPagos implements OnInit {
   cargarHistorial(): void {
     this.cargando = true;
     this.error = null;
+    this.errorPareja = false;
 
     this.pagoService.obtenerHistorial().subscribe({
       next: (pagos) => {
@@ -59,7 +61,12 @@ export class HistorialPagos implements OnInit {
       },
       error: (err) => {
         console.error('Error al cargar historial:', err);
-        this.error = 'No se pudo cargar el historial de pagos';
+        if (err.status === 400 && err.error?.mensaje?.includes('pareja')) {
+          this.errorPareja = true;
+          this.error = null;
+        } else {
+          this.error = 'No se pudo cargar el historial de pagos';
+        }
         this.cargando = false;
       }
     });
@@ -90,6 +97,10 @@ export class HistorialPagos implements OnInit {
 
   volver(): void {
     this.router.navigate(['/dashboard']);
+  }
+
+  configurarPareja(): void {
+    this.router.navigate(['/pareja/configurar']);
   }
 
   getMetodoPagoLabel(metodo: string): string {
