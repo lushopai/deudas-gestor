@@ -111,7 +111,7 @@ public class PagoService {
         }
 
         // Validar que el pago no esté ya cancelado
-        if (pago.getEstado() == Pago.EstadoPago.CANCELADO) {
+        if (pago.getEstado() == EstadoPago.CANCELADO) {
             throw new BadRequestException("El pago ya está cancelado");
         }
 
@@ -121,7 +121,7 @@ public class PagoService {
             throw new BadRequestException("No se puede cancelar un pago con más de 7 días de antigüedad");
         }
 
-        pago.setEstado(Pago.EstadoPago.CANCELADO);
+        pago.setEstado(EstadoPago.CANCELADO);
         pagoRepository.save(pago);
     }
 

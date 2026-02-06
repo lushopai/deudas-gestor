@@ -1,6 +1,6 @@
 package com.gastos.gastos_compartidos.dto;
 
-import com.gastos.gastos_compartidos.entity.Pago;
+import com.gastos.gastos_compartidos.entity.MetodoPago;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -27,7 +27,7 @@ public class PagoCreateDTO {
     private String concepto;
 
     @NotNull(message = "El método de pago es requerido")
-    private Pago.MetodoPago metodoPago;
+    private MetodoPago metodoPago;
 
     private LocalDateTime fechaPago;  // Si no se especifica, se usa la fecha actual
 }

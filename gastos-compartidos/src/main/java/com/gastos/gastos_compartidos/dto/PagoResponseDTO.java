@@ -1,5 +1,7 @@
 package com.gastos.gastos_compartidos.dto;
 
+import com.gastos.gastos_compartidos.entity.EstadoPago;
+import com.gastos.gastos_compartidos.entity.MetodoPago;
 import com.gastos.gastos_compartidos.entity.Pago;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,8 +22,8 @@ public class PagoResponseDTO {
     private UsuarioResponseDTO receptor;
     private BigDecimal monto;
     private String concepto;
-    private Pago.MetodoPago metodoPago;
-    private Pago.EstadoPago estado;
+    private MetodoPago metodoPago;
+    private EstadoPago estado;
     private LocalDateTime fechaPago;
     private LocalDateTime fechaCreacion;
     private Integer mesPago;
