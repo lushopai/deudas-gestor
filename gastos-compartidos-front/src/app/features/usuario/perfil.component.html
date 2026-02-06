@@ -130,13 +130,92 @@
               <mat-icon>security</mat-icon>
               <div class="security-text">
                 <div class="security-label">Contraseña</div>
-                <div class="security-detail">Última actualización: {{ usuario.fechaActualizacion | date: 'dd/MM/yyyy' }}</div>
+                @if (usuario.provider === 'GOOGLE') {
+                  <div class="security-detail">Gestionada por Google</div>
+                } @else {
+                  <div class="security-detail">Última actualización: {{ usuario.fechaActualizacion | date: 'dd/MM/yyyy' }}</div>
+                }
               </div>
             </div>
-            <button mat-stroked-button type="button" [disabled]="true">
-              Cambiar
-            </button>
+            @if (usuario.provider !== 'GOOGLE') {
+              <button mat-stroked-button type="button" (click)="toggleFormPassword()">
+                {{ mostrarFormPassword ? 'Cancelar' : 'Cambiar' }}
+              </button>
+            }
           </div>
+
+          <!-- Formulario de cambio de contraseña -->
+          @if (mostrarFormPassword) {
+            <mat-divider></mat-divider>
+            <div class="password-form-container" [formGroup]="passwordForm">
+              <!-- Contraseña actual -->
+              <mat-form-field class="form-field">
+                <mat-label>Contraseña actual</mat-label>
+                <input matInput formControlName="passwordActual"
+                  [type]="hidePasswordActual ? 'password' : 'text'" />
+                <mat-icon matIconPrefix>lock</mat-icon>
+                <button mat-icon-button matSuffix type="button"
+                  (click)="hidePasswordActual = !hidePasswordActual">
+                  <mat-icon>{{ hidePasswordActual ? 'visibility_off' : 'visibility' }}</mat-icon>
+                </button>
+                @if (passwordForm.get('passwordActual')?.hasError('required') && passwordForm.get('passwordActual')?.touched) {
+                  <mat-error>La contraseña actual es requerida</mat-error>
+                }
+              </mat-form-field>
+
+              <!-- Nueva contraseña -->
+              <mat-form-field class="form-field">
+                <mat-label>Nueva contraseña</mat-label>
+                <input matInput formControlName="passwordNueva"
+                  [type]="hidePasswordNueva ? 'password' : 'text'" />
+                <mat-icon matIconPrefix>lock_reset</mat-icon>
+                <button mat-icon-button matSuffix type="button"
+                  (click)="hidePasswordNueva = !hidePasswordNueva">
+                  <mat-icon>{{ hidePasswordNueva ? 'visibility_off' : 'visibility' }}</mat-icon>
+                </button>
+                @if (passwordForm.get('passwordNueva')?.hasError('required') && passwordForm.get('passwordNueva')?.touched) {
+                  <mat-error>La nueva contraseña es requerida</mat-error>
+                } @else if (passwordForm.get('passwordNueva')?.hasError('minlength') && passwordForm.get('passwordNueva')?.touched) {
+                  <mat-error>Mínimo 8 caracteres</mat-error>
+                } @else if (passwordForm.get('passwordNueva')?.hasError('pattern') && passwordForm.get('passwordNueva')?.touched) {
+                  <mat-error>Debe incluir mayúscula, minúscula, número y carácter especial</mat-error>
+                }
+              </mat-form-field>
+
+              <!-- Confirmar contraseña -->
+              <mat-form-field class="form-field">
+                <mat-label>Confirmar contraseña</mat-label>
+                <input matInput formControlName="confirmarPassword"
+                  [type]="hideConfirmar ? 'password' : 'text'" />
+                <mat-icon matIconPrefix>check_circle</mat-icon>
+                <button mat-icon-button matSuffix type="button"
+                  (click)="hideConfirmar = !hideConfirmar">
+                  <mat-icon>{{ hideConfirmar ? 'visibility_off' : 'visibility' }}</mat-icon>
+                </button>
+                @if (passwordForm.get('confirmarPassword')?.hasError('required') && passwordForm.get('confirmarPassword')?.touched) {
+                  <mat-error>Confirma tu nueva contraseña</mat-error>
+                } @else if (passwordForm.hasError('passwordMismatch') && passwordForm.get('confirmarPassword')?.touched) {
+                  <mat-error>Las contraseñas no coinciden</mat-error>
+                }
+              </mat-form-field>
+
+              <div class="password-actions">
+                <button mat-raised-button color="primary" type="button"
+                  (click)="cambiarPassword()"
+                  [disabled]="guardandoPassword || passwordForm.invalid">
+                  @if (guardandoPassword) {
+                    <mat-progress-spinner diameter="20" mode="indeterminate" class="spinner"></mat-progress-spinner>
+                  }
+                  {{ guardandoPassword ? 'Guardando...' : 'Guardar Contraseña' }}
+                </button>
+                <button mat-stroked-button type="button" (click)="toggleFormPassword()"
+                  [disabled]="guardandoPassword">
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          }
+
           <mat-divider></mat-divider>
           <div class="security-item">
             <div class="security-info">

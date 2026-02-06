@@ -61,6 +61,10 @@ export class ApiService {
     return this.http.put(`${this.apiUrl}/usuarios/me`, datos);
   }
 
+  cambiarPassword(datos: { passwordActual: string, passwordNueva: string }): Observable<any> {
+    return this.http.put(`${this.apiUrl}/usuarios/me/password`, datos);
+  }
+
   // Reportes
   getReporteMensual(mes: number, anio: number): Observable<any> {
     return this.http.get(`${this.apiUrl}/reportes/mes`, {

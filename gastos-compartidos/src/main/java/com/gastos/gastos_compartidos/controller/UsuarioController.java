@@ -1,16 +1,20 @@
 package com.gastos.gastos_compartidos.controller;
 
 import com.gastos.gastos_compartidos.dto.ActualizarPerfilDTO;
+import com.gastos.gastos_compartidos.dto.CambiarPasswordDTO;
 import com.gastos.gastos_compartidos.dto.UsuarioResponseDTO;
 import com.gastos.gastos_compartidos.security.CustomUserDetails;
 import com.gastos.gastos_compartidos.service.UsuarioService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/usuarios")
@@ -37,6 +41,15 @@ public class UsuarioController {
 
         UsuarioResponseDTO perfil = usuarioService.actualizarPerfil(currentUser.getId(), dto);
         return ResponseEntity.ok(perfil);
+    }
+
+    @PutMapping("/me/password")
+    @Operation(summary = "Cambiar contraseña", description = "Cambia la contraseña del usuario autenticado")
+    public ResponseEntity<Map<String, String>> cambiarPassword(
+            @AuthenticationPrincipal CustomUserDetails currentUser,
+            @Valid @RequestBody CambiarPasswordDTO dto) {
+        usuarioService.cambiarPassword(currentUser.getId(), dto);
+        return ResponseEntity.ok(Map.of("mensaje", "Contraseña actualizada correctamente"));
     }
 
     @GetMapping("/{id}")

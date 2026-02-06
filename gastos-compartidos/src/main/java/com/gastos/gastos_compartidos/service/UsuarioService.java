@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.gastos.gastos_compartidos.dto.ActualizarPerfilDTO;
+import com.gastos.gastos_compartidos.dto.CambiarPasswordDTO;
 import com.gastos.gastos_compartidos.dto.RegistroRequestDTO;
 import com.gastos.gastos_compartidos.dto.UsuarioResponseDTO;
 import com.gastos.gastos_compartidos.entity.Pareja;
@@ -107,6 +108,21 @@ public class UsuarioService {
     public UsuarioResponseDTO obtenerPerfil(Long usuarioId) {
         Usuario usuario = obtenerPorId(usuarioId);
         return UsuarioResponseDTO.fromEntity(usuario);
+    }
+
+    public void cambiarPassword(Long usuarioId, CambiarPasswordDTO dto) {
+        Usuario usuario = obtenerPorId(usuarioId);
+
+        if (usuario.getProvider() != Usuario.AuthProvider.LOCAL) {
+            throw new BadRequestException("No se puede cambiar la contraseña de una cuenta gestionada por Google");
+        }
+
+        if (!getPasswordEncoder().matches(dto.getPasswordActual(), usuario.getPassword())) {
+            throw new BadRequestException("La contraseña actual es incorrecta");
+        }
+
+        usuario.setPassword(getPasswordEncoder().encode(dto.getPasswordNueva()));
+        usuarioRepository.save(usuario);
     }
 
     public UsuarioResponseDTO actualizarPerfil(Long usuarioId, ActualizarPerfilDTO dto) {

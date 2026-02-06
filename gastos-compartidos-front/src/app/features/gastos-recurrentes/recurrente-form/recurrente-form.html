@@ -55,13 +55,6 @@
             <mat-form-field appearance="outline">
               <mat-label>Frecuencia</mat-label>
               <mat-select formControlName="frecuencia">
-                <mat-select-trigger>
-                  @for (freq of frecuencias; track freq.value) {
-                    @if (freq.value === formulario.get('frecuencia')?.value) {
-                      {{ freq.label }}
-                    }
-                  }
-                </mat-select-trigger>
                 @for (freq of frecuencias; track freq.value) {
                   <mat-option [value]="freq.value">{{ freq.label }}</mat-option>
                 }

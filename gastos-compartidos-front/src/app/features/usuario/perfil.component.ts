@@ -1,7 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, Router } from '@angular/router';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -38,11 +38,17 @@ import { LoadingService } from '../../core/services/loading.service';
 })
 export class PerfilComponent implements OnInit {
   perfilForm!: FormGroup;
+  passwordForm!: FormGroup;
   usuario: any;
   cargando = false;
   guardando = false;
+  guardandoPassword = false;
+  mostrarFormPassword = false;
   error: string | null = null;
   previewFoto: string | null = null;
+  hidePasswordActual = true;
+  hidePasswordNueva = true;
+  hideConfirmar = true;
 
   constructor(
     private authService: AuthService,
@@ -56,6 +62,7 @@ export class PerfilComponent implements OnInit {
 
   ngOnInit() {
     this.inicializarFormulario();
+    this.inicializarPasswordForm();
     this.cargarPerfil();
   }
 
@@ -171,6 +178,64 @@ export class PerfilComponent implements OnInit {
         console.error('Error al guardar perfil:', err);
         this.guardando = false;
         this.loadingService.hide();
+        this.cdRef.detectChanges();
+      }
+    });
+  }
+
+  inicializarPasswordForm() {
+    this.passwordForm = this.formBuilder.group({
+      passwordActual: ['', Validators.required],
+      passwordNueva: ['', [
+        Validators.required,
+        Validators.minLength(8),
+        Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/)
+      ]],
+      confirmarPassword: ['', Validators.required]
+    }, { validators: this.passwordMatchValidator });
+  }
+
+  passwordMatchValidator(group: AbstractControl): ValidationErrors | null {
+    const password = group.get('passwordNueva')?.value;
+    const confirm = group.get('confirmarPassword')?.value;
+    return password === confirm ? null : { passwordMismatch: true };
+  }
+
+  toggleFormPassword() {
+    this.mostrarFormPassword = !this.mostrarFormPassword;
+    if (!this.mostrarFormPassword) {
+      this.passwordForm.reset();
+    }
+  }
+
+  cambiarPassword() {
+    if (this.passwordForm.invalid) {
+      this.passwordForm.markAllAsTouched();
+      return;
+    }
+
+    this.guardandoPassword = true;
+    this.loadingService.show('Cambiando contraseña...');
+
+    const datos = {
+      passwordActual: this.passwordForm.get('passwordActual')?.value,
+      passwordNueva: this.passwordForm.get('passwordNueva')?.value
+    };
+
+    this.apiService.cambiarPassword(datos).subscribe({
+      next: () => {
+        this.guardandoPassword = false;
+        this.loadingService.hide();
+        this.notificationService.success('Contraseña actualizada correctamente');
+        this.mostrarFormPassword = false;
+        this.passwordForm.reset();
+        this.cdRef.detectChanges();
+      },
+      error: (err) => {
+        this.guardandoPassword = false;
+        this.loadingService.hide();
+        const mensaje = err.error?.message || err.error?.mensaje || 'Error al cambiar la contraseña';
+        this.notificationService.error(mensaje);
         this.cdRef.detectChanges();
       }
     });

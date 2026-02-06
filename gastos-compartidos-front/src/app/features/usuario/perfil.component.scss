@@ -275,6 +275,25 @@ mat-spinner {
   color: #999;
 }
 
+/* Password Form */
+.password-form-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px 0;
+}
+
+.password-actions {
+  display: flex;
+  gap: 12px;
+
+  button {
+    flex: 1;
+    height: 44px;
+    font-weight: 600;
+  }
+}
+
 /* Action Buttons */
 .action-buttons {
   display: flex;
