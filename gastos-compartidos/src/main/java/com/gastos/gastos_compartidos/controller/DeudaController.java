@@ -1,0 +1,120 @@
+package com.gastos.gastos_compartidos.controller;
+
+import com.gastos.gastos_compartidos.dto.*;
+import com.gastos.gastos_compartidos.security.CustomUserDetails;
+import com.gastos.gastos_compartidos.service.DeudaService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/deudas")
+@RequiredArgsConstructor
+@Tag(name = "Deudas", description = "Gestión de deudas externas y abonos")
+@SecurityRequirement(name = "bearer-jwt")
+public class DeudaController {
+
+    private final DeudaService deudaService;
+
+    // ==================== DEUDAS ====================
+
+    @PostMapping
+    @Operation(summary = "Crear nueva deuda", description = "Registra una nueva deuda externa")
+    public ResponseEntity<DeudaResponseDTO> crearDeuda(
+            @AuthenticationPrincipal CustomUserDetails currentUser,
+            @Valid @RequestBody DeudaCreateDTO dto) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(deudaService.crearDeuda(currentUser.getId(), dto));
+    }
+
+    @GetMapping
+    @Operation(summary = "Listar deudas", description = "Obtiene todas las deudas del usuario")
+    public ResponseEntity<List<DeudaResponseDTO>> obtenerDeudas(
+            @AuthenticationPrincipal CustomUserDetails currentUser,
+            @RequestParam(required = false, defaultValue = "false") boolean soloActivas) {
+        List<DeudaResponseDTO> deudas = soloActivas
+                ? deudaService.obtenerDeudasActivas(currentUser.getId())
+                : deudaService.obtenerDeudasUsuario(currentUser.getId());
+        return ResponseEntity.ok(deudas);
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Obtener deuda", description = "Obtiene el detalle de una deuda con sus últimos abonos")
+    public ResponseEntity<DeudaResponseDTO> obtenerDeuda(
+            @AuthenticationPrincipal CustomUserDetails currentUser,
+            @PathVariable Long id) {
+        return ResponseEntity.ok(deudaService.obtenerDeuda(currentUser.getId(), id));
+    }
+
+    @PutMapping("/{id}")
+    @Operation(summary = "Actualizar deuda", description = "Actualiza los datos de una deuda")
+    public ResponseEntity<DeudaResponseDTO> actualizarDeuda(
+            @AuthenticationPrincipal CustomUserDetails currentUser,
+            @PathVariable Long id,
+            @Valid @RequestBody DeudaCreateDTO dto) {
+        return ResponseEntity.ok(deudaService.actualizarDeuda(currentUser.getId(), id, dto));
+    }
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Eliminar deuda", description = "Elimina una deuda y todos sus abonos")
+    public ResponseEntity<Void> eliminarDeuda(
+            @AuthenticationPrincipal CustomUserDetails currentUser,
+            @PathVariable Long id) {
+        deudaService.eliminarDeuda(currentUser.getId(), id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/cancelar")
+    @Operation(summary = "Cancelar deuda", description = "Marca una deuda como cancelada sin eliminarla")
+    public ResponseEntity<DeudaResponseDTO> cancelarDeuda(
+            @AuthenticationPrincipal CustomUserDetails currentUser,
+            @PathVariable Long id) {
+        return ResponseEntity.ok(deudaService.cancelarDeuda(currentUser.getId(), id));
+    }
+
+    // ==================== ABONOS ====================
+
+    @PostMapping("/{deudaId}/abonos")
+    @Operation(summary = "Registrar abono", description = "Registra un abono a una deuda")
+    public ResponseEntity<AbonoDeudaResponseDTO> registrarAbono(
+            @AuthenticationPrincipal CustomUserDetails currentUser,
+            @PathVariable Long deudaId,
+            @Valid @RequestBody AbonoDeudaCreateDTO dto) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(deudaService.registrarAbono(currentUser.getId(), deudaId, dto));
+    }
+
+    @GetMapping("/{deudaId}/abonos")
+    @Operation(summary = "Listar abonos", description = "Obtiene el historial de abonos de una deuda")
+    public ResponseEntity<List<AbonoDeudaResponseDTO>> obtenerAbonos(
+            @AuthenticationPrincipal CustomUserDetails currentUser,
+            @PathVariable Long deudaId) {
+        return ResponseEntity.ok(deudaService.obtenerAbonosDeuda(currentUser.getId(), deudaId));
+    }
+
+    @DeleteMapping("/{deudaId}/abonos/{abonoId}")
+    @Operation(summary = "Eliminar abono", description = "Elimina un abono y restaura el saldo de la deuda")
+    public ResponseEntity<Void> eliminarAbono(
+            @AuthenticationPrincipal CustomUserDetails currentUser,
+            @PathVariable Long deudaId,
+            @PathVariable Long abonoId) {
+        deudaService.eliminarAbono(currentUser.getId(), deudaId, abonoId);
+        return ResponseEntity.noContent().build();
+    }
+
+    // ==================== RESUMEN ====================
+
+    @GetMapping("/resumen")
+    @Operation(summary = "Resumen de deudas", description = "Obtiene un resumen de todas las deudas del usuario")
+    public ResponseEntity<ResumenDeudasDTO> obtenerResumen(
+            @AuthenticationPrincipal CustomUserDetails currentUser) {
+        return ResponseEntity.ok(deudaService.obtenerResumen(currentUser.getId()));
+    }
+}

@@ -1,0 +1,287 @@
+.deudas-container {
+  padding: 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+
+  .header-content {
+    h1 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 600;
+      color: #1a1a1a;
+    }
+
+    .subtitle {
+      margin: 4px 0 0;
+      color: #666;
+      font-size: 14px;
+    }
+  }
+}
+
+.resumen-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+
+  .resumen-card {
+    border-radius: 12px;
+
+    mat-card-content {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 20px !important;
+
+      mat-icon {
+        font-size: 32px;
+        width: 32px;
+        height: 32px;
+        opacity: 0.8;
+      }
+
+      .resumen-info {
+        display: flex;
+        flex-direction: column;
+
+        .label {
+          font-size: 12px;
+          color: rgba(255, 255, 255, 0.8);
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        .monto {
+          font-size: 24px;
+          font-weight: 600;
+        }
+      }
+    }
+
+    &.deuda-total {
+      background: linear-gradient(135deg, #ef5350 0%, #e53935 100%);
+      color: white;
+    }
+
+    &.deudas-activas {
+      background: linear-gradient(135deg, #42a5f5 0%, #1e88e5 100%);
+      color: white;
+    }
+
+    &.abonado-mes {
+      background: linear-gradient(135deg, #66bb6a 0%, #43a047 100%);
+      color: white;
+    }
+  }
+}
+
+.filtros {
+  margin-bottom: 20px;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  gap: 16px;
+  color: #666;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 48px 24px;
+  border-radius: 12px;
+
+  mat-card-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+
+    mat-icon {
+      font-size: 64px;
+      width: 64px;
+      height: 64px;
+      color: #ccc;
+    }
+
+    h3 {
+      margin: 0;
+      color: #333;
+    }
+
+    p {
+      margin: 0;
+      color: #666;
+    }
+  }
+}
+
+.deudas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+.deuda-card {
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  &.pagada {
+    opacity: 0.7;
+    background: #f5f5f5;
+  }
+
+  mat-card-header {
+    position: relative;
+    padding: 16px 16px 8px;
+
+    .tipo-icon {
+      background: #e3f2fd;
+      color: #1976d2;
+      border-radius: 8px;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    mat-card-title {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    mat-card-subtitle {
+      font-size: 12px;
+    }
+
+    .menu-button {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+    }
+  }
+
+  mat-card-content {
+    padding: 0 16px 16px;
+
+    .montos {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+
+      .monto-item {
+        display: flex;
+        flex-direction: column;
+
+        .label {
+          font-size: 11px;
+          color: #888;
+          text-transform: uppercase;
+          letter-spacing: 0.3px;
+        }
+
+        .valor {
+          font-size: 16px;
+          font-weight: 500;
+          color: #333;
+
+          &.principal {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1976d2;
+          }
+        }
+      }
+    }
+
+    .progreso-section {
+      margin-bottom: 16px;
+
+      .progreso-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        font-size: 12px;
+        color: #666;
+
+        .porcentaje {
+          font-weight: 600;
+          color: #1976d2;
+        }
+      }
+
+      mat-progress-bar {
+        height: 8px;
+        border-radius: 4px;
+      }
+    }
+
+    .footer-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      .abonos-count {
+        font-size: 12px;
+        color: #888;
+      }
+    }
+  }
+
+  mat-card-actions {
+    padding: 0 16px 16px;
+    margin: 0;
+
+    button {
+      width: 100%;
+    }
+  }
+}
+
+.delete-option {
+  color: #f44336;
+}
+
+@media (max-width: 600px) {
+  .deudas-container {
+    padding: 12px;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+
+    button {
+      width: 100%;
+    }
+  }
+
+  .deudas-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .resumen-cards {
+    grid-template-columns: 1fr;
+  }
+}

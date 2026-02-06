@@ -87,16 +87,4 @@ public class Pago {
             anoPago = fechaPago.getYear();
         }
     }
-
-    public enum MetodoPago {
-        EFECTIVO,
-        TRANSFERENCIA,
-        TARJETA,
-        OTRO
-    }
-
-    public enum EstadoPago {
-        COMPLETADO,
-        CANCELADO
-    }
 }

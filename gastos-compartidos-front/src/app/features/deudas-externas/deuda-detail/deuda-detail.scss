@@ -1,0 +1,264 @@
+.deuda-detail-container {
+  padding: 16px;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+
+  h1 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+  }
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  gap: 16px;
+  color: #666;
+}
+
+.deuda-card {
+  border-radius: 12px;
+  margin-bottom: 16px;
+
+  mat-card-header {
+    position: relative;
+    padding: 20px 20px 12px;
+
+    .tipo-icon {
+      background: #e3f2fd;
+      color: #1976d2;
+      border-radius: 12px;
+      width: 48px;
+      height: 48px;
+      font-size: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    mat-card-title {
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .estado-chip {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+    }
+  }
+
+  mat-card-content {
+    padding: 0 20px 20px;
+
+    .descripcion {
+      color: #666;
+      margin: 0 0 20px;
+      font-size: 14px;
+    }
+  }
+
+  mat-card-actions {
+    padding: 16px 20px;
+    border-top: 1px solid #e0e0e0;
+    display: flex;
+    gap: 12px;
+  }
+}
+
+.montos-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+
+  .monto-box {
+    background: #f5f5f5;
+    border-radius: 8px;
+    padding: 16px;
+    text-align: center;
+
+    .label {
+      display: block;
+      font-size: 11px;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      margin-bottom: 4px;
+    }
+
+    .valor {
+      display: block;
+      font-size: 18px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    &.principal {
+      background: #e3f2fd;
+
+      .valor {
+        color: #1976d2;
+        font-size: 22px;
+      }
+    }
+
+    &.success {
+      background: #e8f5e9;
+
+      .valor {
+        color: #388e3c;
+      }
+    }
+  }
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.progreso-section {
+  margin-bottom: 20px;
+
+  .progreso-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 13px;
+    color: #666;
+
+    .porcentaje {
+      font-weight: 600;
+      color: #1976d2;
+    }
+  }
+
+  mat-progress-bar {
+    height: 10px;
+    border-radius: 5px;
+  }
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 16px;
+
+  .info-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+
+    mat-icon {
+      color: #1976d2;
+      margin-top: 2px;
+    }
+
+    .label {
+      display: block;
+      font-size: 11px;
+      color: #888;
+      text-transform: uppercase;
+    }
+
+    .valor {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      color: #333;
+    }
+  }
+}
+
+.abonos-card {
+  border-radius: 12px;
+
+  mat-card-header {
+    padding: 20px;
+
+    mat-card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 16px;
+
+      mat-icon {
+        color: #1976d2;
+      }
+    }
+  }
+
+  mat-card-content {
+    padding: 0;
+  }
+}
+
+.empty-abonos {
+  text-align: center;
+  padding: 32px;
+  color: #888;
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    color: #ccc;
+  }
+
+  p {
+    margin: 12px 0 0;
+  }
+}
+
+.abono-item {
+  .abono-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .monto {
+      font-weight: 600;
+      color: #388e3c;
+    }
+
+    .fecha {
+      font-size: 12px;
+      color: #888;
+    }
+  }
+
+  .abono-subtitle {
+    font-size: 12px;
+    color: #666;
+
+    .comprobante {
+      margin-left: 4px;
+    }
+  }
+
+  .abono-notas {
+    font-size: 12px;
+    color: #888;
+    font-style: italic;
+  }
+
+  .delete-btn {
+    color: #f44336;
+    opacity: 0.6;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+}

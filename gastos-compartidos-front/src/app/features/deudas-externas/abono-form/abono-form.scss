@@ -1,0 +1,124 @@
+.abono-form-container {
+  padding: 16px;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+
+  h1 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+  }
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  gap: 16px;
+  color: #666;
+}
+
+.deuda-info-card {
+  border-radius: 12px;
+  margin-bottom: 16px;
+  background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+  color: white;
+
+  mat-card-content {
+    padding: 20px !important;
+  }
+
+  .deuda-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .acreedor {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      mat-icon {
+        font-size: 28px;
+        width: 28px;
+        height: 28px;
+        opacity: 0.9;
+      }
+
+      span {
+        font-size: 18px;
+        font-weight: 500;
+      }
+    }
+
+    .saldo {
+      text-align: right;
+
+      .label {
+        display: block;
+        font-size: 11px;
+        opacity: 0.8;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+      }
+
+      .monto {
+        display: block;
+        font-size: 24px;
+        font-weight: 600;
+      }
+    }
+  }
+}
+
+.form-card {
+  border-radius: 12px;
+
+  mat-card-content {
+    padding: 24px !important;
+  }
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  mat-form-field {
+    width: 100%;
+  }
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e0e0e0;
+
+  button {
+    min-width: 120px;
+
+    mat-progress-spinner {
+      display: inline-block;
+    }
+  }
+
+  @media (max-width: 480px) {
+    flex-direction: column-reverse;
+
+    button {
+      width: 100%;
+    }
+  }
+}

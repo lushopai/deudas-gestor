@@ -75,6 +75,11 @@ export class MainLayoutComponent implements OnInit {
       route: '/deudas/historial'
     },
     {
+      label: 'Mis Deudas',
+      icon: 'account_balance',
+      route: '/deudas-externas'
+    },
+    {
       label: 'Reportes',
       icon: 'assessment',
       route: '/reportes'

@@ -156,6 +156,25 @@ export class RegistroComponent implements OnInit {
     return password ? this.validarPassword(password) : [];
   }
 
+  checkPassword(requirement: string): boolean {
+    const password = this.formulario.get('password')?.value || '';
+
+    switch (requirement) {
+      case 'lowercase':
+        return /[a-z]/.test(password);
+      case 'uppercase':
+        return /[A-Z]/.test(password);
+      case 'number':
+        return /\d/.test(password);
+      case 'special':
+        return /[@$!%*?&]/.test(password);
+      case 'length':
+        return password.length >= 8;
+      default:
+        return false;
+    }
+  }
+
   tieneError(fieldName: string): boolean {
     const field = this.formulario.get(fieldName);
     return !!(field && field.invalid && (field.dirty || field.touched));

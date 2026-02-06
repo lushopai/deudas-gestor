@@ -1,0 +1,166 @@
+<div class="deuda-detail-container">
+  <div class="page-header">
+    <button mat-icon-button (click)="volver()">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <h1>Detalle de Deuda</h1>
+  </div>
+
+  @if (cargando) {
+    <div class="loading-container">
+      <mat-progress-spinner diameter="40" mode="indeterminate"></mat-progress-spinner>
+      <span>Cargando...</span>
+    </div>
+  }
+
+  @if (deuda && !cargando) {
+    <!-- Card Principal -->
+    <mat-card class="deuda-card">
+      <mat-card-header>
+        <mat-icon mat-card-avatar class="tipo-icon">{{ getIconoTipo(deuda.tipo) }}</mat-icon>
+        <mat-card-title>{{ deuda.acreedor }}</mat-card-title>
+        <mat-card-subtitle>{{ tipoDeudaLabels[deuda.tipo] }}</mat-card-subtitle>
+        <mat-chip [color]="getColorEstado(deuda.estado)" selected class="estado-chip">
+          {{ estadoDeudaLabels[deuda.estado] }}
+        </mat-chip>
+      </mat-card-header>
+
+      <mat-card-content>
+        @if (deuda.descripcion) {
+          <p class="descripcion">{{ deuda.descripcion }}</p>
+        }
+
+        <!-- Montos -->
+        <div class="montos-grid">
+          <div class="monto-box principal">
+            <span class="label">Saldo Pendiente</span>
+            <span class="valor">{{ formatMonto(deuda.saldoPendiente) }}</span>
+          </div>
+          <div class="monto-box">
+            <span class="label">Monto Original</span>
+            <span class="valor">{{ formatMonto(deuda.montoOriginal) }}</span>
+          </div>
+          <div class="monto-box success">
+            <span class="label">Total Pagado</span>
+            <span class="valor">{{ formatMonto(deuda.montoPagado) }}</span>
+          </div>
+        </div>
+
+        <!-- Progreso -->
+        <div class="progreso-section">
+          <div class="progreso-header">
+            <span>Progreso de pago</span>
+            <span class="porcentaje">{{ deuda.progreso }}%</span>
+          </div>
+          <mat-progress-bar mode="determinate" [value]="deuda.progreso"></mat-progress-bar>
+        </div>
+
+        <!-- Info Adicional -->
+        <div class="info-grid">
+          @if (deuda.fechaInicio) {
+            <div class="info-item">
+              <mat-icon>event</mat-icon>
+              <div>
+                <span class="label">Fecha Inicio</span>
+                <span class="valor">{{ formatFecha(deuda.fechaInicio) }}</span>
+              </div>
+            </div>
+          }
+          @if (deuda.fechaVencimiento) {
+            <div class="info-item">
+              <mat-icon>event_busy</mat-icon>
+              <div>
+                <span class="label">Vencimiento</span>
+                <span class="valor">{{ formatFecha(deuda.fechaVencimiento) }}</span>
+              </div>
+            </div>
+          }
+          @if (deuda.diaCorte) {
+            <div class="info-item">
+              <mat-icon>calendar_today</mat-icon>
+              <div>
+                <span class="label">Día de Corte</span>
+                <span class="valor">{{ deuda.diaCorte }}</span>
+              </div>
+            </div>
+          }
+          @if (deuda.diaLimitePago) {
+            <div class="info-item">
+              <mat-icon>schedule</mat-icon>
+              <div>
+                <span class="label">Día Límite Pago</span>
+                <span class="valor">{{ deuda.diaLimitePago }}</span>
+              </div>
+            </div>
+          }
+          @if (deuda.tasaInteres) {
+            <div class="info-item">
+              <mat-icon>percent</mat-icon>
+              <div>
+                <span class="label">Tasa de Interés</span>
+                <span class="valor">{{ deuda.tasaInteres }}% anual</span>
+              </div>
+            </div>
+          }
+        </div>
+      </mat-card-content>
+
+      <mat-card-actions>
+        @if (deuda.estado === 'ACTIVA') {
+          <button mat-raised-button color="primary" (click)="abonar()">
+            <mat-icon>payments</mat-icon>
+            Registrar Abono
+          </button>
+          <button mat-stroked-button (click)="editarDeuda()">
+            <mat-icon>edit</mat-icon>
+            Editar
+          </button>
+        }
+      </mat-card-actions>
+    </mat-card>
+
+    <!-- Historial de Abonos -->
+    <mat-card class="abonos-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>history</mat-icon>
+          Historial de Abonos ({{ abonos.length }})
+        </mat-card-title>
+      </mat-card-header>
+
+      <mat-card-content>
+        @if (abonos.length === 0) {
+          <div class="empty-abonos">
+            <mat-icon>payments</mat-icon>
+            <p>No hay abonos registrados</p>
+          </div>
+        } @else {
+          <mat-list>
+            @for (abono of abonos; track abono.id) {
+              <mat-list-item class="abono-item">
+                <mat-icon matListItemIcon>payment</mat-icon>
+                <div matListItemTitle class="abono-title">
+                  <span class="monto">{{ formatMonto(abono.monto) }}</span>
+                  <span class="fecha">{{ formatFecha(abono.fechaPago) }}</span>
+                </div>
+                <div matListItemLine class="abono-subtitle">
+                  <span class="metodo">{{ metodoPagoLabels[abono.metodoPago] }}</span>
+                  @if (abono.comprobante) {
+                    <span class="comprobante">• Ref: {{ abono.comprobante }}</span>
+                  }
+                </div>
+                @if (abono.notas) {
+                  <div matListItemLine class="abono-notas">{{ abono.notas }}</div>
+                }
+                <button mat-icon-button matListItemMeta (click)="eliminarAbono(abono)" class="delete-btn">
+                  <mat-icon>delete_outline</mat-icon>
+                </button>
+              </mat-list-item>
+              <mat-divider></mat-divider>
+            }
+          </mat-list>
+        }
+      </mat-card-content>
+    </mat-card>
+  }
+</div>

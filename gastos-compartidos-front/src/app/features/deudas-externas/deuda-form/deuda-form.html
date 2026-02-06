@@ -1,0 +1,140 @@
+<div class="deuda-form-container">
+  <div class="page-header">
+    <button mat-icon-button (click)="cancelar()">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <h1>{{ modoEdicion ? 'Editar Deuda' : 'Nueva Deuda' }}</h1>
+  </div>
+
+  @if (cargando) {
+    <div class="loading-container">
+      <mat-progress-spinner diameter="40" mode="indeterminate"></mat-progress-spinner>
+      <span>Cargando...</span>
+    </div>
+  } @else {
+    <mat-card class="form-card">
+      <mat-card-content>
+        <form [formGroup]="formulario" (ngSubmit)="guardar()">
+          <!-- Información Principal -->
+          <div class="section">
+            <h3 class="section-title">Información Principal</h3>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Acreedor</mat-label>
+              <mat-icon matPrefix>business</mat-icon>
+              <input matInput formControlName="acreedor" placeholder="Ej: Banco Santander, Tarjeta Visa">
+              @if (tieneError('acreedor')) {
+                <mat-error>El acreedor es requerido (máx. 100 caracteres)</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Tipo de Deuda</mat-label>
+              <mat-icon matPrefix>category</mat-icon>
+              <mat-select formControlName="tipo">
+                @for (tipo of tiposDeuda; track tipo.value) {
+                  <mat-option [value]="tipo.value">{{ tipo.label }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Descripción (opcional)</mat-label>
+              <mat-icon matPrefix>description</mat-icon>
+              <textarea matInput formControlName="descripcion" rows="2"
+                placeholder="Ej: Tarjeta de crédito principal"></textarea>
+            </mat-form-field>
+          </div>
+
+          <!-- Montos -->
+          <div class="section">
+            <h3 class="section-title">Monto</h3>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Monto Total de la Deuda</mat-label>
+              <mat-icon matPrefix>attach_money</mat-icon>
+              <input matInput type="number" formControlName="montoOriginal" placeholder="500000">
+              @if (tieneError('montoOriginal')) {
+                <mat-error>Ingresa un monto válido mayor a 0</mat-error>
+              }
+              @if (modoEdicion && formulario.get('montoOriginal')?.disabled) {
+                <mat-hint>No se puede modificar porque ya tiene abonos</mat-hint>
+              }
+            </mat-form-field>
+          </div>
+
+          <!-- Fechas -->
+          <div class="section">
+            <h3 class="section-title">Fechas</h3>
+
+            <div class="row">
+              <mat-form-field appearance="outline">
+                <mat-label>Fecha de Inicio</mat-label>
+                <input matInput [matDatepicker]="pickerInicio" formControlName="fechaInicio">
+                <mat-datepicker-toggle matIconSuffix [for]="pickerInicio"></mat-datepicker-toggle>
+                <mat-datepicker #pickerInicio></mat-datepicker>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Fecha de Vencimiento (opcional)</mat-label>
+                <input matInput [matDatepicker]="pickerVencimiento" formControlName="fechaVencimiento">
+                <mat-datepicker-toggle matIconSuffix [for]="pickerVencimiento"></mat-datepicker-toggle>
+                <mat-datepicker #pickerVencimiento></mat-datepicker>
+              </mat-form-field>
+            </div>
+          </div>
+
+          <!-- Configuración Tarjeta (opcional) -->
+          <div class="section">
+            <h3 class="section-title">Configuración (opcional)</h3>
+            <p class="section-hint">Útil para tarjetas de crédito</p>
+
+            <div class="row">
+              <mat-form-field appearance="outline">
+                <mat-label>Día de Corte</mat-label>
+                <mat-icon matPrefix>event</mat-icon>
+                <input matInput type="number" formControlName="diaCorte" min="1" max="31" placeholder="15">
+                @if (tieneError('diaCorte')) {
+                  <mat-error>Debe ser entre 1 y 31</mat-error>
+                }
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Día Límite de Pago</mat-label>
+                <mat-icon matPrefix>event</mat-icon>
+                <input matInput type="number" formControlName="diaLimitePago" min="1" max="31" placeholder="5">
+                @if (tieneError('diaLimitePago')) {
+                  <mat-error>Debe ser entre 1 y 31</mat-error>
+                }
+              </mat-form-field>
+            </div>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Tasa de Interés Anual (%)</mat-label>
+              <mat-icon matPrefix>percent</mat-icon>
+              <input matInput type="number" formControlName="tasaInteres" min="0" max="100" placeholder="24.5">
+              @if (tieneError('tasaInteres')) {
+                <mat-error>Debe ser entre 0 y 100</mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+          <!-- Botones -->
+          <div class="form-actions">
+            <button mat-stroked-button type="button" (click)="cancelar()">
+              Cancelar
+            </button>
+            <button mat-raised-button color="primary" type="submit" [disabled]="guardando">
+              @if (guardando) {
+                <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>
+              } @else {
+                <mat-icon>save</mat-icon>
+                {{ modoEdicion ? 'Guardar Cambios' : 'Crear Deuda' }}
+              }
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  }
+</div>

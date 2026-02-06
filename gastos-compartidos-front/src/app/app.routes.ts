@@ -9,6 +9,10 @@ import { ReportesComponent } from './features/reportes/reportes.component';
 import { PagoForm } from './features/deudas/pago-form/pago-form';
 import { HistorialPagos } from './features/deudas/historial-pagos/historial-pagos';
 import { ParejaSetup } from './features/pareja/pareja-setup/pareja-setup';
+import { DeudasList } from './features/deudas-externas/deudas-list/deudas-list';
+import { DeudaForm } from './features/deudas-externas/deuda-form/deuda-form';
+import { DeudaDetail } from './features/deudas-externas/deuda-detail/deuda-detail';
+import { AbonoForm } from './features/deudas-externas/abono-form/abono-form';
 import { MainLayoutComponent } from './shared/layouts/main-layout/main-layout.component';
 import { AuthGuard } from './core/guards/auth.guard';
 
@@ -30,7 +34,13 @@ export const routes: Routes = [
       { path: 'reportes', component: ReportesComponent },
       { path: 'deudas/abonar', component: PagoForm },
       { path: 'deudas/historial', component: HistorialPagos },
-      { path: 'pareja/configurar', component: ParejaSetup }
+      { path: 'pareja/configurar', component: ParejaSetup },
+      // Deudas Externas
+      { path: 'deudas-externas', component: DeudasList },
+      { path: 'deudas-externas/nueva', component: DeudaForm },
+      { path: 'deudas-externas/:id', component: DeudaDetail },
+      { path: 'deudas-externas/:id/editar', component: DeudaForm },
+      { path: 'deudas-externas/:id/abonar', component: AbonoForm }
     ]
   },
   { path: '**', redirectTo: '/login' }

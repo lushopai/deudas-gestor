@@ -1,135 +1,106 @@
 <div class="registro-container">
-  <!-- Header Section -->
   <div class="header-section">
-    <div class="logo">👤</div>
+    <div class="logo">💰</div>
     <h1 class="app-title">Crear Cuenta</h1>
     <p class="app-subtitle">Únete a Gastos Compartidos</p>
   </div>
 
-  <!-- Registro Card -->
   <mat-card class="registro-card">
     <mat-card-content>
-      <!-- Form Section -->
       <form [formGroup]="formulario" (ngSubmit)="registro()">
-        <!-- Email -->
-        <mat-form-field appearance="outline" class="full-width">
+        <mat-form-field appearance="outline">
           <mat-label>Email</mat-label>
-          <input matInput type="email" formControlName="email" (blur)="actualizarValidacionesError('email')">
           <mat-icon matPrefix>email</mat-icon>
-          <mat-error *ngFor="let error of validacionesError['email']">
-            {{ error }}
-          </mat-error>
+          <input matInput type="email" formControlName="email">
+          @if (tieneError('email')) {
+            <mat-error>Email inválido</mat-error>
+          }
         </mat-form-field>
 
-        <!-- Nombre -->
-        <mat-form-field appearance="outline" class="full-width">
+        <mat-form-field appearance="outline">
           <mat-label>Nombre</mat-label>
-          <input matInput type="text" formControlName="nombre" (blur)="actualizarValidacionesError('nombre')">
           <mat-icon matPrefix>person</mat-icon>
-          <mat-error *ngFor="let error of validacionesError['nombre']">
-            {{ error }}
-          </mat-error>
+          <input matInput type="text" formControlName="nombre">
+          @if (tieneError('nombre')) {
+            <mat-error>Nombre requerido (mín. 2 caracteres)</mat-error>
+          }
         </mat-form-field>
 
-        <!-- Apellido -->
-        <mat-form-field appearance="outline" class="full-width">
+        <mat-form-field appearance="outline">
           <mat-label>Apellido (Opcional)</mat-label>
-          <input matInput type="text" formControlName="apellido" (blur)="actualizarValidacionesError('apellido')">
           <mat-icon matPrefix>badge</mat-icon>
-          <mat-error *ngFor="let error of validacionesError['apellido']">
-            {{ error }}
-          </mat-error>
+          <input matInput type="text" formControlName="apellido">
         </mat-form-field>
 
-        <!-- Contraseña -->
         <div class="password-section">
-          <mat-form-field appearance="outline" class="full-width">
+          <mat-form-field appearance="outline">
             <mat-label>Contraseña</mat-label>
-            <input matInput [type]="mostrarPassword ? 'text' : 'password'" formControlName="password"
-              (blur)="actualizarValidacionesError('password')">
             <mat-icon matPrefix>lock</mat-icon>
-            <button mat-icon-button matSuffix type="button" (click)="togglePassword()" class="toggle-password">
+            <input matInput [type]="mostrarPassword ? 'text' : 'password'" formControlName="password">
+            <button mat-icon-button matSuffix type="button" (click)="togglePassword()">
               <mat-icon>{{ mostrarPassword ? 'visibility' : 'visibility_off' }}</mat-icon>
             </button>
-            <mat-error *ngFor="let error of validacionesError['password']">
-              {{ error }}
-            </mat-error>
           </mat-form-field>
 
-          <!-- Requisitos de contraseña -->
-          <div class="password-requirements" *ngIf="formulario.get('password')?.value">
-            <p class="requirements-title">Requisitos:</p>
-            <div class="requirement-item"
-              [ngClass]="{'completed': /[a-z]/.test(formulario.get('password')?.value || '')}">
-              <mat-icon>{{ /[a-z]/.test(formulario.get('password')?.value || '') ? 'check_circle' :
-                'radio_button_unchecked' }}</mat-icon>
-              <span>Letra minúscula</span>
+          @if (formulario.get('password')?.value) {
+            <div class="password-requirements">
+              <p class="requirements-title">Requisitos:</p>
+              <div class="requirement-item" [class.completed]="checkPassword('lowercase')">
+                <mat-icon>{{ checkPassword('lowercase') ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+                <span>Letra minúscula</span>
+              </div>
+              <div class="requirement-item" [class.completed]="checkPassword('uppercase')">
+                <mat-icon>{{ checkPassword('uppercase') ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+                <span>Letra mayúscula</span>
+              </div>
+              <div class="requirement-item" [class.completed]="checkPassword('number')">
+                <mat-icon>{{ checkPassword('number') ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+                <span>Número</span>
+              </div>
+              <div class="requirement-item" [class.completed]="checkPassword('special')">
+                <mat-icon>{{ checkPassword('special') ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+                <span>Carácter especial (@$!%*?&)</span>
+              </div>
+              <div class="requirement-item" [class.completed]="checkPassword('length')">
+                <mat-icon>{{ checkPassword('length') ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+                <span>Mínimo 8 caracteres</span>
+              </div>
             </div>
-            <div class="requirement-item"
-              [ngClass]="{'completed': /[A-Z]/.test(formulario.get('password')?.value || '')}">
-              <mat-icon>{{ /[A-Z]/.test(formulario.get('password')?.value || '') ? 'check_circle' :
-                'radio_button_unchecked' }}</mat-icon>
-              <span>Letra mayúscula</span>
-            </div>
-            <div class="requirement-item" [ngClass]="{'completed': /\d/.test(formulario.get('password')?.value || '')}">
-              <mat-icon>{{ /\d/.test(formulario.get('password')?.value || '') ? 'check_circle' :
-                'radio_button_unchecked' }}</mat-icon>
-              <span>Número</span>
-            </div>
-            <div class="requirement-item"
-              [ngClass]="{'completed': /[@$!%*?&]/.test(formulario.get('password')?.value || '')}">
-              <mat-icon>{{ /[@$!%*?&]/.test(formulario.get('password')?.value || '') ? 'check_circle' :
-                'radio_button_unchecked' }}</mat-icon>
-              <span>Carácter especial (@$!%*?&)</span>
-            </div>
-            <div class="requirement-item"
-              [ngClass]="{'completed': (formulario.get('password')?.value || '').length >= 8}">
-              <mat-icon>{{ (formulario.get('password')?.value || '').length >= 8 ? 'check_circle' :
-                'radio_button_unchecked' }}</mat-icon>
-              <span>Mínimo 8 caracteres</span>
-            </div>
-          </div>
+          }
         </div>
 
-        <!-- Confirmar Contraseña -->
-        <mat-form-field appearance="outline" class="full-width">
+        <mat-form-field appearance="outline">
           <mat-label>Confirmar Contraseña</mat-label>
-          <input matInput type="password" formControlName="confirmPassword"
-            (blur)="actualizarValidacionesError('confirmPassword')">
           <mat-icon matPrefix>lock_outline</mat-icon>
-          <mat-error *ngIf="formulario.errors?.['passwordMismatch'] && formulario.get('confirmPassword')?.touched">
-            Las contraseñas no coinciden
-          </mat-error>
+          <input matInput type="password" formControlName="confirmPassword">
+          @if (formulario.errors?.['passwordMismatch'] && formulario.get('confirmPassword')?.touched) {
+            <mat-error>Las contraseñas no coinciden</mat-error>
+          }
         </mat-form-field>
 
-        <!-- Nombre Pareja (Opcional) -->
-        <mat-form-field appearance="outline" class="full-width">
+        <mat-form-field appearance="outline">
           <mat-label>Nombre del Grupo (Opcional)</mat-label>
-          <input matInput type="text" formControlName="nombrePareja"
-            (blur)="actualizarValidacionesError('nombrePareja')">
           <mat-icon matPrefix>group</mat-icon>
-          <mat-error *ngFor="let error of validacionesError['nombrePareja']">
-            {{ error }}
-          </mat-error>
+          <input matInput type="text" formControlName="nombrePareja">
         </mat-form-field>
 
-        <!-- Button -->
-        <button mat-raised-button color="primary" type="submit" class="full-width submit-button"
+        <button mat-raised-button color="primary" type="submit" class="submit-button"
           [disabled]="formulario.invalid || cargando">
-          <mat-progress-spinner *ngIf="cargando" diameter="20" mode="indeterminate"></mat-progress-spinner>
-          <span *ngIf="!cargando">Crear Cuenta</span>
+          @if (cargando) {
+            <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>
+          } @else {
+            <span>Crear Cuenta</span>
+          }
         </button>
       </form>
 
-      <!-- Login Link -->
       <div class="login-link">
         <p>¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión aquí</a></p>
       </div>
     </mat-card-content>
   </mat-card>
 
-  <!-- Footer -->
   <div class="footer">
-    <p class="footer-text">© 2026 Gastos Compartidos. Todos los derechos reservados.</p>
+    <p class="footer-text">© 2026 Gastos Compartidos</p>
   </div>
 </div>

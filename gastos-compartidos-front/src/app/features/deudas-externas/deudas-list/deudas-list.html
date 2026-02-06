@@ -1,0 +1,157 @@
+<div class="deudas-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1>Mis Deudas</h1>
+      <p class="subtitle">Gestiona tus deudas externas y abonos</p>
+    </div>
+    <button mat-raised-button color="primary" (click)="nuevaDeuda()">
+      <mat-icon>add</mat-icon>
+      Nueva Deuda
+    </button>
+  </div>
+
+  <!-- Resumen Cards -->
+  @if (resumen) {
+    <div class="resumen-cards">
+      <mat-card class="resumen-card deuda-total">
+        <mat-card-content>
+          <mat-icon>account_balance_wallet</mat-icon>
+          <div class="resumen-info">
+            <span class="label">Deuda Total</span>
+            <span class="monto">{{ formatMonto(resumen.totalDeudaPendiente) }}</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="resumen-card deudas-activas">
+        <mat-card-content>
+          <mat-icon>receipt_long</mat-icon>
+          <div class="resumen-info">
+            <span class="label">Deudas Activas</span>
+            <span class="monto">{{ resumen.cantidadDeudasActivas }}</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="resumen-card abonado-mes">
+        <mat-card-content>
+          <mat-icon>trending_down</mat-icon>
+          <div class="resumen-info">
+            <span class="label">Abonado Este Mes</span>
+            <span class="monto">{{ formatMonto(resumen.totalAbonadoEsteMes) }}</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  }
+
+  <!-- Filtros -->
+  <div class="filtros">
+    <mat-chip-listbox>
+      <mat-chip-option [selected]="filtroActivo === 'todas'" (click)="cambiarFiltro('todas')">
+        Todas
+      </mat-chip-option>
+      <mat-chip-option [selected]="filtroActivo === 'activas'" (click)="cambiarFiltro('activas')">
+        Activas
+      </mat-chip-option>
+      <mat-chip-option [selected]="filtroActivo === 'pagadas'" (click)="cambiarFiltro('pagadas')">
+        Pagadas
+      </mat-chip-option>
+    </mat-chip-listbox>
+  </div>
+
+  <!-- Loading -->
+  @if (cargando) {
+    <div class="loading-container">
+      <mat-progress-spinner diameter="40" mode="indeterminate"></mat-progress-spinner>
+      <span>Cargando deudas...</span>
+    </div>
+  }
+
+  <!-- Lista de Deudas -->
+  @if (!cargando) {
+    @if (deudasFiltradas.length === 0) {
+      <mat-card class="empty-state">
+        <mat-card-content>
+          <mat-icon>account_balance_wallet</mat-icon>
+          <h3>No tienes deudas registradas</h3>
+          <p>Registra tus deudas para llevar un control de tus pagos</p>
+          <button mat-raised-button color="primary" (click)="nuevaDeuda()">
+            <mat-icon>add</mat-icon>
+            Agregar Primera Deuda
+          </button>
+        </mat-card-content>
+      </mat-card>
+    } @else {
+      <div class="deudas-grid">
+        @for (deuda of deudasFiltradas; track deuda.id) {
+          <mat-card class="deuda-card" [class.pagada]="deuda.estado === 'PAGADA'">
+            <mat-card-header>
+              <mat-icon mat-card-avatar class="tipo-icon">{{ getIconoTipo(deuda.tipo) }}</mat-icon>
+              <mat-card-title>{{ deuda.acreedor }}</mat-card-title>
+              <mat-card-subtitle>{{ tipoDeudaLabels[deuda.tipo] }}</mat-card-subtitle>
+              <button mat-icon-button [matMenuTriggerFor]="menu" class="menu-button">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #menu="matMenu">
+                <button mat-menu-item (click)="verDetalle(deuda)">
+                  <mat-icon>visibility</mat-icon>
+                  <span>Ver Detalle</span>
+                </button>
+                <button mat-menu-item (click)="editarDeuda(deuda)" [disabled]="deuda.estado !== 'ACTIVA'">
+                  <mat-icon>edit</mat-icon>
+                  <span>Editar</span>
+                </button>
+                <button mat-menu-item (click)="eliminarDeuda(deuda)" class="delete-option">
+                  <mat-icon>delete</mat-icon>
+                  <span>Eliminar</span>
+                </button>
+              </mat-menu>
+            </mat-card-header>
+
+            <mat-card-content (click)="verDetalle(deuda)">
+              <!-- Montos -->
+              <div class="montos">
+                <div class="monto-item">
+                  <span class="label">Saldo Pendiente</span>
+                  <span class="valor principal">{{ formatMonto(deuda.saldoPendiente) }}</span>
+                </div>
+                <div class="monto-item">
+                  <span class="label">Monto Original</span>
+                  <span class="valor">{{ formatMonto(deuda.montoOriginal) }}</span>
+                </div>
+              </div>
+
+              <!-- Progreso -->
+              <div class="progreso-section">
+                <div class="progreso-header">
+                  <span>Progreso de pago</span>
+                  <span class="porcentaje">{{ deuda.progreso }}%</span>
+                </div>
+                <mat-progress-bar mode="determinate" [value]="deuda.progreso"></mat-progress-bar>
+              </div>
+
+              <!-- Estado y abonos -->
+              <div class="footer-info">
+                <mat-chip [color]="getColorEstado(deuda.estado)" selected>
+                  {{ estadoDeudaLabels[deuda.estado] }}
+                </mat-chip>
+                <span class="abonos-count">{{ deuda.totalAbonos }} abonos</span>
+              </div>
+            </mat-card-content>
+
+            @if (deuda.estado === 'ACTIVA') {
+              <mat-card-actions>
+                <button mat-raised-button color="primary" (click)="abonar(deuda); $event.stopPropagation()">
+                  <mat-icon>payments</mat-icon>
+                  Abonar
+                </button>
+              </mat-card-actions>
+            }
+          </mat-card>
+        }
+      </div>
+    }
+  }
+</div>

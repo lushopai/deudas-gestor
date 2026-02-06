@@ -50,8 +50,9 @@ export class BalanceCard implements OnInit {
       error: (err) => {
         console.error('Error al cargar resumen:', err);
 
-        // Detectar si el error es por falta de pareja
-        if (err.status === 400 && err.error?.mensaje?.includes('pareja')) {
+        // Detectar si el error es por falta de pareja completa (2 usuarios)
+        const mensaje = err.error?.mensaje || err.error?.message || '';
+        if (err.status === 400 && (mensaje.includes('pareja') || mensaje.includes('2 usuarios'))) {
           this.necesitaPareja = true;
           this.error = null;
         } else {
