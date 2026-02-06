@@ -217,6 +217,59 @@ p {
 }
 
 /* ============================================
+   OVERLAY PANELS (Select, Datepicker)
+   Estos se renderizan en el CDK overlay fuera
+   de los componentes, necesitan estilos globales
+   ============================================ */
+.mat-mdc-select-panel {
+  background-color: white !important;
+}
+
+.mat-mdc-option {
+  color: rgba(0, 0, 0, 0.87) !important;
+}
+
+.mat-datepicker-content {
+  background-color: white !important;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2) !important;
+}
+
+.mat-calendar {
+  background-color: white !important;
+}
+
+.mat-calendar-body-cell-content {
+  color: rgba(0, 0, 0, 0.87) !important;
+}
+
+.mat-calendar-body-selected {
+  background-color: var(--primary-color) !important;
+  color: white !important;
+}
+
+.mat-calendar-body-today:not(.mat-calendar-body-selected) {
+  border-color: var(--primary-color) !important;
+}
+
+.mat-calendar-table-header,
+.mat-calendar-body-label {
+  color: rgba(0, 0, 0, 0.6) !important;
+}
+
+.mat-calendar-arrow {
+  fill: rgba(0, 0, 0, 0.87) !important;
+}
+
+.mat-calendar-previous-button,
+.mat-calendar-next-button {
+  color: rgba(0, 0, 0, 0.87) !important;
+}
+
+.mat-calendar-period-button {
+  color: rgba(0, 0, 0, 0.87) !important;
+}
+
+/* ============================================
    SWEETALERT2 CUSTOMIZATION
    ============================================ */
 .swal2-popup {
