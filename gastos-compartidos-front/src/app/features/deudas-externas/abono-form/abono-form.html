@@ -92,8 +92,10 @@
               @if (guardando) {
                 <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>
               } @else {
-                <mat-icon>check</mat-icon>
-                Registrar Abono
+                <ng-container>
+                  <mat-icon>check</mat-icon>
+                  Registrar Abono
+                </ng-container>
               }
             </button>
           </div>

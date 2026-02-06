@@ -112,10 +112,8 @@ export class DeudasList implements OnInit {
 
   async eliminarDeuda(deuda: Deuda): Promise<void> {
     const confirmado = await this.notificationService.confirm(
-      '¿Eliminar deuda?',
       `Se eliminará "${deuda.acreedor}" y todos sus abonos. Esta acción no se puede deshacer.`,
-      'Eliminar',
-      'Cancelar'
+      '¿Eliminar deuda?'
     );
 
     if (confirmado) {

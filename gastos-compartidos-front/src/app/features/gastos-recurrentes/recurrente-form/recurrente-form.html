@@ -113,8 +113,10 @@
               @if (guardando) {
                 <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>
               } @else {
-                <mat-icon>{{ modoEdicion ? 'save' : 'add' }}</mat-icon>
-                {{ modoEdicion ? 'Guardar Cambios' : 'Crear Gasto Recurrente' }}
+                <ng-container>
+                  <mat-icon>{{ modoEdicion ? 'save' : 'add' }}</mat-icon>
+                  {{ modoEdicion ? 'Guardar Cambios' : 'Crear Gasto Recurrente' }}
+                </ng-container>
               }
             </button>
           </div>

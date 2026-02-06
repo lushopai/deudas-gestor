@@ -139,10 +139,8 @@ export class RecurrentesList implements OnInit {
 
   async eliminarGasto(gasto: GastoRecurrente): Promise<void> {
     const confirmado = await this.notificationService.confirm(
-      '¿Eliminar gasto recurrente?',
       `Se eliminará "${gasto.descripcion}". Esta acción no se puede deshacer.`,
-      'Eliminar',
-      'Cancelar'
+      '¿Eliminar gasto recurrente?'
     );
 
     if (confirmado) {

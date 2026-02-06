@@ -101,10 +101,8 @@ export class DeudaDetail implements OnInit {
 
   async eliminarAbono(abono: AbonoDeuda): Promise<void> {
     const confirmado = await this.notificationService.confirm(
-      '¿Eliminar abono?',
       `Se eliminará el abono de ${this.formatMonto(abono.monto)} y se restaurará el saldo de la deuda.`,
-      'Eliminar',
-      'Cancelar'
+      '¿Eliminar abono?'
     );
 
     if (confirmado) {

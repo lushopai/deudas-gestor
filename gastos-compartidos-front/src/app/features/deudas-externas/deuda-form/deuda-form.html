@@ -128,8 +128,10 @@
               @if (guardando) {
                 <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>
               } @else {
-                <mat-icon>save</mat-icon>
-                {{ modoEdicion ? 'Guardar Cambios' : 'Crear Deuda' }}
+                <ng-container>
+                  <mat-icon>save</mat-icon>
+                  {{ modoEdicion ? 'Guardar Cambios' : 'Crear Deuda' }}
+                </ng-container>
               }
             </button>
           </div>
