@@ -38,7 +38,7 @@
 form {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 16px;
 
   mat-form-field {
     width: 100%;
@@ -68,6 +68,11 @@ form {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
+  align-items: flex-start;
+
+  mat-form-field {
+    width: 100%;
+  }
 
   @media (max-width: 480px) {
     grid-template-columns: 1fr;
