@@ -55,6 +55,13 @@
             <mat-form-field appearance="outline">
               <mat-label>Frecuencia</mat-label>
               <mat-select formControlName="frecuencia">
+                <mat-select-trigger>
+                  @for (freq of frecuencias; track freq.value) {
+                    @if (freq.value === formulario.get('frecuencia')?.value) {
+                      {{ freq.label }}
+                    }
+                  }
+                </mat-select-trigger>
                 @for (freq of frecuencias; track freq.value) {
                   <mat-option [value]="freq.value">{{ freq.label }}</mat-option>
                 }
@@ -64,7 +71,7 @@
             @if (necesitaDia) {
               <mat-form-field appearance="outline">
                 <mat-label>Día del mes</mat-label>
-                <input matInput type="number" formControlName="diaEjecucion" min="1" max="31">
+                <input matInput type="number" formControlName="diaEjecucion" min="1" max="31" placeholder="1-31">
                 <mat-icon matIconPrefix>event</mat-icon>
                 <mat-hint>Día en que se ejecuta (1-31)</mat-hint>
               </mat-form-field>
@@ -75,14 +82,14 @@
           <div class="form-row">
             <mat-form-field appearance="outline">
               <mat-label>Fecha de inicio</mat-label>
-              <input matInput [matDatepicker]="pickerInicio" formControlName="fechaInicio">
+              <input matInput [matDatepicker]="pickerInicio" formControlName="fechaInicio" placeholder="DD/MM/YYYY">
               <mat-datepicker-toggle matIconSuffix [for]="pickerInicio"></mat-datepicker-toggle>
               <mat-datepicker #pickerInicio></mat-datepicker>
             </mat-form-field>
 
             <mat-form-field appearance="outline">
               <mat-label>Fecha de fin (opcional)</mat-label>
-              <input matInput [matDatepicker]="pickerFin" formControlName="fechaFin">
+              <input matInput [matDatepicker]="pickerFin" formControlName="fechaFin" placeholder="DD/MM/YYYY">
               <mat-datepicker-toggle matIconSuffix [for]="pickerFin"></mat-datepicker-toggle>
               <mat-datepicker #pickerFin></mat-datepicker>
               <mat-hint>Dejar vacío si no tiene fecha de término</mat-hint>
