@@ -13,6 +13,8 @@ import { DeudasList } from './features/deudas-externas/deudas-list/deudas-list';
 import { DeudaForm } from './features/deudas-externas/deuda-form/deuda-form';
 import { DeudaDetail } from './features/deudas-externas/deuda-detail/deuda-detail';
 import { AbonoForm } from './features/deudas-externas/abono-form/abono-form';
+import { RecurrentesList } from './features/gastos-recurrentes/recurrentes-list/recurrentes-list';
+import { RecurrenteForm } from './features/gastos-recurrentes/recurrente-form/recurrente-form';
 import { MainLayoutComponent } from './shared/layouts/main-layout/main-layout.component';
 import { AuthGuard } from './core/guards/auth.guard';
 
@@ -40,7 +42,11 @@ export const routes: Routes = [
       { path: 'deudas-externas/nueva', component: DeudaForm },
       { path: 'deudas-externas/:id', component: DeudaDetail },
       { path: 'deudas-externas/:id/editar', component: DeudaForm },
-      { path: 'deudas-externas/:id/abonar', component: AbonoForm }
+      { path: 'deudas-externas/:id/abonar', component: AbonoForm },
+      // Gastos Recurrentes
+      { path: 'gastos-recurrentes', component: RecurrentesList },
+      { path: 'gastos-recurrentes/nuevo', component: RecurrenteForm },
+      { path: 'gastos-recurrentes/:id/editar', component: RecurrenteForm }
     ]
   },
   { path: '**', redirectTo: '/login' }

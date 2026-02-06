@@ -1,0 +1,125 @@
+<div class="form-container">
+  <mat-card class="form-card">
+    <mat-card-header>
+      <mat-icon mat-card-avatar>{{ modoEdicion ? 'edit' : 'add_circle' }}</mat-icon>
+      <mat-card-title>{{ modoEdicion ? 'Editar' : 'Nuevo' }} Gasto Recurrente</mat-card-title>
+      <mat-card-subtitle>Programa un gasto que se repite periódicamente</mat-card-subtitle>
+    </mat-card-header>
+
+    @if (cargando) {
+      <mat-card-content class="loading-content">
+        <mat-progress-spinner diameter="40" mode="indeterminate"></mat-progress-spinner>
+        <span>Cargando...</span>
+      </mat-card-content>
+    } @else {
+      <mat-card-content>
+        <form [formGroup]="formulario" (ngSubmit)="guardar()">
+          <!-- Descripción -->
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Descripción</mat-label>
+            <input matInput formControlName="descripcion" placeholder="Ej: Arriendo, Netflix, Luz...">
+            <mat-icon matIconPrefix>description</mat-icon>
+            @if (tieneError('descripcion')) {
+              <mat-error>La descripción es requerida</mat-error>
+            }
+          </mat-form-field>
+
+          <!-- Monto y Categoría -->
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Monto</mat-label>
+              <input matInput type="number" formControlName="monto" placeholder="0">
+              <mat-icon matIconPrefix>attach_money</mat-icon>
+              @if (tieneError('monto')) {
+                <mat-error>Ingresa un monto válido</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Categoría</mat-label>
+              <mat-select formControlName="categoriaId">
+                @for (cat of categorias; track cat.id) {
+                  <mat-option [value]="cat.id">
+                    {{ cat.icono }} {{ cat.nombre }}
+                  </mat-option>
+                }
+              </mat-select>
+              @if (tieneError('categoriaId')) {
+                <mat-error>Selecciona una categoría</mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+          <!-- Frecuencia y Día -->
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Frecuencia</mat-label>
+              <mat-select formControlName="frecuencia">
+                @for (freq of frecuencias; track freq.value) {
+                  <mat-option [value]="freq.value">{{ freq.label }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+
+            @if (necesitaDia) {
+              <mat-form-field appearance="outline">
+                <mat-label>Día del mes</mat-label>
+                <input matInput type="number" formControlName="diaEjecucion" min="1" max="31">
+                <mat-icon matIconPrefix>event</mat-icon>
+                <mat-hint>Día en que se ejecuta (1-31)</mat-hint>
+              </mat-form-field>
+            }
+          </div>
+
+          <!-- Fechas -->
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Fecha de inicio</mat-label>
+              <input matInput [matDatepicker]="pickerInicio" formControlName="fechaInicio">
+              <mat-datepicker-toggle matIconSuffix [for]="pickerInicio"></mat-datepicker-toggle>
+              <mat-datepicker #pickerInicio></mat-datepicker>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Fecha de fin (opcional)</mat-label>
+              <input matInput [matDatepicker]="pickerFin" formControlName="fechaFin">
+              <mat-datepicker-toggle matIconSuffix [for]="pickerFin"></mat-datepicker-toggle>
+              <mat-datepicker #pickerFin></mat-datepicker>
+              <mat-hint>Dejar vacío si no tiene fecha de término</mat-hint>
+            </mat-form-field>
+          </div>
+
+          <!-- Compartido -->
+          <div class="checkbox-row">
+            <mat-checkbox formControlName="esCompartido" color="primary">
+              Compartir con pareja (se divide el gasto)
+            </mat-checkbox>
+          </div>
+
+          <!-- Notas -->
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Notas (opcional)</mat-label>
+            <textarea matInput formControlName="notas" rows="3" placeholder="Detalles adicionales..."></textarea>
+            <mat-icon matIconPrefix>notes</mat-icon>
+          </mat-form-field>
+
+          <!-- Acciones -->
+          <div class="form-actions">
+            <button mat-button type="button" (click)="cancelar()">
+              Cancelar
+            </button>
+            <button mat-raised-button color="primary" type="submit"
+                    [disabled]="guardando || formulario.invalid">
+              @if (guardando) {
+                <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>
+              } @else {
+                <mat-icon>{{ modoEdicion ? 'save' : 'add' }}</mat-icon>
+                {{ modoEdicion ? 'Guardar Cambios' : 'Crear Gasto Recurrente' }}
+              }
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    }
+  </mat-card>
+</div>

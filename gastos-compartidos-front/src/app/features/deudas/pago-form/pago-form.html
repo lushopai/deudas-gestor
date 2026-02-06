@@ -48,7 +48,7 @@
           <mat-form-field appearance="fill" class="full-width">
             <mat-label>Monto a pagar</mat-label>
             <input matInput type="number" step="0.01" formControlName="monto" placeholder="0.00" required>
-            <mat-icon matPrefix>attach_money</mat-icon>
+            <mat-icon matIconPrefix>attach_money</mat-icon>
             @if (resumen.saldoPendiente > 0) {
               <mat-hint>Deuda pendiente: ${{ resumen.saldoPendiente | number: '1.2-2' }}</mat-hint>
             }
@@ -58,7 +58,7 @@
           <mat-form-field appearance="fill" class="full-width">
             <mat-label>Concepto (opcional)</mat-label>
             <input matInput formControlName="concepto" placeholder="Ej: Abono deudas febrero">
-            <mat-icon matPrefix>notes</mat-icon>
+            <mat-icon matIconPrefix>notes</mat-icon>
           </mat-form-field>
 
           <!-- Método de pago -->
@@ -71,7 +71,7 @@
                 </mat-option>
               }
             </mat-select>
-            <mat-icon matPrefix>payment</mat-icon>
+            <mat-icon matIconPrefix>payment</mat-icon>
           </mat-form-field>
 
           <!-- Botón submit -->

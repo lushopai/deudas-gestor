@@ -1,128 +1,198 @@
-<!-- Main Content -->
 <div class="dashboard-container">
- 
-
-  <!-- Action Buttons - Diseño minimalista -->
+  <!-- Action Buttons -->
   <div class="action-buttons section-spacing">
-    <button
-      mat-raised-button
-      color="primary"
-      (click)="abrirNuevoGasto()"
-      class="action-btn"
-    >
+    <button mat-raised-button color="primary" (click)="abrirNuevoGasto()" class="action-btn">
       <mat-icon>add_circle</mat-icon>
       <span>Nuevo Gasto</span>
     </button>
-    <button
-      mat-raised-button
-      color="accent"
-      (click)="abrirOCR()"
-      class="action-btn"
-    >
+    <button mat-stroked-button (click)="abrirOCR()" class="action-btn">
       <mat-icon>receipt</mat-icon>
       <span>Escanear Recibo</span>
     </button>
   </div>
 
   <!-- Error State -->
-  <mat-card class="error-card" *ngIf="error && !cargando">
-    <mat-card-content>
-      <div class="error-content">
-        <mat-icon class="error-icon">error_outline</mat-icon>
-        <div class="error-message">{{ error }}</div>
-        <button mat-stroked-button (click)="reintentar()" class="retry-btn">
-          <mat-icon>refresh</mat-icon>
-          Reintentar
-        </button>
-      </div>
-    </mat-card-content>
-  </mat-card>
+  @if (error && !cargando) {
+    <mat-card class="error-card">
+      <mat-card-content>
+        <div class="error-content">
+          <mat-icon class="error-icon">error_outline</mat-icon>
+          <div class="error-message">{{ error }}</div>
+          <button mat-stroked-button (click)="reintentar()" class="retry-btn">
+            <mat-icon>refresh</mat-icon>
+            Reintentar
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  }
 
   <!-- Loading State -->
-  <div class="loading-container" *ngIf="cargando">
-    <mat-card class="skeleton-card"></mat-card>
-    <mat-card class="skeleton-card"></mat-card>
-  </div>
+  @if (cargando) {
+    <div class="loading-container">
+      <mat-card class="skeleton-card"></mat-card>
+      <mat-card class="skeleton-card"></mat-card>
+    </div>
+  }
 
-  <!-- Balance de Deudas -->
+  <!-- Balance de Pareja -->
   <app-balance-card></app-balance-card>
 
+  <!-- Resumen Deudas Externas -->
+  @if (resumenDeudas && resumenDeudas.cantidadDeudasActivas > 0) {
+    <mat-card class="deudas-externas-card" (click)="abrirDeudas()">
+      <mat-card-content>
+        <div class="deudas-header">
+          <div class="deudas-icon">
+            <mat-icon>account_balance</mat-icon>
+          </div>
+          <div class="deudas-info">
+            <span class="deudas-label">Deudas Externas</span>
+            <span class="deudas-count">{{ resumenDeudas.cantidadDeudasActivas }} activas</span>
+          </div>
+          <div class="deudas-monto">
+            <span class="monto-label">Total Pendiente</span>
+            <span class="monto-valor">{{ formatMonto(resumenDeudas.totalDeudaPendiente) }}</span>
+          </div>
+          <mat-icon class="arrow-icon">chevron_right</mat-icon>
+        </div>
+        @if (resumenDeudas.totalAbonadoEsteMes > 0) {
+          <div class="deudas-abonado">
+            <mat-icon>trending_down</mat-icon>
+            <span>Abonado este mes: {{ formatMonto(resumenDeudas.totalAbonadoEsteMes) }}</span>
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+  }
+
+  <!-- Acceso Rápido Deudas (si no tiene deudas) -->
+  @if (!resumenDeudas || resumenDeudas.cantidadDeudasActivas === 0) {
+    <mat-card class="deudas-empty-card" (click)="abrirDeudas()">
+      <mat-card-content>
+        <mat-icon>account_balance</mat-icon>
+        <span>Registrar Deudas Externas</span>
+        <mat-icon class="arrow">chevron_right</mat-icon>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  <!-- Gastos Recurrentes Próximos -->
+  @if (proximosRecurrentes.length > 0) {
+    <mat-card class="recurrentes-card" (click)="abrirRecurrentes()">
+      <mat-card-content>
+        <div class="recurrentes-header">
+          <div class="recurrentes-icon">
+            <mat-icon>autorenew</mat-icon>
+          </div>
+          <div class="recurrentes-info">
+            <span class="recurrentes-label">Gastos Recurrentes</span>
+            <span class="recurrentes-count">{{ proximosRecurrentes.length }} próximos en 7 días</span>
+          </div>
+          <mat-icon class="arrow-icon">chevron_right</mat-icon>
+        </div>
+        <div class="recurrentes-lista">
+          @for (gr of proximosRecurrentes; track gr.id) {
+            <div class="recurrente-item">
+              <span class="recurrente-desc">{{ gr.descripcion }}</span>
+              <span class="recurrente-monto">{{ formatMonto(gr.monto) }}</span>
+              <span class="recurrente-dias">
+                @if (gr.diasHastaProxima <= 0) {
+                  Hoy
+                } @else if (gr.diasHastaProxima === 1) {
+                  Mañana
+                } @else {
+                  En {{ gr.diasHastaProxima }}d
+                }
+              </span>
+            </div>
+          }
+        </div>
+      </mat-card-content>
+    </mat-card>
+  }
+
   <!-- Stats -->
-  <div class="stats-grid" *ngIf="!cargando && resumenGastos">
-    <mat-card class="stat-card">
-      <mat-icon class="stat-icon">trending_up</mat-icon>
-      <div class="stat-value">${{ resumenGastos.totalGastos | number: '1.2-2' }}</div>
-      <div class="stat-label">Gastos Totales</div>
-      <div class="stat-detail">{{ resumenGastos.cantidadGastos }} transacciones</div>
-    </mat-card>
-    <mat-card class="stat-card">
-      <mat-icon class="stat-icon">calculate</mat-icon>
-      <div class="stat-value">${{ resumenGastos.promedioPorGasto | number: '1.2-2' }}</div>
-      <div class="stat-label">Promedio por Gasto</div>
-      <div class="stat-detail">Gasto medio</div>
-    </mat-card>
-  </div>
+  @if (!cargando && resumenGastos) {
+    <div class="stats-grid">
+      <mat-card class="stat-card">
+        <mat-icon class="stat-icon">trending_up</mat-icon>
+        <div class="stat-value">${{ resumenGastos.totalGastos | number: '1.2-2' }}</div>
+        <div class="stat-label">Gastos Totales</div>
+        <div class="stat-detail">{{ resumenGastos.cantidadGastos }} transacciones</div>
+      </mat-card>
+      <mat-card class="stat-card">
+        <mat-icon class="stat-icon">calculate</mat-icon>
+        <div class="stat-value">${{ resumenGastos.promedioPorGasto | number: '1.2-2' }}</div>
+        <div class="stat-label">Promedio por Gasto</div>
+        <div class="stat-detail">Gasto medio</div>
+      </mat-card>
+    </div>
+  }
 
   <!-- Gastos por Categoría -->
-  <mat-card class="categorias-card" *ngIf="!cargando && resumenGastos && Object.keys(resumenGastos.gastosPorCategoria).length > 0">
-    <mat-card-header>
-      <mat-card-title>Gastos por Categoría</mat-card-title>
-    </mat-card-header>
-    <mat-divider></mat-divider>
-    <mat-card-content>
-      <div class="categoria-item" *ngFor="let categoria of Object.keys(resumenGastos.gastosPorCategoria)">
-        <div class="categoria-header">
-          <span class="categoria-nombre">{{ categoria }}</span>
-          <span class="categoria-monto">${{ resumenGastos.gastosPorCategoria[categoria] | number: '1.2-2' }}</span>
-        </div>
-        <mat-progress-bar 
-          mode="determinate" 
-          [value]="obtenerPorcentaje(resumenGastos.gastosPorCategoria[categoria], resumenGastos.totalGastos)"
-          class="categoria-progress"
-        ></mat-progress-bar>
-      </div>
-    </mat-card-content>
-  </mat-card>
+  @if (!cargando && resumenGastos && Object.keys(resumenGastos.gastosPorCategoria).length > 0) {
+    <mat-card class="categorias-card">
+      <mat-card-header>
+        <mat-card-title>Gastos por Categoría</mat-card-title>
+      </mat-card-header>
+      <mat-divider></mat-divider>
+      <mat-card-content>
+        @for (categoria of Object.keys(resumenGastos.gastosPorCategoria); track categoria) {
+          <div class="categoria-item">
+            <div class="categoria-header">
+              <span class="categoria-nombre">{{ categoria }}</span>
+              <span class="categoria-monto">${{ resumenGastos.gastosPorCategoria[categoria] | number: '1.2-2' }}</span>
+            </div>
+            <mat-progress-bar
+              mode="determinate"
+              [value]="obtenerPorcentaje(resumenGastos.gastosPorCategoria[categoria], resumenGastos.totalGastos)"
+              class="categoria-progress"
+            ></mat-progress-bar>
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+  }
 
   <!-- Gastos Recientes -->
-  <mat-card class="gastos-card" *ngIf="!cargando && gastosRecientes.length > 0">
-    <mat-card-header>
-      <mat-card-title>Gastos Recientes</mat-card-title>
-      <button mat-icon-button routerLink="/gastos" class="view-all-btn">
-        <mat-icon>arrow_forward</mat-icon>
-      </button>
-    </mat-card-header>
-    <mat-divider></mat-divider>
-    <mat-card-content>
-      <div class="gasto-item" *ngFor="let gasto of gastosRecientes">
-        <div class="gasto-row">
-          <div class="gasto-info">
-            <div class="gasto-descripcion">{{ gasto.descripcion }}</div>
-            <div class="gasto-fecha">{{ gasto.fechaCreacion | date: 'dd/MM/yyyy HH:mm' }}</div>
+  @if (!cargando && gastosRecientes.length > 0) {
+    <mat-card class="gastos-card">
+      <mat-card-header>
+        <mat-card-title>Gastos Recientes</mat-card-title>
+        <button mat-icon-button routerLink="/gastos" class="view-all-btn">
+          <mat-icon>arrow_forward</mat-icon>
+        </button>
+      </mat-card-header>
+      <mat-divider></mat-divider>
+      <mat-card-content>
+        @for (gasto of gastosRecientes; track gasto.id) {
+          <div class="gasto-item">
+            <div class="gasto-row">
+              <div class="gasto-info">
+                <div class="gasto-descripcion">{{ gasto.descripcion }}</div>
+                <div class="gasto-fecha">{{ gasto.fechaCreacion | date: 'dd/MM/yyyy HH:mm' }}</div>
+              </div>
+              <div class="gasto-monto">
+                ${{ gasto.monto | number: '1.2-2' }}
+              </div>
+            </div>
           </div>
-          <div class="gasto-monto" [class.positivo]="true">
-            ${{ gasto.monto | number: '1.2-2' }}
-          </div>
-        </div>
-        <mat-progress-bar 
-          mode="determinate" 
-          value="100" 
-          class="gasto-divider"
-        ></mat-progress-bar>
-      </div>
-    </mat-card-content>
-  </mat-card>
+        }
+      </mat-card-content>
+    </mat-card>
+  }
 
   <!-- Empty State -->
-  <div class="empty-state" *ngIf="!cargando && gastosRecientes.length === 0">
-    <mat-icon class="empty-icon">inbox</mat-icon>
-    <div class="empty-text">Sin gastos aún</div>
-    <div class="empty-hint">Crea tu primer gasto para comenzar a seguir tus gastos compartidos</div>
-    <button 
-      mat-raised-button 
-      color="primary"
-      (click)="abrirNuevoGasto()"
-      class="empty-action-btn"
-    >
-      <mat-icon>add</mat-icon>
-      Crear Primer Gasto
+  @if (!cargando && gastosRecientes.length === 0) {
+    <div class="empty-state">
+      <mat-icon class="empty-icon">inbox</mat-icon>
+      <div class="empty-text">Sin gastos aún</div>
+      <div class="empty-hint">Crea tu primer gasto para comenzar a seguir tus gastos compartidos</div>
+      <button mat-raised-button color="primary" (click)="abrirNuevoGasto()" class="empty-action-btn">
+        <mat-icon>add</mat-icon>
+        Crear Primer Gasto
+      </button>
+    </div>
+  }
+</div>

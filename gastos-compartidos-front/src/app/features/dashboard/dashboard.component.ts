@@ -14,6 +14,9 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatTabsModule } from '@angular/material/tabs';
 import { AuthService } from '../../core/services/auth.service';
 import { GastoService, Gasto, ResumenGastos } from '../../core/services/gasto.service';
+import { DeudaService, ResumenDeudas } from '../../core/services/deuda.service';
+import { GastoRecurrenteService, GastoRecurrente } from '../../core/services/gasto-recurrente.service';
+import { ReminderService } from '../../core/services/reminder.service';
 import { BalanceCard } from '../deudas/balance-card/balance-card';
 
 
@@ -41,6 +44,8 @@ import { BalanceCard } from '../deudas/balance-card/balance-card';
 export class DashboardComponent implements OnInit {
   gastosRecientes: Gasto[] = [];
   resumenGastos: ResumenGastos | null = null;
+  resumenDeudas: ResumenDeudas | null = null;
+  proximosRecurrentes: GastoRecurrente[] = [];
   cargando = true;
   error: string | null = null;
   Object = Object;  // Hacer Object accesible en el template
@@ -48,12 +53,17 @@ export class DashboardComponent implements OnInit {
   constructor(
     public authService: AuthService,
     private gastoService: GastoService,
+    private deudaService: DeudaService,
+    private gastoRecurrenteService: GastoRecurrenteService,
+    private reminderService: ReminderService,
     private router: Router,
     private cdRef: ChangeDetectorRef
   ) { }
 
   ngOnInit() {
     this.cargarDatos();
+    // Verificar recordatorios con un pequeño delay para no bloquear la carga
+    setTimeout(() => this.reminderService.verificarRecordatorios(), 2000);
   }
 
   cargarDatos() {
@@ -77,6 +87,28 @@ export class DashboardComponent implements OnInit {
         this.cdRef.detectChanges();
       }
     });
+
+    // Cargar resumen de deudas externas (separado para no bloquear si falla)
+    this.deudaService.obtenerResumen().subscribe({
+      next: (resumen) => {
+        this.resumenDeudas = resumen;
+        this.cdRef.detectChanges();
+      },
+      error: () => {
+        this.resumenDeudas = null;
+      }
+    });
+
+    // Cargar próximos gastos recurrentes (próximos 7 días)
+    this.gastoRecurrenteService.proximos(7).subscribe({
+      next: (proximos) => {
+        this.proximosRecurrentes = proximos;
+        this.cdRef.detectChanges();
+      },
+      error: () => {
+        this.proximosRecurrentes = [];
+      }
+    });
   }
 
   obtenerPorcentaje(monto: number, total: number): number {
@@ -98,5 +130,21 @@ export class DashboardComponent implements OnInit {
 
   reintentar() {
     this.cargarDatos();
+  }
+
+  abrirDeudas() {
+    this.router.navigate(['/deudas-externas']);
+  }
+
+  abrirRecurrentes() {
+    this.router.navigate(['/gastos-recurrentes']);
+  }
+
+  formatMonto(monto: number): string {
+    return new Intl.NumberFormat('es-CL', {
+      style: 'currency',
+      currency: 'CLP',
+      minimumFractionDigits: 0
+    }).format(monto);
   }
 }

@@ -21,7 +21,7 @@
 
             <mat-form-field appearance="outline">
               <mat-label>Acreedor</mat-label>
-              <mat-icon matPrefix>business</mat-icon>
+              <mat-icon matIconPrefix>business</mat-icon>
               <input matInput formControlName="acreedor" placeholder="Ej: Banco Santander, Tarjeta Visa">
               @if (tieneError('acreedor')) {
                 <mat-error>El acreedor es requerido (máx. 100 caracteres)</mat-error>
@@ -30,7 +30,7 @@
 
             <mat-form-field appearance="outline">
               <mat-label>Tipo de Deuda</mat-label>
-              <mat-icon matPrefix>category</mat-icon>
+              <mat-icon matIconPrefix>category</mat-icon>
               <mat-select formControlName="tipo">
                 @for (tipo of tiposDeuda; track tipo.value) {
                   <mat-option [value]="tipo.value">{{ tipo.label }}</mat-option>
@@ -40,7 +40,7 @@
 
             <mat-form-field appearance="outline">
               <mat-label>Descripción (opcional)</mat-label>
-              <mat-icon matPrefix>description</mat-icon>
+              <mat-icon matIconPrefix>description</mat-icon>
               <textarea matInput formControlName="descripcion" rows="2"
                 placeholder="Ej: Tarjeta de crédito principal"></textarea>
             </mat-form-field>
@@ -52,7 +52,7 @@
 
             <mat-form-field appearance="outline">
               <mat-label>Monto Total de la Deuda</mat-label>
-              <mat-icon matPrefix>attach_money</mat-icon>
+              <mat-icon matIconPrefix>attach_money</mat-icon>
               <input matInput type="number" formControlName="montoOriginal" placeholder="500000">
               @if (tieneError('montoOriginal')) {
                 <mat-error>Ingresa un monto válido mayor a 0</mat-error>
@@ -92,7 +92,7 @@
             <div class="row">
               <mat-form-field appearance="outline">
                 <mat-label>Día de Corte</mat-label>
-                <mat-icon matPrefix>event</mat-icon>
+                <mat-icon matIconPrefix>event</mat-icon>
                 <input matInput type="number" formControlName="diaCorte" min="1" max="31" placeholder="15">
                 @if (tieneError('diaCorte')) {
                   <mat-error>Debe ser entre 1 y 31</mat-error>
@@ -101,7 +101,7 @@
 
               <mat-form-field appearance="outline">
                 <mat-label>Día Límite de Pago</mat-label>
-                <mat-icon matPrefix>event</mat-icon>
+                <mat-icon matIconPrefix>event</mat-icon>
                 <input matInput type="number" formControlName="diaLimitePago" min="1" max="31" placeholder="5">
                 @if (tieneError('diaLimitePago')) {
                   <mat-error>Debe ser entre 1 y 31</mat-error>
@@ -111,7 +111,7 @@
 
             <mat-form-field appearance="outline">
               <mat-label>Tasa de Interés Anual (%)</mat-label>
-              <mat-icon matPrefix>percent</mat-icon>
+              <mat-icon matIconPrefix>percent</mat-icon>
               <input matInput type="number" formControlName="tasaInteres" min="0" max="100" placeholder="24.5">
               @if (tieneError('tasaInteres')) {
                 <mat-error>Debe ser entre 0 y 100</mat-error>

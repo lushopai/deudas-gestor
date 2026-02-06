@@ -80,6 +80,11 @@ export class MainLayoutComponent implements OnInit {
       route: '/deudas-externas'
     },
     {
+      label: 'Gastos Recurrentes',
+      icon: 'autorenew',
+      route: '/gastos-recurrentes'
+    },
+    {
       label: 'Reportes',
       icon: 'assessment',
       route: '/reportes'

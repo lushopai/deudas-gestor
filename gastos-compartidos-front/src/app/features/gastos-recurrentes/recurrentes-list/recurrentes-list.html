@@ -1,0 +1,170 @@
+<div class="recurrentes-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1>Gastos Recurrentes</h1>
+      <p class="subtitle">Programa tus gastos fijos y automatiza su registro</p>
+    </div>
+    <button mat-raised-button color="primary" (click)="nuevoGasto()">
+      <mat-icon>add</mat-icon>
+      Nuevo Recurrente
+    </button>
+  </div>
+
+  <!-- Resumen -->
+  @if (!cargando && gastos.length > 0) {
+    <div class="resumen-cards">
+      <mat-card class="resumen-card activos">
+        <mat-card-content>
+          <mat-icon>autorenew</mat-icon>
+          <div class="resumen-info">
+            <span class="label">Activos</span>
+            <span class="monto">{{ cantidadActivos }}</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="resumen-card mensual">
+        <mat-card-content>
+          <mat-icon>calendar_month</mat-icon>
+          <div class="resumen-info">
+            <span class="label">Gasto Mensual Est.</span>
+            <span class="monto">{{ formatMonto(totalMensual) }}</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="resumen-card total">
+        <mat-card-content>
+          <mat-icon>format_list_numbered</mat-icon>
+          <div class="resumen-info">
+            <span class="label">Total Registrados</span>
+            <span class="monto">{{ gastos.length }}</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  }
+
+  <!-- Filtros -->
+  @if (gastos.length > 0) {
+    <div class="filtros">
+      <mat-chip-listbox>
+        <mat-chip-option [selected]="filtroActivo === 'todos'" (click)="cambiarFiltro('todos')">
+          Todos
+        </mat-chip-option>
+        <mat-chip-option [selected]="filtroActivo === 'activos'" (click)="cambiarFiltro('activos')">
+          Activos
+        </mat-chip-option>
+        <mat-chip-option [selected]="filtroActivo === 'inactivos'" (click)="cambiarFiltro('inactivos')">
+          Pausados
+        </mat-chip-option>
+      </mat-chip-listbox>
+    </div>
+  }
+
+  <!-- Loading -->
+  @if (cargando) {
+    <div class="loading-container">
+      <mat-progress-spinner diameter="40" mode="indeterminate"></mat-progress-spinner>
+      <span>Cargando gastos recurrentes...</span>
+    </div>
+  }
+
+  <!-- Lista -->
+  @if (!cargando) {
+    @if (gastosFiltrados.length === 0) {
+      <mat-card class="empty-state">
+        <mat-card-content>
+          <mat-icon>autorenew</mat-icon>
+          <h3>No tienes gastos recurrentes</h3>
+          <p>Programa tus gastos fijos como arriendo, servicios o suscripciones</p>
+          <button mat-raised-button color="primary" (click)="nuevoGasto()">
+            <mat-icon>add</mat-icon>
+            Crear Primer Gasto Recurrente
+          </button>
+        </mat-card-content>
+      </mat-card>
+    } @else {
+      <div class="gastos-grid">
+        @for (gasto of gastosFiltrados; track gasto.id) {
+          <mat-card class="gasto-card" [class]="getColorEstado(gasto)">
+            <mat-card-header>
+              <mat-icon mat-card-avatar class="categoria-icon">
+                {{ gasto.categoriaIcono || 'receipt' }}
+              </mat-icon>
+              <mat-card-title>{{ gasto.descripcion }}</mat-card-title>
+              <mat-card-subtitle>
+                <mat-icon class="freq-icon">{{ getIconoFrecuencia(gasto.frecuencia) }}</mat-icon>
+                {{ gasto.frecuenciaDescripcion }}
+              </mat-card-subtitle>
+              <button mat-icon-button [matMenuTriggerFor]="menu" class="menu-button">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #menu="matMenu">
+                <button mat-menu-item (click)="editarGasto(gasto)">
+                  <mat-icon>edit</mat-icon>
+                  <span>Editar</span>
+                </button>
+                <button mat-menu-item (click)="ejecutarManualmente(gasto)" [disabled]="!gasto.activo">
+                  <mat-icon>play_arrow</mat-icon>
+                  <span>Ejecutar Ahora</span>
+                </button>
+                <button mat-menu-item (click)="toggleActivo(gasto)">
+                  <mat-icon>{{ gasto.activo ? 'pause' : 'play_arrow' }}</mat-icon>
+                  <span>{{ gasto.activo ? 'Pausar' : 'Activar' }}</span>
+                </button>
+                <button mat-menu-item (click)="eliminarGasto(gasto)" class="delete-option">
+                  <mat-icon>delete</mat-icon>
+                  <span>Eliminar</span>
+                </button>
+              </mat-menu>
+            </mat-card-header>
+
+            <mat-card-content>
+              <div class="gasto-info">
+                <div class="monto-section">
+                  <span class="monto">{{ formatMonto(gasto.monto) }}</span>
+                  <span class="categoria-nombre">{{ gasto.categoriaNombre }}</span>
+                </div>
+
+                <div class="estado-section">
+                  <mat-chip [class]="'estado-chip ' + getColorEstado(gasto)">
+                    {{ getEstadoTexto(gasto) }}
+                  </mat-chip>
+                </div>
+              </div>
+
+              <div class="detalles">
+                @if (gasto.proximaEjecucion) {
+                  <div class="detalle-item">
+                    <mat-icon>event</mat-icon>
+                    <span>Próximo: {{ formatFecha(gasto.proximaEjecucion) }}</span>
+                  </div>
+                }
+                @if (gasto.ultimaEjecucion) {
+                  <div class="detalle-item">
+                    <mat-icon>history</mat-icon>
+                    <span>Última: {{ formatFecha(gasto.ultimaEjecucion) }}</span>
+                  </div>
+                }
+                @if (gasto.totalEjecutado > 0) {
+                  <div class="detalle-item">
+                    <mat-icon>repeat</mat-icon>
+                    <span>{{ gasto.totalEjecutado }} veces ejecutado</span>
+                  </div>
+                }
+                @if (gasto.esCompartido) {
+                  <div class="detalle-item compartido">
+                    <mat-icon>group</mat-icon>
+                    <span>Compartido con pareja</span>
+                  </div>
+                }
+              </div>
+            </mat-card-content>
+          </mat-card>
+        }
+      </div>
+    }
+  }
+</div>
