@@ -88,7 +88,7 @@ export class GastoService {
 
   // Obtener categorías
   obtenerCategorias(): Observable<Categoria[]> {
-    return this.http.get<Categoria[]>(`${environment.apiUrl}/categorias`);
+    return this.http.get<Categoria[]>(`${environment.apiUrl}/public/categorias`);
   }
 
   // Obtener gastos por rango de fechas
