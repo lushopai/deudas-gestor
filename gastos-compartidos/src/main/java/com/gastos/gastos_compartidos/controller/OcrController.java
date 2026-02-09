@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.gastos.gastos_compartidos.dto.OcrResponseDTO;
-import com.gastos.gastos_compartidos.service.CloudflareOcrService;
+import com.gastos.gastos_compartidos.service.ClaudeOcrService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 @CrossOrigin(origins = "*") // Permitir CORS desde cualquier origen (ajustar en prod)
 public class OcrController {
 
-    private final CloudflareOcrService ocrService;
+    private final ClaudeOcrService ocrService;
 
     @PostMapping("/scan")
     public ResponseEntity<OcrResponseDTO> escanearRecibo(@RequestParam("file") MultipartFile file) {

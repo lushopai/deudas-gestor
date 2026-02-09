@@ -39,11 +39,11 @@ export class GeminiOcrService {
     constructor(private http: HttpClient) { }
 
     /**
-     * Procesa un recibo llamando al backend (que usa Cloudflare AI)
+     * Procesa un recibo llamando al backend (que usa Claude Vision de Anthropic)
      */
     async procesarRecibo(imagenFile: File): Promise<OcrResult> {
         try {
-            console.log('🤖 [OCR Backend] Enviando imagen al backend...');
+            console.log('🤖 [OCR Backend] Enviando imagen al backend (Claude Vision)...');
 
             const formData = new FormData();
             formData.append('file', imagenFile);
@@ -60,7 +60,7 @@ export class GeminiOcrService {
                             confianza: response.confianza,
                             datos: response.datos,
                             usedGemini: true,
-                            motor: 'llama-vision-backend'
+                            motor: response.motor || 'claude-vision'
                         });
                     },
                     error: (error) => {

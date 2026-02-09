@@ -203,6 +203,12 @@ mat-form-field {
     background: #e0e0e0;
     color: #616161;
   }
+
+  &.claude {
+    background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+    color: white;
+    box-shadow: 0 2px 4px rgba(14, 165, 233, 0.4);
+  }
 }
 
 .result-title {

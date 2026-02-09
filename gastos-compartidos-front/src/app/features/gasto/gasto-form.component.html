@@ -97,7 +97,7 @@
 
               <div *ngIf="procesandoOcr" class="processing-indicator">
                 <mat-progress-spinner diameter="32" mode="indeterminate"></mat-progress-spinner>
-                <span>🤖 Procesando con Llama Vision AI...</span>
+                <span>🤖 Procesando con Claude Vision...</span>
                 <small class="processing-hint">Analizando imagen con inteligencia artificial...</small>
               </div>
 
@@ -105,8 +105,8 @@
               <div *ngIf="resultadoOcr" class="ocr-result">
                 <div class="result-header">
                   <h3 class="result-title">✓ Datos Extraídos del Recibo</h3>
-                  <span class="motor-badge" [class.gemini]="resultadoOcr.motor === 'gemini'" [class.tesseract]="resultadoOcr.motor === 'tesseract'">
-                    {{ resultadoOcr.motor === 'gemini' ? '🦙 Llama AI' : '📝 Tesseract' }}
+                  <span class="motor-badge" [class.claude]="resultadoOcr.motor === 'claude-vision'">
+                    {{ resultadoOcr.motor === 'claude-vision' ? '🧠 Claude Vision' : resultadoOcr.motor }}
                   </span>
                 </div>
 
