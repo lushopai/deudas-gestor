@@ -65,6 +65,10 @@ public class SecurityConfig {
                         .requestMatchers("/api/public/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                         .requestMatchers("/actuator/**").permitAll()
+                        // Permitir acceso a archivos estáticos del frontend
+                        .requestMatchers("/", "/index.html", "/favicon.ico", "/*.css", "/*.js", "/*.map",
+                                        "/assets/**", "/styles/**", "/manifest.webmanifest", "/ngsw-worker.js",
+                                        "/ngsw.json", "/safety-worker.js", "/worker-basic.min.js").permitAll()
                         .anyRequest().authenticated())
                 .authenticationProvider(authenticationProvider());
 
