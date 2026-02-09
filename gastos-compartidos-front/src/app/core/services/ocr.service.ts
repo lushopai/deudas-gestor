@@ -1,4 +1,4 @@
-﻿import { Injectable } from '@angular/core';
+﻿﻿import { Injectable } from '@angular/core';
 import { GeminiOcrService, OcrResult as GeminiOcrResult } from './gemini-ocr.service';
 
 interface OcrResult {
@@ -26,7 +26,7 @@ export class OcrService {
    * Procesa un recibo usando Claude Vision API (backend)
    */
   async procesarRecibo(imagenFile: File): Promise<OcrResult> {
-    console.log('ðŸ” [OCR] Iniciando procesamiento de recibo con Claude Vision...');
+    console.log('🔍 [OCR] Iniciando procesamiento de recibo con Claude Vision...');
 
     try {
       const resultado = await this.claudeOcrService.procesarRecibo(imagenFile);
@@ -38,7 +38,7 @@ export class OcrService {
         motor: resultado.motor
       };
     } catch (error) {
-      console.error('âŒ [OCR] Error procesando con Claude Vision:', error);
+      console.error('❌ [OCR] Error procesando con Claude Vision:', error);
       throw error;
     }
   }
