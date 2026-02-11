@@ -40,6 +40,7 @@ interface NavItem {
 export class MainLayoutComponent implements OnInit {
   sidenavAberto = false;
   usuario$;
+  darkMode = false;
 
   menuItems: NavItem[] = [
     {
@@ -103,6 +104,20 @@ export class MainLayoutComponent implements OnInit {
   }
 
   ngOnInit() {
+    // Restaurar preferencia de tema
+    const savedTheme = localStorage.getItem('gastos_theme');
+    if (savedTheme === 'dark') {
+      this.darkMode = true;
+      document.documentElement.setAttribute('data-theme', 'dark');
+    } else if (!savedTheme) {
+      // Respetar preferencia del sistema si no hay preferencia guardada
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (prefersDark) {
+        this.darkMode = true;
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    }
+
     // Cerrar sidenav automáticamente en móvil al navegar
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
@@ -142,6 +157,17 @@ export class MainLayoutComponent implements OnInit {
   abrirPerfil() {
     this.router.navigate(['/perfil']);
     this.cerrarSidenav();
+  }
+
+  toggleDarkMode() {
+    this.darkMode = !this.darkMode;
+    if (this.darkMode) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      localStorage.setItem('gastos_theme', 'dark');
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+      localStorage.setItem('gastos_theme', 'light');
+    }
   }
 
   cerrarSesion() {

@@ -16,11 +16,15 @@ mat-sidenav-content {
 
 /* Header */
 .header {
-  background: #1976d2;
+  background: var(--primary-color, #1976d2);
   box-shadow: var(--shadow-sm);
   display: flex;
   align-items: center;
   height: 56px;
+}
+
+.theme-toggle {
+  color: white;
 }
 
 .menu-button {
@@ -54,7 +58,7 @@ mat-sidenav-content {
 /* Sidenav */
 .sidenav {
   width: 260px;
-  background: white;
+  background: var(--bg-primary, white);
   box-shadow: var(--shadow-md);
 }
 
@@ -64,7 +68,7 @@ mat-sidenav-content {
   align-items: center;
   gap: var(--spacing-sm);
   padding: var(--spacing-md);
-  background: #f5f5f5;
+  background: var(--bg-tertiary, #f5f5f5);
 }
 
 .sidenav-avatar-container {
@@ -102,13 +106,13 @@ mat-sidenav-content {
 .user-name {
   font-size: 14px;
   font-weight: 700;
-  color: #333;
+  color: var(--text-primary, #333);
   line-height: 1.2;
 }
 
 .user-email {
   font-size: 11px;
-  color: #999;
+  color: var(--text-secondary, #999);
   line-height: 1.2;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -125,7 +129,7 @@ mat-nav-list {
   transition: all 0.3s ease;
 
   &:hover {
-    background: #f5f5f5;
+    background: var(--bg-tertiary, #f5f5f5);
   }
 
   &.logout-item:hover {

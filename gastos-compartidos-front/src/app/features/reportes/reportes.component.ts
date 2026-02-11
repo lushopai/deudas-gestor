@@ -1,5 +1,5 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -7,6 +7,8 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDividerModule } from '@angular/material/divider';
 import { Router } from '@angular/router';
+import { BaseChartDirective } from 'ng2-charts';
+import { ChartConfiguration, ChartData } from 'chart.js';
 import { ApiService } from '../../core/services/api.service';
 import { NotificationService } from '../../core/services/notification.service';
 
@@ -20,7 +22,8 @@ import { NotificationService } from '../../core/services/notification.service';
     MatButtonModule,
     MatToolbarModule,
     MatProgressSpinnerModule,
-    MatDividerModule
+    MatDividerModule,
+    BaseChartDirective
   ],
   template: `
     <mat-toolbar color="primary">
@@ -132,13 +135,57 @@ import { NotificationService } from '../../core/services/notification.service';
           </mat-card-content>
         </mat-card>
 
-        <!-- Gastos por Categoría -->
+        <!-- Pie Chart: Gastos por Categoría -->
+        @if (pieChartData.labels && pieChartData.labels.length > 0) {
+          <mat-card class="chart-card">
+            <mat-card-header>
+              <mat-card-title>
+                <mat-icon>pie_chart</mat-icon>
+                Distribución por Categoría
+              </mat-card-title>
+            </mat-card-header>
+            <mat-divider></mat-divider>
+            <mat-card-content>
+              <div class="chart-wrapper">
+                <canvas baseChart
+                  [data]="pieChartData"
+                  [options]="pieChartOptions"
+                  type="doughnut">
+                </canvas>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        }
+
+        <!-- Bar Chart: Comparativo por Categoría -->
+        @if (barChartData.labels && barChartData.labels.length > 0) {
+          <mat-card class="chart-card">
+            <mat-card-header>
+              <mat-card-title>
+                <mat-icon>bar_chart</mat-icon>
+                Comparativo por Categoría
+              </mat-card-title>
+            </mat-card-header>
+            <mat-divider></mat-divider>
+            <mat-card-content>
+              <div class="chart-wrapper chart-bar">
+                <canvas baseChart
+                  [data]="barChartData"
+                  [options]="barChartOptions"
+                  type="bar">
+                </canvas>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        }
+
+        <!-- Gastos por Categoría (lista detallada) -->
         @if (reporte.gastosPorCategoria && reporte.gastosPorCategoria.length > 0) {
           <mat-card class="categorias-card">
             <mat-card-header>
               <mat-card-title>
-                <mat-icon>pie_chart</mat-icon>
-                Gastos por Categoría
+                <mat-icon>format_list_bulleted</mat-icon>
+                Detalle por Categoría
               </mat-card-title>
             </mat-card-header>
             <mat-divider></mat-divider>
@@ -173,12 +220,12 @@ import { NotificationService } from '../../core/services/notification.service';
       display: flex;
       flex-direction: column;
       min-height: 100vh;
-      background: #f5f5f5;
+      background: var(--bg-tertiary, #f5f5f5);
     }
 
     mat-toolbar {
       flex-shrink: 0;
-      background: #1976d2;
+      background: var(--primary-color, #1976d2);
       color: white;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
       button { color: white; }
@@ -228,7 +275,7 @@ import { NotificationService } from '../../core/services/notification.service';
         font-weight: 500;
         min-width: 180px;
         text-align: center;
-        color: rgba(0,0,0,0.87);
+        color: var(--text-primary, rgba(0,0,0,0.87));
       }
     }
 
@@ -299,7 +346,7 @@ import { NotificationService } from '../../core/services/notification.service';
       .balance-text {
         font-size: 15px;
         font-weight: 500;
-        color: rgba(0,0,0,0.8);
+        color: var(--text-primary, rgba(0,0,0,0.8));
       }
     }
 
@@ -330,7 +377,32 @@ import { NotificationService } from '../../core/services/notification.service';
       &.user2-seg { background: #ef5350; }
     }
 
-    /* Categorías */
+    /* Charts */
+    .chart-card {
+      margin-bottom: 16px;
+      mat-card-header { padding: 16px 16px 12px; }
+      mat-card-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 16px;
+        mat-icon { color: var(--primary-color, #1976d2); font-size: 22px; width: 22px; height: 22px; }
+      }
+      mat-card-content { padding: 12px 16px 16px !important; }
+    }
+
+    .chart-wrapper {
+      position: relative;
+      max-width: 280px;
+      margin: 0 auto;
+      padding: 8px 0;
+    }
+
+    .chart-bar {
+      max-width: 100%;
+    }
+
+    /* Categorías detalle */
     .categorias-card {
       margin-bottom: 16px;
       mat-card-header { padding: 16px 16px 12px; }
@@ -339,7 +411,7 @@ import { NotificationService } from '../../core/services/notification.service';
         align-items: center;
         gap: 8px;
         font-size: 16px;
-        mat-icon { color: #1976d2; font-size: 22px; width: 22px; height: 22px; }
+        mat-icon { color: var(--primary-color, #1976d2); font-size: 22px; width: 22px; height: 22px; }
       }
       mat-card-content { padding: 12px 16px 16px !important; }
     }
@@ -361,7 +433,7 @@ import { NotificationService } from '../../core/services/notification.service';
       align-items: center;
       gap: 8px;
       .cat-icono { font-size: 18px; }
-      .cat-nombre { font-size: 14px; font-weight: 500; color: rgba(0,0,0,0.8); }
+      .cat-nombre { font-size: 14px; font-weight: 500; color: var(--text-primary, rgba(0,0,0,0.8)); }
       .cat-count { font-size: 12px; color: rgba(0,0,0,0.4); }
     }
 
@@ -369,7 +441,7 @@ import { NotificationService } from '../../core/services/notification.service';
       display: flex;
       align-items: center;
       gap: 8px;
-      .cat-valor { font-size: 14px; font-weight: 600; color: rgba(0,0,0,0.87); }
+      .cat-valor { font-size: 14px; font-weight: 600; color: var(--text-primary, rgba(0,0,0,0.87)); }
       .cat-pct {
         font-size: 11px;
         color: rgba(0,0,0,0.5);
@@ -401,6 +473,71 @@ export class ReportesComponent implements OnInit {
   mesActual: number;
   anioActual: number;
 
+  // Pie/Doughnut chart
+  pieChartData: ChartData<'doughnut'> = { labels: [], datasets: [] };
+  pieChartOptions: ChartConfiguration<'doughnut'>['options'] = {
+    responsive: true,
+    maintainAspectRatio: true,
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: {
+          padding: 16,
+          usePointStyle: true,
+          pointStyle: 'circle',
+          font: { size: 12, family: 'Roboto' }
+        }
+      },
+      tooltip: {
+        callbacks: {
+          label: (ctx) => {
+            const value = ctx.parsed;
+            const total = (ctx.dataset.data as number[]).reduce((a, b) => a + b, 0);
+            const pct = total > 0 ? ((value / total) * 100).toFixed(1) : '0';
+            return ` ${ctx.label}: $${value.toLocaleString('es-CL')} (${pct}%)`;
+          }
+        }
+      }
+    },
+    cutout: '55%'
+  };
+
+  // Bar chart
+  barChartData: ChartData<'bar'> = { labels: [], datasets: [] };
+  barChartOptions: ChartConfiguration<'bar'>['options'] = {
+    responsive: true,
+    maintainAspectRatio: true,
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: {
+          padding: 16,
+          usePointStyle: true,
+          pointStyle: 'circle',
+          font: { size: 12, family: 'Roboto' }
+        }
+      },
+      tooltip: {
+        callbacks: {
+          label: (ctx) => ` ${ctx.dataset.label}: $${(ctx.parsed.y ?? 0).toLocaleString('es-CL')}`
+        }
+      }
+    },
+    scales: {
+      x: {
+        grid: { display: false },
+        ticks: { font: { size: 11 } }
+      },
+      y: {
+        beginAtZero: true,
+        ticks: {
+          font: { size: 11 },
+          callback: (value) => '$' + Number(value).toLocaleString('es-CL')
+        }
+      }
+    }
+  };
+
   private meses = [
     '', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
     'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
@@ -427,6 +564,7 @@ export class ReportesComponent implements OnInit {
     this.apiService.getReporteMensual(this.mesActual, this.anioActual).subscribe({
       next: (data) => {
         this.reporte = data;
+        this.buildCharts();
         this.cargando = false;
         this.cdr.detectChanges();
       },
@@ -441,6 +579,41 @@ export class ReportesComponent implements OnInit {
         this.cdr.detectChanges();
       }
     });
+  }
+
+  private buildCharts(): void {
+    if (!this.reporte?.gastosPorCategoria?.length) return;
+
+    const categorias = this.reporte.gastosPorCategoria;
+    const labels = categorias.map((c: any) => `${c.icono} ${c.nombre}`);
+    const montos = categorias.map((c: any) => c.monto);
+    const colores = categorias.map((c: any) => c.color || '#9e9e9e');
+
+    // Pie chart
+    this.pieChartData = {
+      labels,
+      datasets: [{
+        data: montos,
+        backgroundColor: colores,
+        borderWidth: 2,
+        borderColor: '#ffffff',
+        hoverBorderWidth: 3
+      }]
+    };
+
+    // Bar chart - solo si hay 2 usuarios (datos comparativos)
+    // Usamos los datos de categoría general ya que no tenemos desglose por usuario-categoría
+    this.barChartData = {
+      labels: categorias.map((c: any) => c.nombre),
+      datasets: [{
+        label: 'Monto por categoría',
+        data: montos,
+        backgroundColor: colores.map((c: string) => c + 'CC'),
+        borderColor: colores,
+        borderWidth: 1,
+        borderRadius: 4
+      }]
+    };
   }
 
   nombreMes(mes: number): string {

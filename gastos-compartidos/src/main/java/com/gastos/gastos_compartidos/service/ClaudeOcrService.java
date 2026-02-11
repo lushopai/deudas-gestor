@@ -4,11 +4,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Base64;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -48,13 +44,22 @@ public class ClaudeOcrService {
     private static final String CLAUDE_API_URL = "https://api.anthropic.com/v1/messages";
     private static final String CLAUDE_API_VERSION = "2024-06-01";
 
+    // Constantes de validación de archivos
+    private static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+    private static final List<String> ALLOWED_MIME_TYPES = List.of(
+            "image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif");
+    private static final List<String> ALLOWED_EXTENSIONS = List.of(
+            "jpg", "jpeg", "png", "webp", "gif");
+
     public OcrResponseDTO procesarRecibo(MultipartFile file) {
         try {
             if (apiKey == null || apiKey.trim().isEmpty()) {
                 throw new BadRequestException(
-                    "Claude API key no configurada. Configura 'claude.api.key' en application.properties"
-                );
+                        "Claude API key no configurada. Configura 'claude.api.key' en application.properties");
             }
+
+            // VALIDAR ARCHIVO ANTES DE PROCESAR
+            validarArchivo(file);
 
             log.info("Procesando recibo con Claude Vision...");
 
@@ -122,14 +127,14 @@ public class ClaudeOcrService {
         // 2. Prompt de texto
         ObjectNode textContent = content.addObject();
         textContent.put("type", "text");
-        textContent.put("text", 
-            "Analiza esta imagen de recibo/factura y extrae la información en formato JSON valido. " +
-            "Estructura esperada: {\"montoTotal\": number, \"comercio\": \"string\", \"fecha\": \"DD/MM/YYYY\", " +
-            "\"descripcion\": \"string\", \"tipoDocumento\": \"Boleta|Factura|Voucher\", " +
-            "\"items\": [{\"nombre\": \"string\", \"precio\": number}]}. " +
-            "Extrae todos los items individuales con sus precios. " +
-            "Devuelve SOLO el JSON, sin markdown ni explicaciones adicionales."
-        );
+        textContent.put("text",
+                "Analiza esta imagen de recibo/factura y extrae la información en formato JSON valido. " +
+                        "Estructura esperada: {\"montoTotal\": number, \"comercio\": \"string\", \"fecha\": \"DD/MM/YYYY\", "
+                        +
+                        "\"descripcion\": \"string\", \"tipoDocumento\": \"Boleta|Factura|Voucher\", " +
+                        "\"items\": [{\"nombre\": \"string\", \"precio\": number}]}. " +
+                        "Extrae todos los items individuales con sus precios. " +
+                        "Devuelve SOLO el JSON, sin markdown ni explicaciones adicionales.");
 
         return request;
     }
@@ -207,11 +212,10 @@ public class ClaudeOcrService {
                     BigDecimal precio = parseMonto(precioStr);
                     if (precio != null) {
                         listaItems.add(
-                            OcrResponseDTO.Item.builder()
-                                .nombre(nombre)
-                                .precio(precio)
-                                .build()
-                        );
+                                OcrResponseDTO.Item.builder()
+                                        .nombre(nombre)
+                                        .precio(precio)
+                                        .build());
                     }
                 }
             }
@@ -306,5 +310,55 @@ public class ClaudeOcrService {
             log.warn("Error parseando monto: {}", montoStr, e);
             return null;
         }
+    }
+
+    /**
+     * Valida que el archivo cumpla con los requisitos para OCR
+     * 
+     * @throws BadRequestException si el archivo no es válido
+     */
+    private void validarArchivo(MultipartFile file) {
+        // 1. Validar que el archivo no esté vacío
+        if (file == null || file.isEmpty()) {
+            throw new BadRequestException("No se ha proporcionado ningún archivo");
+        }
+
+        // 2. Validar tamaño
+        long fileSize = file.getSize();
+        if (fileSize > MAX_FILE_SIZE) {
+            double sizeMB = fileSize / 1024.0 / 1024.0;
+            throw new BadRequestException(
+                    String.format("Archivo muy grande. Tamaño máximo: 5MB. Tu archivo: %.2fMB", sizeMB));
+        }
+
+        // 3. Validar tipo MIME
+        String contentType = file.getContentType();
+        if (contentType == null || !ALLOWED_MIME_TYPES.contains(contentType.toLowerCase())) {
+            throw new BadRequestException(
+                    "Tipo de archivo no permitido. Solo se aceptan imágenes (JPEG, PNG, WebP, GIF). " +
+                            "Tipo recibido: " + (contentType != null ? contentType : "desconocido"));
+        }
+
+        // 4. Validar extensión del archivo
+        String filename = file.getOriginalFilename();
+        if (filename == null || !tieneExtensionValida(filename)) {
+            throw new BadRequestException(
+                    "Extensión de archivo no válida. Solo se aceptan: " + String.join(", ", ALLOWED_EXTENSIONS));
+        }
+
+        log.info("Archivo validado correctamente: {} ({} bytes, tipo: {})",
+                filename, fileSize, contentType);
+    }
+
+    /**
+     * Verifica si el archivo tiene una extensión válida
+     */
+    private boolean tieneExtensionValida(String filename) {
+        if (filename == null || !filename.contains(".")) {
+            return false;
+        }
+
+        String extension = filename.substring(filename.lastIndexOf(".") + 1).toLowerCase();
+        return ALLOWED_EXTENSIONS.contains(extension);
     }
 }

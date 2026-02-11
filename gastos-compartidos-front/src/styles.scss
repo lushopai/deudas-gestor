@@ -56,6 +56,89 @@
 }
 
 /* ============================================
+   DARK MODE
+   ============================================ */
+[data-theme="dark"] {
+  --primary-color: #64b5f6;
+  --primary-dark: #42a5f5;
+  --primary-light: #90caf9;
+
+  --text-primary: rgba(255, 255, 255, 0.87);
+  --text-secondary: rgba(255, 255, 255, 0.6);
+  --text-disabled: rgba(255, 255, 255, 0.38);
+
+  --bg-primary: #1e1e1e;
+  --bg-secondary: #121212;
+  --bg-tertiary: #2c2c2c;
+
+  --border-color: rgba(255, 255, 255, 0.12);
+  --divider-color: rgba(255, 255, 255, 0.12);
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 2px 6px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.5);
+
+  /* Overlay panels dark */
+  .mat-mdc-select-panel {
+    background-color: #2c2c2c !important;
+  }
+  .mat-mdc-option {
+    color: rgba(255, 255, 255, 0.87) !important;
+  }
+  .mat-datepicker-content {
+    background-color: #2c2c2c !important;
+  }
+  .mat-calendar {
+    background-color: #2c2c2c !important;
+  }
+  .mat-calendar-body-cell-content {
+    color: rgba(255, 255, 255, 0.87) !important;
+  }
+  .mat-calendar-table-header,
+  .mat-calendar-body-label {
+    color: rgba(255, 255, 255, 0.6) !important;
+  }
+  .mat-calendar-arrow {
+    fill: rgba(255, 255, 255, 0.87) !important;
+  }
+  .mat-calendar-previous-button,
+  .mat-calendar-next-button,
+  .mat-calendar-period-button {
+    color: rgba(255, 255, 255, 0.87) !important;
+  }
+
+  /* SweetAlert2 dark */
+  .swal2-popup {
+    background: #2c2c2c !important;
+  }
+  .swal2-title {
+    color: rgba(255, 255, 255, 0.87) !important;
+  }
+  .swal2-html-container {
+    color: rgba(255, 255, 255, 0.6) !important;
+  }
+
+  /* Mat menu dark */
+  .mat-mdc-menu-panel {
+    background: #2c2c2c !important;
+  }
+  .mat-mdc-menu-item {
+    color: rgba(255, 255, 255, 0.87) !important;
+  }
+
+  /* Scrollbar dark */
+  ::-webkit-scrollbar-track {
+    background: #1e1e1e;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+}
+
+/* ============================================
    RESET Y BASE
    ============================================ */
 * {
