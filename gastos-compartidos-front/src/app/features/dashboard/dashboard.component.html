@@ -27,12 +27,10 @@
     </mat-card>
   }
 
-  <!-- Loading State -->
+  <!-- Loading Skeleton -->
   @if (cargando) {
-    <div class="loading-container">
-      <mat-card class="skeleton-card"></mat-card>
-      <mat-card class="skeleton-card"></mat-card>
-    </div>
+    <app-skeleton-loader tipo="summary" [cantidad]="2"></app-skeleton-loader>
+    <app-skeleton-loader tipo="list-item" [cantidad]="3"></app-skeleton-loader>
   }
 
   <!-- Balance de Pareja -->
@@ -185,14 +183,13 @@
 
   <!-- Empty State -->
   @if (!cargando && gastosRecientes.length === 0) {
-    <div class="empty-state">
-      <mat-icon class="empty-icon">inbox</mat-icon>
-      <div class="empty-text">Sin gastos aún</div>
-      <div class="empty-hint">Crea tu primer gasto para comenzar a seguir tus gastos compartidos</div>
-      <button mat-raised-button color="primary" (click)="abrirNuevoGasto()" class="empty-action-btn">
-        <mat-icon>add</mat-icon>
-        Crear Primer Gasto
-      </button>
-    </div>
+    <app-empty-state
+      icon="inbox"
+      titulo="Sin gastos aún"
+      subtitulo="Crea tu primer gasto para comenzar a seguir tus gastos compartidos"
+      accionTexto="Crear Primer Gasto"
+      accionIcono="add"
+      (accionClick)="abrirNuevoGasto()">
+    </app-empty-state>
   }
 </div>

@@ -14,6 +14,8 @@ import {
   FRECUENCIA_LABELS
 } from '../../../core/services/gasto-recurrente.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state';
+import { SkeletonLoaderComponent } from '../../../shared/components/skeleton-loader/skeleton-loader';
 
 @Component({
   selector: 'app-recurrentes-list',
@@ -26,7 +28,9 @@ import { NotificationService } from '../../../core/services/notification.service
     MatProgressSpinnerModule,
     MatChipsModule,
     MatMenuModule,
-    MatSlideToggleModule
+    MatSlideToggleModule,
+    EmptyStateComponent,
+    SkeletonLoaderComponent
   ],
   templateUrl: './recurrentes-list.html',
   styleUrl: './recurrentes-list.scss'

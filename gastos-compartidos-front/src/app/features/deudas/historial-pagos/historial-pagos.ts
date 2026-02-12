@@ -12,6 +12,8 @@ import { PagoService, Pago } from '../../../core/services/pago.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { LoadingService } from '../../../core/services/loading.service';
+import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state';
+import { SkeletonLoaderComponent } from '../../../shared/components/skeleton-loader/skeleton-loader';
 
 @Component({
   selector: 'app-historial-pagos',
@@ -24,7 +26,9 @@ import { LoadingService } from '../../../core/services/loading.service';
     MatIconModule,
     MatProgressSpinnerModule,
     MatChipsModule,
-    MatDividerModule
+    MatDividerModule,
+    EmptyStateComponent,
+    SkeletonLoaderComponent
   ],
   templateUrl: './historial-pagos.html',
   styleUrl: './historial-pagos.scss',

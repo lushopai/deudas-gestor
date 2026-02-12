@@ -63,28 +63,22 @@
     </div>
   }
 
-  <!-- Loading -->
+  <!-- Loading Skeleton -->
   @if (cargando) {
-    <div class="loading-container">
-      <mat-progress-spinner diameter="40" mode="indeterminate"></mat-progress-spinner>
-      <span>Cargando gastos recurrentes...</span>
-    </div>
+    <app-skeleton-loader tipo="card" [cantidad]="3"></app-skeleton-loader>
   }
 
   <!-- Lista -->
   @if (!cargando) {
     @if (gastosFiltrados.length === 0) {
-      <mat-card class="empty-state">
-        <mat-card-content>
-          <mat-icon>autorenew</mat-icon>
-          <h3>No tienes gastos recurrentes</h3>
-          <p>Programa tus gastos fijos como arriendo, servicios o suscripciones</p>
-          <button mat-raised-button color="primary" (click)="nuevoGasto()">
-            <mat-icon>add</mat-icon>
-            Crear Primer Gasto Recurrente
-          </button>
-        </mat-card-content>
-      </mat-card>
+      <app-empty-state
+        icon="autorenew"
+        titulo="No tienes gastos recurrentes"
+        subtitulo="Programa tus gastos fijos como arriendo, servicios o suscripciones"
+        accionTexto="Crear Primer Gasto Recurrente"
+        accionIcono="add"
+        (accionClick)="nuevoGasto()">
+      </app-empty-state>
     } @else {
       <div class="gastos-grid">
         @for (gasto of gastosFiltrados; track gasto.id) {

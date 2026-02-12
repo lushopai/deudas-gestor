@@ -61,28 +61,22 @@
     </mat-chip-listbox>
   </div>
 
-  <!-- Loading -->
+  <!-- Loading Skeleton -->
   @if (cargando) {
-    <div class="loading-container">
-      <mat-progress-spinner diameter="40" mode="indeterminate"></mat-progress-spinner>
-      <span>Cargando deudas...</span>
-    </div>
+    <app-skeleton-loader tipo="card" [cantidad]="3"></app-skeleton-loader>
   }
 
   <!-- Lista de Deudas -->
   @if (!cargando) {
     @if (deudasFiltradas.length === 0) {
-      <mat-card class="empty-state">
-        <mat-card-content>
-          <mat-icon>account_balance_wallet</mat-icon>
-          <h3>No tienes deudas registradas</h3>
-          <p>Registra tus deudas para llevar un control de tus pagos</p>
-          <button mat-raised-button color="primary" (click)="nuevaDeuda()">
-            <mat-icon>add</mat-icon>
-            Agregar Primera Deuda
-          </button>
-        </mat-card-content>
-      </mat-card>
+      <app-empty-state
+        icon="account_balance_wallet"
+        titulo="No tienes deudas registradas"
+        subtitulo="Registra tus deudas para llevar un control de tus pagos"
+        accionTexto="Agregar Primera Deuda"
+        accionIcono="add"
+        (accionClick)="nuevaDeuda()">
+      </app-empty-state>
     } @else {
       <div class="deudas-grid">
         @for (deuda of deudasFiltradas; track deuda.id) {

@@ -10,25 +10,21 @@
 </mat-toolbar>
 
 <div class="historial-container">
-  <!-- Loading -->
+  <!-- Loading Skeleton -->
   @if (cargando) {
-    <div class="loading-state">
-      <mat-progress-spinner diameter="40" mode="indeterminate"></mat-progress-spinner>
-      <span>Cargando historial...</span>
-    </div>
+    <app-skeleton-loader tipo="list-item" [cantidad]="4"></app-skeleton-loader>
   }
 
   <!-- Error Pareja -->
   @if (errorPareja && !cargando) {
-    <div class="error-pareja-state">
-      <mat-icon>people_outline</mat-icon>
-      <div class="error-title">Configura tu Pareja Primero</div>
-      <div class="error-message">Para ver el historial de pagos, necesitas estar en una pareja con otro usuario</div>
-      <button mat-raised-button color="primary" (click)="configurarPareja()">
-        <mat-icon>add</mat-icon>
-        Configurar Pareja
-      </button>
-    </div>
+    <app-empty-state
+      icon="people_outline"
+      titulo="Configura tu Pareja Primero"
+      subtitulo="Para ver el historial de pagos, necesitas estar en una pareja con otro usuario"
+      accionTexto="Configurar Pareja"
+      accionIcono="add"
+      (accionClick)="configurarPareja()">
+    </app-empty-state>
   }
 
   <!-- Error -->
@@ -45,15 +41,14 @@
 
   <!-- Empty State -->
   @if (!cargando && !error && !errorPareja && pagos.length === 0) {
-    <div class="empty-state">
-      <mat-icon>receipt_long</mat-icon>
-      <div class="empty-text">Sin pagos registrados</div>
-      <div class="empty-hint">Registra tu primer pago para comenzar a llevar el historial</div>
-      <button mat-raised-button color="primary" (click)="abonarPago()">
-        <mat-icon>add</mat-icon>
-        Registrar Pago
-      </button>
-    </div>
+    <app-empty-state
+      icon="receipt_long"
+      titulo="Sin pagos registrados"
+      subtitulo="Registra tu primer pago para comenzar a llevar el historial"
+      accionTexto="Registrar Pago"
+      accionIcono="add"
+      (accionClick)="abonarPago()">
+    </app-empty-state>
   }
 
   <!-- Lista de pagos -->

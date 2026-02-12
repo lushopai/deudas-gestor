@@ -1,120 +1,209 @@
 <div class="gastos-list-container">
-  <!-- Loading State -->
-  <div class="loading-state" *ngIf="cargando">
-    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
-    <p>Cargando gastos...</p>
-  </div>
-
-  <!-- Error State -->
-  <mat-card class="error-card" *ngIf="error && !cargando">
-    <mat-card-content>
-      <div class="error-content">
-        <mat-icon class="error-icon">error_outline</mat-icon>
-        <div class="error-message">{{ error }}</div>
-        <button mat-stroked-button (click)="reintentar()" class="retry-btn">
-          <mat-icon>refresh</mat-icon>
-          Reintentar
-        </button>
-      </div>
-    </mat-card-content>
-  </mat-card>
-
-  <!-- Gastos Table -->
-  <mat-card class="gastos-table-card" *ngIf="!cargando && gastos.length > 0">
-    <mat-card-header>
-      <mat-card-title>Todos los Gastos</mat-card-title>
-      <span class="spacer"></span>
-      <button mat-icon-button routerLink="/gastos/nuevo" title="Nuevo gasto">
-        <mat-icon>add</mat-icon>
-      </button>
-    </mat-card-header>
-    <mat-divider></mat-divider>
-    <div class="table-responsive">
-      <table mat-table [dataSource]="gastos" class="gastos-table">
-        <!-- Descripción Column -->
-        <ng-container matColumnDef="descripcion">
-          <th mat-header-cell *matHeaderCellDef>Descripción</th>
-          <td mat-cell *matCellDef="let gasto" class="descripcion-cell">
-            <div class="descripcion-content">
-              <span class="descripcion">{{ gasto.descripcion }}</span>
-              <span class="notas" *ngIf="gasto.notas">{{ gasto.notas }}</span>
-            </div>
-          </td>
-        </ng-container>
-
-        <!-- Monto Column -->
-        <ng-container matColumnDef="monto">
-          <th mat-header-cell *matHeaderCellDef>Monto</th>
-          <td mat-cell *matCellDef="let gasto" class="monto-cell">
-            <span class="monto">${{ gasto.monto | number: '1.2-2' }}</span>
-          </td>
-        </ng-container>
-
-        <!-- Categoría Column -->
-        <ng-container matColumnDef="categoria">
-          <th mat-header-cell *matHeaderCellDef>Categoría</th>
-          <td mat-cell *matCellDef="let gasto" class="categoria-cell">
-            <mat-chip>
-              {{ gasto.categoriaId ? 'Categoría ' + gasto.categoriaId : 'Sin categoría' }}
-            </mat-chip>
-          </td>
-        </ng-container>
-
-        <!-- Fecha Column -->
-        <ng-container matColumnDef="fecha">
-          <th mat-header-cell *matHeaderCellDef>Fecha</th>
-          <td mat-cell *matCellDef="let gasto" class="fecha-cell">
-            {{ gasto.fechaCreacion | date: 'dd/MM/yyyy HH:mm' }}
-          </td>
-        </ng-container>
-
-        <!-- Acciones Column -->
-        <ng-container matColumnDef="acciones">
-          <th mat-header-cell *matHeaderCellDef>Acciones</th>
-          <td mat-cell *matCellDef="let gasto" class="acciones-cell">
-            <button 
-              mat-icon-button 
-              [matMenuTriggerFor]="menu"
-              class="action-menu-btn"
-            >
-              <mat-icon>more_vert</mat-icon>
-            </button>
-            <mat-menu #menu="matMenu">
-              <button mat-menu-item (click)="editarGasto(gasto.id)">
-                <mat-icon>edit</mat-icon>
-                <span>Editar</span>
-              </button>
-              <button 
-                mat-menu-item 
-                (click)="eliminarGasto(gasto.id)"
-                class="delete-option"
-              >
-                <mat-icon>delete</mat-icon>
-                <span>Eliminar</span>
-              </button>
-            </mat-menu>
-          </td>
-        </ng-container>
-
-        <tr mat-header-row *matHeaderRowDef="displayedColumns" class="header-row"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="data-row"></tr>
-      </table>
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1>Mis Gastos</h1>
+      <p class="subtitle">Todos tus gastos registrados</p>
     </div>
-  </mat-card>
-
-  <!-- Empty State -->
-  <div class="empty-state" *ngIf="!cargando && gastos.length === 0">
-    <mat-icon class="empty-icon">inbox</mat-icon>
-    <div class="empty-text">Sin gastos registrados</div>
-    <div class="empty-hint">Crea tu primer gasto para comenzar</div>
-    <button 
-      mat-raised-button 
-      color="primary"
-      routerLink="/gastos/nuevo"
-      class="empty-action-btn"
-    >
+    <button mat-raised-button color="primary" routerLink="/gastos/nuevo">
       <mat-icon>add</mat-icon>
-      Crear Gasto
+      Nuevo Gasto
     </button>
   </div>
+
+  <!-- Loading Skeleton -->
+  @if (cargando) {
+    <app-skeleton-loader tipo="table-row" [cantidad]="5"></app-skeleton-loader>
+  }
+
+  <!-- Error State -->
+  @if (error && !cargando) {
+    <mat-card class="error-card">
+      <mat-card-content>
+        <div class="error-content">
+          <mat-icon class="error-icon">error_outline</mat-icon>
+          <div class="error-message">{{ error }}</div>
+          <button mat-stroked-button (click)="reintentar()" class="retry-btn">
+            <mat-icon>refresh</mat-icon>
+            Reintentar
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  <!-- Filtros -->
+  @if (!cargando && !error && gastos.length > 0) {
+    <div class="filtros-section">
+      <!-- Búsqueda + Toggle filtros -->
+      <div class="filtros-top">
+        <mat-form-field appearance="outline" class="busqueda-field">
+          <mat-icon matPrefix>search</mat-icon>
+          <input matInput
+            placeholder="Buscar gasto..."
+            [(ngModel)]="busqueda"
+            (ngModelChange)="aplicarFiltros()">
+          @if (busqueda) {
+            <button matSuffix mat-icon-button (click)="busqueda = ''; aplicarFiltros()">
+              <mat-icon>close</mat-icon>
+            </button>
+          }
+        </mat-form-field>
+        <button mat-icon-button (click)="filtrosVisibles = !filtrosVisibles"
+          [class.active]="filtrosVisibles || hayFiltrosActivos"
+          class="filter-toggle">
+          <mat-icon>tune</mat-icon>
+        </button>
+      </div>
+
+      <!-- Filtros expandidos -->
+      @if (filtrosVisibles) {
+        <div class="filtros-expanded">
+          <!-- Categorías chips -->
+          @if (categorias.length > 0) {
+            <div class="filtro-group">
+              <span class="filtro-label">Categoría</span>
+              <div class="categoria-chips">
+                @for (cat of categorias; track cat.id) {
+                  <button mat-stroked-button
+                    class="cat-chip"
+                    [class.selected]="categoriaSeleccionada === cat.id"
+                    (click)="filtrarPorCategoria(cat.id)">
+                    {{ cat.icono }} {{ cat.nombre }}
+                  </button>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Rango de fechas -->
+          <div class="filtro-group filtro-fechas">
+            <span class="filtro-label">Rango de fechas</span>
+            <div class="fecha-inputs">
+              <mat-form-field appearance="outline" class="fecha-field">
+                <mat-label>Desde</mat-label>
+                <input matInput [matDatepicker]="pickerDesde" [(ngModel)]="fechaDesde" (dateChange)="aplicarFiltros()">
+                <mat-datepicker-toggle matSuffix [for]="pickerDesde"></mat-datepicker-toggle>
+                <mat-datepicker #pickerDesde></mat-datepicker>
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="fecha-field">
+                <mat-label>Hasta</mat-label>
+                <input matInput [matDatepicker]="pickerHasta" [(ngModel)]="fechaHasta" (dateChange)="aplicarFiltros()">
+                <mat-datepicker-toggle matSuffix [for]="pickerHasta"></mat-datepicker-toggle>
+                <mat-datepicker #pickerHasta></mat-datepicker>
+              </mat-form-field>
+            </div>
+          </div>
+
+          <!-- Limpiar filtros -->
+          @if (hayFiltrosActivos) {
+            <button mat-button color="warn" (click)="limpiarFiltros()" class="limpiar-btn">
+              <mat-icon>filter_list_off</mat-icon>
+              Limpiar filtros
+            </button>
+          }
+        </div>
+      }
+
+      <!-- Indicador de resultados -->
+      @if (hayFiltrosActivos) {
+        <div class="filtro-resultado">
+          {{ gastosFiltrados.length }} de {{ gastos.length }} gastos
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Gastos Table -->
+  @if (!cargando && !error && gastosFiltrados.length > 0) {
+    <mat-card class="gastos-table-card">
+      <div class="table-responsive">
+        <table mat-table [dataSource]="gastosFiltrados" class="gastos-table">
+          <!-- Descripción Column -->
+          <ng-container matColumnDef="descripcion">
+            <th mat-header-cell *matHeaderCellDef>Descripción</th>
+            <td mat-cell *matCellDef="let gasto" class="descripcion-cell">
+              <div class="descripcion-content">
+                <span class="descripcion">{{ gasto.descripcion }}</span>
+                @if (gasto.notas) {
+                  <span class="notas">{{ gasto.notas }}</span>
+                }
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Monto Column -->
+          <ng-container matColumnDef="monto">
+            <th mat-header-cell *matHeaderCellDef>Monto</th>
+            <td mat-cell *matCellDef="let gasto" class="monto-cell">
+              <span class="monto">${{ gasto.monto | number: '1.0-0' }}</span>
+            </td>
+          </ng-container>
+
+          <!-- Categoría Column -->
+          <ng-container matColumnDef="categoria">
+            <th mat-header-cell *matHeaderCellDef>Categoría</th>
+            <td mat-cell *matCellDef="let gasto" class="categoria-cell">
+              <mat-chip>{{ getNombreCategoria(gasto.categoriaId) }}</mat-chip>
+            </td>
+          </ng-container>
+
+          <!-- Fecha Column -->
+          <ng-container matColumnDef="fecha">
+            <th mat-header-cell *matHeaderCellDef>Fecha</th>
+            <td mat-cell *matCellDef="let gasto" class="fecha-cell">
+              {{ gasto.fechaCreacion | date: 'dd/MM/yyyy' }}
+            </td>
+          </ng-container>
+
+          <!-- Acciones Column -->
+          <ng-container matColumnDef="acciones">
+            <th mat-header-cell *matHeaderCellDef></th>
+            <td mat-cell *matCellDef="let gasto" class="acciones-cell">
+              <button mat-icon-button [matMenuTriggerFor]="menu" class="action-menu-btn">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #menu="matMenu">
+                <button mat-menu-item (click)="editarGasto(gasto.id)">
+                  <mat-icon>edit</mat-icon>
+                  <span>Editar</span>
+                </button>
+                <button mat-menu-item (click)="eliminarGasto(gasto.id)" class="delete-option">
+                  <mat-icon>delete</mat-icon>
+                  <span>Eliminar</span>
+                </button>
+              </mat-menu>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns" class="header-row"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="data-row"></tr>
+        </table>
+      </div>
+    </mat-card>
+  }
+
+  <!-- Empty State (sin gastos) -->
+  @if (!cargando && !error && gastos.length === 0) {
+    <app-empty-state
+      icon="receipt_long"
+      titulo="Sin gastos registrados"
+      subtitulo="Crea tu primer gasto para comenzar a llevar el control"
+      accionTexto="Crear Gasto"
+      accionIcono="add"
+      (accionClick)="crearGasto()">
+    </app-empty-state>
+  }
+
+  <!-- Empty State (filtros sin resultados) -->
+  @if (!cargando && !error && gastos.length > 0 && gastosFiltrados.length === 0) {
+    <app-empty-state
+      icon="search_off"
+      titulo="Sin resultados"
+      subtitulo="No se encontraron gastos con los filtros aplicados"
+      accionTexto="Limpiar filtros"
+      accionIcono="filter_list_off"
+      (accionClick)="limpiarFiltros()">
+    </app-empty-state>
+  }
 </div>

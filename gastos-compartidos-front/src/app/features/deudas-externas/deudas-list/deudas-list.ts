@@ -17,6 +17,8 @@ import {
   ESTADO_DEUDA_LABELS
 } from '../../../core/services/deuda.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state';
+import { SkeletonLoaderComponent } from '../../../shared/components/skeleton-loader/skeleton-loader';
 
 @Component({
   selector: 'app-deudas-list',
@@ -30,7 +32,9 @@ import { NotificationService } from '../../../core/services/notification.service
     MatChipsModule,
     MatProgressBarModule,
     MatMenuModule,
-    MatTabsModule
+    MatTabsModule,
+    EmptyStateComponent,
+    SkeletonLoaderComponent
   ],
   templateUrl: './deudas-list.html',
   styleUrl: './deudas-list.scss'

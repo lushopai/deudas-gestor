@@ -54,6 +54,19 @@ import { NotificationService } from '../../core/services/notification.service';
         </mat-card>
       }
 
+      <!-- Selector de mes (siempre visible cuando no hay error ni loading) -->
+      @if (!cargando && !error) {
+        <div class="mes-selector">
+          <button mat-icon-button (click)="mesAnterior()">
+            <mat-icon>chevron_left</mat-icon>
+          </button>
+          <span class="mes-label">{{ nombreMes(mesActual) }} {{ anioActual }}</span>
+          <button mat-icon-button (click)="mesSiguiente()" [disabled]="esMesActual()">
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+        </div>
+      }
+
       <!-- Sin datos -->
       @if (!cargando && !error && reporte && reporte.cantidadGastos === 0) {
         <mat-card class="empty-card">
@@ -66,17 +79,6 @@ import { NotificationService } from '../../core/services/notification.service';
       }
 
       @if (!cargando && !error && reporte && reporte.cantidadGastos > 0) {
-        <!-- Selector de mes -->
-        <div class="mes-selector">
-          <button mat-icon-button (click)="mesAnterior()">
-            <mat-icon>chevron_left</mat-icon>
-          </button>
-          <span class="mes-label">{{ nombreMes(mesActual) }} {{ anioActual }}</span>
-          <button mat-icon-button (click)="mesSiguiente()" [disabled]="esMesActual()">
-            <mat-icon>chevron_right</mat-icon>
-          </button>
-        </div>
-
         <!-- Resumen principal -->
         <div class="summary-grid">
           <mat-card class="summary-card total">

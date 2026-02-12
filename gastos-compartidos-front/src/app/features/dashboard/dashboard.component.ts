@@ -18,7 +18,8 @@ import { DeudaService, ResumenDeudas } from '../../core/services/deuda.service';
 import { GastoRecurrenteService, GastoRecurrente } from '../../core/services/gasto-recurrente.service';
 import { ReminderService } from '../../core/services/reminder.service';
 import { BalanceCard } from '../deudas/balance-card/balance-card';
-
+import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state';
+import { SkeletonLoaderComponent } from '../../shared/components/skeleton-loader/skeleton-loader';
 
 @Component({
   selector: 'app-dashboard',
@@ -36,7 +37,9 @@ import { BalanceCard } from '../deudas/balance-card/balance-card';
     MatProgressBarModule,
     MatChipsModule,
     MatTabsModule,
-    BalanceCard
+    BalanceCard,
+    EmptyStateComponent,
+    SkeletonLoaderComponent
   ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
