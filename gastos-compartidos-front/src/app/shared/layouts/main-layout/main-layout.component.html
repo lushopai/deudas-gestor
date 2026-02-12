@@ -71,8 +71,15 @@
     </mat-toolbar>
 
     <!-- Page Content -->
-    <div class="content-wrapper">
+    <div class="content-wrapper" [@routeAnimation]="getRouteAnimationData()">
       <router-outlet></router-outlet>
     </div>
+
+    <!-- FAB: Nuevo Gasto (solo en dashboard y lista de gastos) -->
+    @if (showFab) {
+      <button mat-fab class="fab-button" (click)="fabAction()" aria-label="Nuevo gasto">
+        <mat-icon>add</mat-icon>
+      </button>
+    }
   </mat-sidenav-content>
 </mat-sidenav-container>

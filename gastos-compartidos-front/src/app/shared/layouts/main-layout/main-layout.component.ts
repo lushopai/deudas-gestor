@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
+import { ChildrenOutletContexts, RouterOutlet, Router, NavigationEnd } from '@angular/router';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Observable } from 'rxjs';
 import { map, filter } from 'rxjs/operators';
@@ -12,6 +12,7 @@ import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
 import { AuthService } from '../../../core/services/auth.service';
+import { routeFadeAnimation } from '../../animations/route-animations';
 
 interface NavItem {
   label: string;
@@ -35,12 +36,15 @@ interface NavItem {
     MatDividerModule
   ],
   templateUrl: './main-layout.component.html',
-  styleUrls: ['./main-layout.component.scss']
+  styleUrls: ['./main-layout.component.scss'],
+  animations: [routeFadeAnimation]
 })
 export class MainLayoutComponent implements OnInit {
   sidenavAberto = false;
   usuario$;
   darkMode = false;
+  currentRoute = '';
+  showFab = false;
 
   menuItems: NavItem[] = [
     {
@@ -92,13 +96,15 @@ export class MainLayoutComponent implements OnInit {
 
   isMobile$: Observable<boolean>;
 
+  private fabRoutes = ['/dashboard', '/gastos'];
+
   constructor(
     private authService: AuthService,
     private router: Router,
-    private breakpointObserver: BreakpointObserver
+    private breakpointObserver: BreakpointObserver,
+    private contexts: ChildrenOutletContexts
   ) {
     this.usuario$ = this.authService.usuario$;
-    // Usa un breakpoint manual más amplio para asegurar que tablets/móviles grandes se traten como móvil
     this.isMobile$ = this.breakpointObserver.observe('(max-width: 960px)')
       .pipe(map(result => result.matches));
   }
@@ -118,10 +124,14 @@ export class MainLayoutComponent implements OnInit {
       }
     }
 
-    // Cerrar sidenav automáticamente en móvil al navegar
+    // Cerrar sidenav y actualizar FAB al navegar
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
-    ).subscribe(() => {
+    ).subscribe((event) => {
+      const navEnd = event as NavigationEnd;
+      this.currentRoute = navEnd.urlAfterRedirects || navEnd.url;
+      this.showFab = this.fabRoutes.some(r => this.currentRoute === r);
+
       this.isMobile$.subscribe(isMobile => {
         if (isMobile) {
           this.sidenavAberto = false;
@@ -168,6 +178,14 @@ export class MainLayoutComponent implements OnInit {
       document.documentElement.removeAttribute('data-theme');
       localStorage.setItem('gastos_theme', 'light');
     }
+  }
+
+  getRouteAnimationData() {
+    return this.contexts.getContext('primary')?.route?.snapshot?.url;
+  }
+
+  fabAction() {
+    this.router.navigate(['/gastos/nuevo']);
   }
 
   cerrarSesion() {

@@ -20,6 +20,7 @@ import { ReminderService } from '../../core/services/reminder.service';
 import { BalanceCard } from '../deudas/balance-card/balance-card';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state';
 import { SkeletonLoaderComponent } from '../../shared/components/skeleton-loader/skeleton-loader';
+import { PullToRefreshDirective } from '../../shared/directives/pull-to-refresh.directive';
 
 @Component({
   selector: 'app-dashboard',
@@ -39,7 +40,8 @@ import { SkeletonLoaderComponent } from '../../shared/components/skeleton-loader
     MatTabsModule,
     BalanceCard,
     EmptyStateComponent,
-    SkeletonLoaderComponent
+    SkeletonLoaderComponent,
+    PullToRefreshDirective
   ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
