@@ -6,6 +6,7 @@ import com.gastos.gastos_compartidos.service.WebPushService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import com.gastos.gastos_compartidos.security.CustomUserDetails;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -38,7 +39,8 @@ public class PushNotificationController {
     @PostMapping("/subscribe")
     @Operation(summary = "Suscribirse a push notifications")
     public ResponseEntity<?> subscribe(@RequestBody SubscribeRequest request, Authentication auth) {
-        Long userId = Long.parseLong(auth.getName());
+        CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
+        Long userId = userDetails.getId();
         Usuario usuario = usuarioService.obtenerPorId(userId);
 
         webPushService.subscribe(
@@ -68,7 +70,8 @@ public class PushNotificationController {
                     "mensaje", "Push notifications no están habilitadas"));
         }
 
-        Long userId = Long.parseLong(auth.getName());
+        CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
+        Long userId = userDetails.getId();
         webPushService.notifyUser(userId,
                 "¡Prueba exitosa! 🎉",
                 "Las notificaciones push están funcionando correctamente",
