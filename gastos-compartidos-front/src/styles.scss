@@ -91,25 +91,32 @@
   .mat-mdc-select-panel {
     background-color: #2c2c2c !important;
   }
+
   .mat-mdc-option {
     color: rgba(255, 255, 255, 0.87) !important;
   }
+
   .mat-datepicker-content {
     background-color: #2c2c2c !important;
   }
+
   .mat-calendar {
     background-color: #2c2c2c !important;
   }
+
   .mat-calendar-body-cell-content {
     color: rgba(255, 255, 255, 0.87) !important;
   }
+
   .mat-calendar-table-header,
   .mat-calendar-body-label {
     color: rgba(255, 255, 255, 0.6) !important;
   }
+
   .mat-calendar-arrow {
     fill: rgba(255, 255, 255, 0.87) !important;
   }
+
   .mat-calendar-previous-button,
   .mat-calendar-next-button,
   .mat-calendar-period-button {
@@ -120,9 +127,11 @@
   .swal2-popup {
     background: #2c2c2c !important;
   }
+
   .swal2-title {
     color: rgba(255, 255, 255, 0.87) !important;
   }
+
   .swal2-html-container {
     color: rgba(255, 255, 255, 0.6) !important;
   }
@@ -131,6 +140,7 @@
   .mat-mdc-menu-panel {
     background: #2c2c2c !important;
   }
+
   .mat-mdc-menu-item {
     color: rgba(255, 255, 255, 0.87) !important;
   }
@@ -139,9 +149,11 @@
   ::-webkit-scrollbar-track {
     background: #1e1e1e;
   }
+
   ::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.2);
   }
+
   ::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 255, 255, 0.3);
   }
@@ -165,6 +177,8 @@ body {
   background-color: var(--bg-secondary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overscroll-behavior-y: none;
+  /* Evita pull-to-refresh nativo y rebote */
 }
 
 /* ============================================
@@ -523,5 +537,7 @@ p {
 }
 
 @keyframes ptr-spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
