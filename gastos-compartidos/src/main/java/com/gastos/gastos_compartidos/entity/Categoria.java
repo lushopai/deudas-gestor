@@ -22,7 +22,7 @@ public class Categoria {
     private String nombre;
 
     @Column
-    private String icono; // Emoji o ícono (🛒, 🚗, etc.)
+    private String icono; // Icono de categoria
 
     @Column
     private String color;

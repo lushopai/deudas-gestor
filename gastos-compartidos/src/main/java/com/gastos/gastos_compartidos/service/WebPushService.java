@@ -52,7 +52,7 @@ public class WebPushService {
     @PostConstruct
     public void init() {
         if (vapidPublicKey.isEmpty() || vapidPrivateKey.isEmpty()) {
-            log.warn("⚠️ Push notifications deshabilitadas: VAPID keys no configuradas. " +
+            log.warn("Push notifications deshabilitadas: VAPID keys no configuradas. " +
                     "Generar con: npx web-push generate-vapid-keys");
             return;
         }
@@ -64,9 +64,9 @@ public class WebPushService {
             pushService.setPrivateKey(vapidPrivateKey);
             pushService.setSubject(vapidSubject);
             pushEnabled = true;
-            log.info("✅ Push notifications habilitadas");
+            log.info("Push notifications habilitadas");
         } catch (GeneralSecurityException e) {
-            log.error("❌ Error al inicializar Push Service: {}", e.getMessage());
+            log.error("Error al inicializar Push Service: {}", e.getMessage());
         }
     }
 
