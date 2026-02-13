@@ -34,8 +34,17 @@ services:
 
       # Autenticación y Secretos (Se inyectan desde el servidor/Jenkins)
       APP_JWT_SECRET: ${JWT_SECRET}
+      JWT_SECRET: ${JWT_SECRET} # Necesario para application-prod.properties
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+
+      # Notificaciones Push (VAPID)
+      VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY}
+      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY}
+      VAPID_SUBJECT: ${VAPID_SUBJECT:-mailto:admin@gastoscompartidos.app}
+
+      # Fix Schema validation
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
 
       # Configuración de CORS (Permitir todo origen para facilitar VPN/Tailscale)
       CORS_ALLOWED_ORIGINS: "*"
