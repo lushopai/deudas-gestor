@@ -3,6 +3,9 @@ package com.gastos.gastos_compartidos.controller;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -67,11 +70,12 @@ public class GastoController {
     }
 
     @GetMapping
-    @Operation(summary = "Obtener gastos del usuario", description = "Lista todos los gastos del usuario autenticado")
-    public ResponseEntity<List<GastoResponseDTO>> obtenerGastosDelUsuario(
-            @AuthenticationPrincipal CustomUserDetails currentUser) {
+    @Operation(summary = "Obtener gastos del usuario (paginado)", description = "Lista los gastos del usuario autenticado con paginación")
+    public ResponseEntity<Page<GastoResponseDTO>> obtenerGastosDelUsuario(
+            @AuthenticationPrincipal CustomUserDetails currentUser,
+            @PageableDefault(size = 20) Pageable pageable) {
 
-        List<GastoResponseDTO> gastos = gastoService.obtenerGastosPorUsuario(currentUser.getId());
+        Page<GastoResponseDTO> gastos = gastoService.obtenerGastosPorUsuarioPaginado(currentUser.getId(), pageable);
         return ResponseEntity.ok(gastos);
     }
 
@@ -95,12 +99,13 @@ public class GastoController {
     }
 
     @GetMapping("/pareja/todos")
-    @Operation(summary = "Obtener gastos de la pareja", description = "Lista todos los gastos de la pareja del usuario autenticado")
-    public ResponseEntity<List<GastoResponseDTO>> obtenerGastosPorPareja(
-            @AuthenticationPrincipal CustomUserDetails currentUser) {
+    @Operation(summary = "Obtener gastos de la pareja (paginado)", description = "Lista los gastos de la pareja con paginación")
+    public ResponseEntity<Page<GastoResponseDTO>> obtenerGastosPorPareja(
+            @AuthenticationPrincipal CustomUserDetails currentUser,
+            @PageableDefault(size = 20) Pageable pageable) {
 
         Long parejaId = parejaService.obtenerParejaDelUsuario(currentUser.getId()).getId();
-        List<GastoResponseDTO> gastos = gastoService.obtenerGastosPorPareja(parejaId);
+        Page<GastoResponseDTO> gastos = gastoService.obtenerGastosPorParejaPaginado(parejaId, pageable);
         return ResponseEntity.ok(gastos);
     }
 

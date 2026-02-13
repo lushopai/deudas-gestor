@@ -1,6 +1,7 @@
 package com.gastos.gastos_compartidos.repository;
 
 import com.gastos.gastos_compartidos.entity.Pago;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -38,4 +39,8 @@ public interface PagoRepository extends JpaRepository<Pago, Long> {
     List<Pago> findTopByParejaIdOrderByFechaPagoDesc(
             @Param("parejaId") Long parejaId,
             Pageable pageable);
+
+    // === Paginated queries ===
+    @Query("SELECT p FROM Pago p WHERE p.pareja.id = :parejaId AND p.estado = 'COMPLETADO' ORDER BY p.fechaPago DESC")
+    Page<Pago> findByParejaIdPaginado(@Param("parejaId") Long parejaId, Pageable pageable);
 }

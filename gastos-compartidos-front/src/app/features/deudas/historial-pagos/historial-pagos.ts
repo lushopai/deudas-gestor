@@ -9,6 +9,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDividerModule } from '@angular/material/divider';
 import { PagoService, Pago } from '../../../core/services/pago.service';
+import { PageResponse } from '../../../core/models/page-response';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { LoadingService } from '../../../core/services/loading.service';
@@ -36,9 +37,16 @@ import { SkeletonLoaderComponent } from '../../../shared/components/skeleton-loa
 export class HistorialPagos implements OnInit {
   pagos: Pago[] = [];
   cargando = true;
+  cargandoMas = false;
   error: string | null = null;
   errorPareja = false;
   usuarioActualId: number | null = null;
+
+  // Paginación
+  paginaActual = 0;
+  totalElementos = 0;
+  esUltimaPagina = false;
+  pageSize = 20;
 
   constructor(
     private pagoService: PagoService,
@@ -47,7 +55,7 @@ export class HistorialPagos implements OnInit {
     private notificationService: NotificationService,
     private loadingService: LoadingService,
     private cdr: ChangeDetectorRef
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     const usuario = this.authService.obtenerUsuario();
@@ -59,10 +67,14 @@ export class HistorialPagos implements OnInit {
     this.cargando = true;
     this.error = null;
     this.errorPareja = false;
+    this.paginaActual = 0;
+    this.pagos = [];
 
-    this.pagoService.obtenerHistorial().subscribe({
-      next: (pagos) => {
-        this.pagos = pagos;
+    this.pagoService.obtenerHistorialPaginado(0, this.pageSize).subscribe({
+      next: (page: PageResponse<Pago>) => {
+        this.pagos = page.content;
+        this.totalElementos = page.totalElements;
+        this.esUltimaPagina = page.last;
         this.cargando = false;
         this.cdr.detectChanges();
       },
@@ -75,6 +87,26 @@ export class HistorialPagos implements OnInit {
           this.error = 'No se pudo cargar el historial de pagos';
         }
         this.cargando = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  cargarMas(): void {
+    if (this.esUltimaPagina || this.cargandoMas) return;
+    this.cargandoMas = true;
+    this.paginaActual++;
+
+    this.pagoService.obtenerHistorialPaginado(this.paginaActual, this.pageSize).subscribe({
+      next: (page: PageResponse<Pago>) => {
+        this.pagos = [...this.pagos, ...page.content];
+        this.esUltimaPagina = page.last;
+        this.cargandoMas = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.paginaActual--;
+        this.cargandoMas = false;
         this.cdr.detectChanges();
       }
     });

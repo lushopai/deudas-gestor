@@ -16,6 +16,7 @@ import {
   TIPO_DEUDA_LABELS,
   ESTADO_DEUDA_LABELS
 } from '../../../core/services/deuda.service';
+import { PageResponse } from '../../../core/models/page-response';
 import { NotificationService } from '../../../core/services/notification.service';
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state';
 import { SkeletonLoaderComponent } from '../../../shared/components/skeleton-loader/skeleton-loader';
@@ -43,7 +44,14 @@ export class DeudasList implements OnInit {
   deudas: Deuda[] = [];
   resumen: ResumenDeudas | null = null;
   cargando = true;
+  cargandoMas = false;
   filtroActivo = 'todas'; // 'todas' | 'activas' | 'pagadas'
+
+  // Paginación
+  paginaActual = 0;
+  totalElementos = 0;
+  esUltimaPagina = false;
+  pageSize = 20;
 
   tipoDeudaLabels = TIPO_DEUDA_LABELS;
   estadoDeudaLabels = ESTADO_DEUDA_LABELS;
@@ -53,7 +61,7 @@ export class DeudasList implements OnInit {
     private router: Router,
     private notificationService: NotificationService,
     private cdr: ChangeDetectorRef
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.cargarDatos();
@@ -61,11 +69,15 @@ export class DeudasList implements OnInit {
 
   cargarDatos(): void {
     this.cargando = true;
+    this.paginaActual = 0;
+    this.deudas = [];
 
-    // Cargar deudas y resumen en paralelo
-    this.deudaService.obtenerDeudas().subscribe({
-      next: (deudas) => {
-        this.deudas = deudas;
+    // Cargar deudas paginadas y resumen en paralelo
+    this.deudaService.obtenerDeudasPaginado(0, this.pageSize).subscribe({
+      next: (page: PageResponse<Deuda>) => {
+        this.deudas = page.content;
+        this.totalElementos = page.totalElements;
+        this.esUltimaPagina = page.last;
         this.cargando = false;
         this.cdr.detectChanges();
       },
@@ -78,6 +90,26 @@ export class DeudasList implements OnInit {
     this.deudaService.obtenerResumen().subscribe({
       next: (resumen) => {
         this.resumen = resumen;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  cargarMas(): void {
+    if (this.esUltimaPagina || this.cargandoMas) return;
+    this.cargandoMas = true;
+    this.paginaActual++;
+
+    this.deudaService.obtenerDeudasPaginado(this.paginaActual, this.pageSize).subscribe({
+      next: (page: PageResponse<Deuda>) => {
+        this.deudas = [...this.deudas, ...page.content];
+        this.esUltimaPagina = page.last;
+        this.cargandoMas = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.paginaActual--;
+        this.cargandoMas = false;
         this.cdr.detectChanges();
       }
     });

@@ -9,8 +9,8 @@ export class NotificationService {
   /**
    * Muestra un mensaje de éxito
    */
-  success(message: string, title: string = '¡Éxito!'): void {
-    Swal.fire({
+  success(message: string, title: string = '¡Éxito!') {
+    return Swal.fire({
       icon: 'success',
       title: title,
       text: message,
@@ -24,11 +24,12 @@ export class NotificationService {
   /**
    * Muestra un mensaje de error
    */
-  error(message: string, title: string = 'Error'): void {
-    Swal.fire({
+  error(message: string, title: string = 'Error', details?: string) {
+    return Swal.fire({
       icon: 'error',
       title: title,
       text: message,
+      footer: details ? `<small>${details}</small>` : undefined,
       confirmButtonText: 'Cerrar',
       confirmButtonColor: '#1976d2'
     });

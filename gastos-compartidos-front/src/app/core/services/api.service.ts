@@ -71,4 +71,18 @@ export class ApiService {
       params: { ano: anio.toString(), mes: mes.toString() }
     });
   }
+
+  exportarPdf(desde: string, hasta: string): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/reportes/exportar/pdf`, {
+      params: { desde, hasta },
+      responseType: 'blob'
+    });
+  }
+
+  exportarExcel(desde: string, hasta: string): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/reportes/exportar/excel`, {
+      params: { desde, hasta },
+      responseType: 'blob'
+    });
+  }
 }

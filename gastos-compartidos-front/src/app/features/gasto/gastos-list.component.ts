@@ -18,7 +18,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { GastoService, Gasto, Categoria } from '../../core/services/gasto.service';
-import { AlertService } from '../../core/services/alert.service';
+import { PageResponse } from '../../core/models/page-response';
+import { NotificationService } from '../../core/services/notification.service';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state';
 import { SkeletonLoaderComponent } from '../../shared/components/skeleton-loader/skeleton-loader';
 
@@ -55,8 +56,16 @@ export class GastosListComponent implements OnInit {
   gastosFiltrados: Gasto[] = [];
   categorias: Categoria[] = [];
   cargando = true;
+  cargandoMas = false;
   error: string | null = null;
   displayedColumns: string[] = ['descripcion', 'monto', 'categoria', 'fecha', 'acciones'];
+
+  // Paginación
+  paginaActual = 0;
+  totalPaginas = 0;
+  totalElementos = 0;
+  pageSize = 20;
+  esUltimaPagina = false;
 
   // Filtros
   busqueda = '';
@@ -67,7 +76,7 @@ export class GastosListComponent implements OnInit {
 
   constructor(
     private gastoService: GastoService,
-    private alertService: AlertService,
+    private notificationService: NotificationService,
     private router: Router,
     private cdRef: ChangeDetectorRef
   ) { }
@@ -76,17 +85,22 @@ export class GastosListComponent implements OnInit {
     this.cargarGastos();
     this.gastoService.obtenerCategorias().subscribe({
       next: (cats) => this.categorias = cats.filter(c => c.activo),
-      error: () => {}
+      error: () => { }
     });
   }
 
   cargarGastos() {
     this.cargando = true;
     this.error = null;
+    this.paginaActual = 0;
+    this.gastos = [];
 
-    this.gastoService.obtenerGastos().subscribe({
-      next: (gastos) => {
-        this.gastos = gastos;
+    this.gastoService.obtenerGastosPaginado(0, this.pageSize).subscribe({
+      next: (page: PageResponse<Gasto>) => {
+        this.gastos = page.content;
+        this.totalPaginas = page.totalPages;
+        this.totalElementos = page.totalElements;
+        this.esUltimaPagina = page.last;
         this.aplicarFiltros();
         this.cargando = false;
         this.cdRef.detectChanges();
@@ -94,12 +108,33 @@ export class GastosListComponent implements OnInit {
       error: (err) => {
         console.error('Error al cargar gastos:', err);
         this.error = 'No se pudieron cargar los gastos';
-        this.alertService.error(
+        this.notificationService.error(
           'No se pudieron cargar los gastos',
           'Error de conexión',
           err.message || 'Verifica tu conexión e intenta nuevamente'
         );
         this.cargando = false;
+        this.cdRef.detectChanges();
+      }
+    });
+  }
+
+  cargarMas() {
+    if (this.esUltimaPagina || this.cargandoMas) return;
+    this.cargandoMas = true;
+    this.paginaActual++;
+
+    this.gastoService.obtenerGastosPaginado(this.paginaActual, this.pageSize).subscribe({
+      next: (page: PageResponse<Gasto>) => {
+        this.gastos = [...this.gastos, ...page.content];
+        this.esUltimaPagina = page.last;
+        this.aplicarFiltros();
+        this.cargandoMas = false;
+        this.cdRef.detectChanges();
+      },
+      error: () => {
+        this.paginaActual--;
+        this.cargandoMas = false;
         this.cdRef.detectChanges();
       }
     });
@@ -163,32 +198,31 @@ export class GastosListComponent implements OnInit {
     return cat ? `${cat.icono} ${cat.nombre}` : `Categoría ${catId}`;
   }
 
-  eliminarGasto(id: number) {
-    this.alertService.confirm(
+  async eliminarGasto(id: number) {
+    const confirmed = await this.notificationService.confirm(
       'Esta acción no se puede deshacer',
       '¿Eliminar este gasto?'
-    ).then((result) => {
-      if (result.isConfirmed) {
-        this.alertService.loading('Eliminando gasto...');
+    );
+    if (confirmed) {
+      this.notificationService.showLoading('Eliminando gasto...');
 
-        this.gastoService.eliminarGasto(id).subscribe({
-          next: () => {
-            this.alertService.close();
-            this.alertService.success('El gasto se eliminó correctamente');
-            this.cargarGastos();
-          },
-          error: (err) => {
-            this.alertService.close();
-            console.error('Error al eliminar gasto:', err);
-            this.alertService.error(
-              'No se pudo eliminar el gasto',
-              'Error',
-              err.error?.message || 'Intenta nuevamente'
-            );
-          }
-        });
-      }
-    });
+      this.gastoService.eliminarGasto(id).subscribe({
+        next: () => {
+          this.notificationService.closeLoading();
+          this.notificationService.success('El gasto se eliminó correctamente');
+          this.cargarGastos();
+        },
+        error: (err) => {
+          this.notificationService.closeLoading();
+          console.error('Error al eliminar gasto:', err);
+          this.notificationService.error(
+            'No se pudo eliminar el gasto',
+            'Error',
+            err.error?.message || 'Intenta nuevamente'
+          );
+        }
+      });
+    }
   }
 
   editarGasto(id: number) {

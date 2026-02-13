@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { tap } from 'rxjs/operators';
+import { map, tap } from 'rxjs/operators';
+import { PageResponse } from '../models/page-response';
 
 export interface Gasto {
   id: number;
@@ -43,9 +44,20 @@ export class GastoService {
 
   constructor(private http: HttpClient) {}
 
-  // Obtener todos los gastos del usuario
+  // Obtener gastos paginados
+  obtenerGastosPaginado(page = 0, size = 20): Observable<PageResponse<Gasto>> {
+    const params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString());
+    return this.http.get<PageResponse<Gasto>>(this.apiUrl, { params });
+  }
+
+  // Obtener todos los gastos (extrae content de la respuesta paginada)
   obtenerGastos(): Observable<Gasto[]> {
-    return this.http.get<Gasto[]>(`${this.apiUrl}`).pipe(
+    return this.http.get<PageResponse<Gasto>>(this.apiUrl, {
+      params: new HttpParams().set('size', '1000')
+    }).pipe(
+      map(page => page.content),
       tap(gastos => this.gastosSubject.next(gastos))
     );
   }

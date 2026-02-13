@@ -8,7 +8,9 @@ import com.gastos.gastos_compartidos.repository.AbonoDeudaRepository;
 import com.gastos.gastos_compartidos.repository.DeudaRepository;
 import com.gastos.gastos_compartidos.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
@@ -62,6 +64,15 @@ public class DeudaService {
                 .stream()
                 .map(DeudaResponseDTO::fromEntity)
                 .collect(Collectors.toList());
+    }
+
+    public Page<DeudaResponseDTO> obtenerDeudasUsuarioPaginado(Long usuarioId, boolean soloActivas, Pageable pageable) {
+        if (soloActivas) {
+            return deudaRepository.findByUsuarioIdAndEstadoOrderByFechaCreacionDesc(usuarioId, EstadoDeuda.ACTIVA, pageable)
+                    .map(DeudaResponseDTO::fromEntity);
+        }
+        return deudaRepository.findByUsuarioIdOrderByFechaCreacionDesc(usuarioId, pageable)
+                .map(DeudaResponseDTO::fromEntity);
     }
 
     public DeudaResponseDTO obtenerDeuda(Long usuarioId, Long deudaId) {

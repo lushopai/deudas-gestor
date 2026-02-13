@@ -11,6 +11,32 @@
     </button>
   </div>
 
+  <!-- Banner: Gastos Recurrentes Ejecutados Hoy -->
+  @if (ejecutadosHoy.length > 0) {
+    <div class="ejecutados-banner">
+      <div class="ejecutados-header">
+        <mat-icon>check_circle</mat-icon>
+        <div class="ejecutados-info">
+          <span class="ejecutados-titulo">
+            {{ ejecutadosHoy.length === 1 ? 'Se registró 1 gasto recurrente hoy' : 'Se registraron ' + ejecutadosHoy.length + ' gastos recurrentes hoy' }}
+          </span>
+          <span class="ejecutados-total">Total: {{ formatMonto(totalEjecutadoHoy) }}</span>
+        </div>
+        <button mat-icon-button (click)="descartarBannerEjecutados()" class="ejecutados-close">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+      <div class="ejecutados-lista">
+        @for (gr of ejecutadosHoy; track gr.id) {
+          <div class="ejecutado-item">
+            <span class="ejecutado-desc">{{ gr.descripcion }}</span>
+            <span class="ejecutado-monto">{{ formatMonto(gr.monto) }}</span>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
   <!-- Error State -->
   @if (error && !cargando) {
     <mat-card class="error-card">

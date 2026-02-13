@@ -15,7 +15,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { OcrService } from '../../core/services/ocr.service';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
-import { AlertService } from '../../core/services/alert.service';
+import { NotificationService } from '../../core/services/notification.service';
 
 @Component({
   selector: 'app-gasto-form',
@@ -57,7 +57,7 @@ export class GastoFormComponent implements OnInit {
     private authService: AuthService,
     private router: Router,
     private route: ActivatedRoute,
-    private alertService: AlertService,
+    private notificationService: NotificationService,
     private cdRef: ChangeDetectorRef
   ) {
     this.formulario = this.fb.group({
@@ -93,7 +93,7 @@ export class GastoFormComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error al cargar categorias:', err);
-        this.alertService.error(
+        this.notificationService.error(
           'No se pudieron cargar las categorías',
           'Error de conexión',
           err.message || 'Verifica tu conexión a internet'
@@ -116,7 +116,7 @@ export class GastoFormComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error al cargar gasto:', err);
-        this.alertService.error(
+        this.notificationService.error(
           'No se pudo cargar el gasto',
           'Error',
           err.message || 'El gasto no existe o no tienes permiso para verlo'
@@ -134,13 +134,13 @@ export class GastoFormComponent implements OnInit {
 
   guardarGasto(): void {
     if (this.formulario.invalid) {
-      this.alertService.warning('Por favor completa todos los campos requeridos');
+      this.notificationService.warning('Por favor completa todos los campos requeridos');
       return;
     }
 
     const usuario = this.authService.obtenerUsuario();
     if (!usuario || !usuario.id) {
-      this.alertService.error('No se pudo identificar al usuario', 'Error de sesión');
+      this.notificationService.error('No se pudo identificar al usuario', 'Error de sesión');
       return;
     }
 
@@ -163,13 +163,13 @@ export class GastoFormComponent implements OnInit {
 
     operacion.subscribe({
       next: () => {
-        this.alertService.success(mensajeExito).then(() => {
+        this.notificationService.success(mensajeExito).then(() => {
           this.router.navigate(['/gastos']);
         });
       },
       error: (err) => {
         console.error('Error al guardar gasto:', err);
-        this.alertService.error(
+        this.notificationService.error(
           this.modoEdicion ? 'No se pudo actualizar el gasto' : 'No se pudo guardar el gasto',
           'Error',
           err.error?.message || 'Verifica tu conexión e inténtalo nuevamente'
@@ -207,7 +207,7 @@ export class GastoFormComponent implements OnInit {
         this.cdRef.detectChanges();
       }).catch(err => {
         console.error('Error en OCR:', err);
-        this.alertService.error(
+        this.notificationService.error(
           'No se pudo procesar la imagen',
           'Error de OCR',
           'Intenta con otra imagen más clara'

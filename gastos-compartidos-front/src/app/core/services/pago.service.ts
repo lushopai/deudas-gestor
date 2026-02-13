@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { tap } from 'rxjs/operators';
+import { tap, map } from 'rxjs/operators';
+import { PageResponse } from '../models/page-response';
 
 export interface Usuario {
   id: number;
@@ -71,7 +72,7 @@ export class PagoService {
   private resumenDeudaSubject = new BehaviorSubject<ResumenDeuda | null>(null);
   public resumenDeuda$ = this.resumenDeudaSubject.asObservable();
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   // Registrar un nuevo pago
   registrarPago(pago: PagoCreate): Observable<Pago> {
@@ -80,9 +81,21 @@ export class PagoService {
     );
   }
 
-  // Obtener historial de pagos
+  // Obtener historial de pagos paginado
+  obtenerHistorialPaginado(page = 0, size = 20): Observable<PageResponse<Pago>> {
+    const params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString());
+    return this.http.get<PageResponse<Pago>>(this.apiUrl, { params });
+  }
+
+  // Obtener historial de pagos (backward compatible)
   obtenerHistorial(): Observable<Pago[]> {
-    return this.http.get<Pago[]>(this.apiUrl);
+    return this.http.get<PageResponse<Pago>>(this.apiUrl, {
+      params: new HttpParams().set('size', '1000')
+    }).pipe(
+      map(page => page.content)
+    );
   }
 
   // Obtener un pago por ID

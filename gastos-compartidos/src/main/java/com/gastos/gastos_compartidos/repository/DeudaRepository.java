@@ -3,6 +3,8 @@ package com.gastos.gastos_compartidos.repository;
 import com.gastos.gastos_compartidos.entity.Deuda;
 import com.gastos.gastos_compartidos.entity.EstadoDeuda;
 import com.gastos.gastos_compartidos.entity.TipoDeuda;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -32,4 +34,8 @@ public interface DeudaRepository extends JpaRepository<Deuda, Long> {
     // Buscar deudas por acreedor (para autocompletar)
     @Query("SELECT DISTINCT d.acreedor FROM Deuda d WHERE d.usuario.id = :usuarioId AND LOWER(d.acreedor) LIKE LOWER(CONCAT('%', :termino, '%'))")
     List<String> buscarAcreedores(@Param("usuarioId") Long usuarioId, @Param("termino") String termino);
+
+    // === Paginated queries ===
+    Page<Deuda> findByUsuarioIdOrderByFechaCreacionDesc(Long usuarioId, Pageable pageable);
+    Page<Deuda> findByUsuarioIdAndEstadoOrderByFechaCreacionDesc(Long usuarioId, EstadoDeuda estado, Pageable pageable);
 }

@@ -2,15 +2,23 @@ package com.gastos.gastos_compartidos.controller;
 
 import com.gastos.gastos_compartidos.dto.ReporteDTO;
 import com.gastos.gastos_compartidos.security.CustomUserDetails;
+import com.gastos.gastos_compartidos.service.ExportService;
 import com.gastos.gastos_compartidos.service.ReporteService;
 import com.gastos.gastos_compartidos.service.ParejaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 @RestController
 @RequestMapping("/api/reportes")
@@ -21,6 +29,7 @@ public class ReporteController {
 
     private final ReporteService reporteService;
     private final ParejaService parejaService;
+    private final ExportService exportService;
 
     @GetMapping("/mes")
     @Operation(summary = "Reporte mensual", description = "Genera un reporte del mes actual con resumen de gastos y deudas")
@@ -32,5 +41,43 @@ public class ReporteController {
         Long parejaId = parejaService.obtenerParejaDelUsuario(currentUser.getId()).getId();
         ReporteDTO reporte = reporteService.generarReporteMensual(parejaId, ano, mes);
         return ResponseEntity.ok(reporte);
+    }
+
+    @GetMapping("/exportar/pdf")
+    @Operation(summary = "Exportar gastos a PDF", description = "Genera un archivo PDF con los gastos del período indicado")
+    public ResponseEntity<byte[]> exportarPdf(
+            @AuthenticationPrincipal CustomUserDetails currentUser,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta) {
+
+        Long parejaId = parejaService.obtenerParejaDelUsuario(currentUser.getId()).getId();
+        byte[] pdf = exportService.generarPdfGastos(parejaId, desde, hasta);
+
+        String filename = "gastos_" + desde.format(DateTimeFormatter.BASIC_ISO_DATE)
+                + "_" + hasta.format(DateTimeFormatter.BASIC_ISO_DATE) + ".pdf";
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdf);
+    }
+
+    @GetMapping("/exportar/excel")
+    @Operation(summary = "Exportar gastos a Excel", description = "Genera un archivo Excel con los gastos del período indicado")
+    public ResponseEntity<byte[]> exportarExcel(
+            @AuthenticationPrincipal CustomUserDetails currentUser,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta) throws IOException {
+
+        Long parejaId = parejaService.obtenerParejaDelUsuario(currentUser.getId()).getId();
+        byte[] excel = exportService.generarExcelGastos(parejaId, desde, hasta);
+
+        String filename = "gastos_" + desde.format(DateTimeFormatter.BASIC_ISO_DATE)
+                + "_" + hasta.format(DateTimeFormatter.BASIC_ISO_DATE) + ".xlsx";
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .body(excel);
     }
 }

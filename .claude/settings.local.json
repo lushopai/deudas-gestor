@@ -4,7 +4,12 @@
       "Bash(ng generate component:*)",
       "Bash(ls:*)",
       "Bash(npm install:*)",
-      "Bash(npx ng build:*)"
+      "Bash(npx ng build:*)",
+      "Bash(mvn compile:*)",
+      "Bash(./mvnw compile:*)",
+      "Bash(cmd /c:*)",
+      "Bash(powershell -Command \"Set-Location ''d:\\\\Proyectos\\\\deudas\\\\deudas-gestor\\\\gastos-compartidos''; mvn compile 2>&1\")",
+      "Bash(powershell -Command:*)"
     ]
   }
 }

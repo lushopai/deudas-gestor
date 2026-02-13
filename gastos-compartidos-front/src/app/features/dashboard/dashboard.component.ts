@@ -51,6 +51,7 @@ export class DashboardComponent implements OnInit {
   resumenGastos: ResumenGastos | null = null;
   resumenDeudas: ResumenDeudas | null = null;
   proximosRecurrentes: GastoRecurrente[] = [];
+  ejecutadosHoy: GastoRecurrente[] = [];
   cargando = true;
   error: string | null = null;
   Object = Object;  // Hacer Object accesible en el template
@@ -114,6 +115,18 @@ export class DashboardComponent implements OnInit {
         this.proximosRecurrentes = [];
       }
     });
+
+    // Detectar gastos recurrentes ejecutados hoy
+    this.gastoRecurrenteService.listar(true).subscribe({
+      next: (activos) => {
+        const hoy = new Date().toISOString().split('T')[0];
+        this.ejecutadosHoy = activos.filter(gr => gr.ultimaEjecucion === hoy);
+        this.cdRef.detectChanges();
+      },
+      error: () => {
+        this.ejecutadosHoy = [];
+      }
+    });
   }
 
   obtenerPorcentaje(monto: number, total: number): number {
@@ -143,6 +156,14 @@ export class DashboardComponent implements OnInit {
 
   abrirRecurrentes() {
     this.router.navigate(['/gastos-recurrentes']);
+  }
+
+  get totalEjecutadoHoy(): number {
+    return this.ejecutadosHoy.reduce((sum, gr) => sum + gr.monto, 0);
+  }
+
+  descartarBannerEjecutados() {
+    this.ejecutadosHoy = [];
   }
 
   formatMonto(monto: number): string {

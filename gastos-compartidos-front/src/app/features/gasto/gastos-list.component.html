@@ -180,6 +180,26 @@
           <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="data-row"></tr>
         </table>
       </div>
+
+      <!-- Paginación info + cargar más -->
+      @if (!esUltimaPagina) {
+        <div class="load-more-section">
+          <span class="pagination-info">
+            Mostrando {{ gastos.length }} de {{ totalElementos }} gastos
+          </span>
+          @if (cargandoMas) {
+            <button mat-stroked-button disabled class="load-more-btn">
+              <mat-icon class="spin">sync</mat-icon>
+              Cargando...
+            </button>
+          } @else {
+            <button mat-stroked-button color="primary" (click)="cargarMas()" class="load-more-btn">
+              <mat-icon>expand_more</mat-icon>
+              Cargar más
+            </button>
+          }
+        </div>
+      }
     </mat-card>
   }
 

@@ -91,6 +91,11 @@ export class MainLayoutComponent implements OnInit {
       label: 'Reportes',
       icon: 'assessment',
       route: '/reportes'
+    },
+    {
+      label: 'Configuración',
+      icon: 'settings',
+      route: '/settings'
     }
   ];
 
@@ -166,6 +171,11 @@ export class MainLayoutComponent implements OnInit {
 
   abrirPerfil() {
     this.router.navigate(['/perfil']);
+    this.cerrarSidenav();
+  }
+
+  abrirSettings() {
+    this.router.navigate(['/settings']);
     this.cerrarSidenav();
   }
 

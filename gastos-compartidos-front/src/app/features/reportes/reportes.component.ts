@@ -6,6 +6,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatMenuModule } from '@angular/material/menu';
 import { Router } from '@angular/router';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartData } from 'chart.js';
@@ -23,6 +24,7 @@ import { NotificationService } from '../../core/services/notification.service';
     MatToolbarModule,
     MatProgressSpinnerModule,
     MatDividerModule,
+    MatMenuModule,
     BaseChartDirective
   ],
   template: `
@@ -31,6 +33,21 @@ import { NotificationService } from '../../core/services/notification.service';
         <mat-icon>arrow_back</mat-icon>
       </button>
       <span>Reportes</span>
+      @if (reporte && reporte.cantidadGastos > 0) {
+        <button mat-icon-button [matMenuTriggerFor]="exportMenu" aria-label="Exportar">
+          <mat-icon>file_download</mat-icon>
+        </button>
+        <mat-menu #exportMenu="matMenu">
+          <button mat-menu-item (click)="exportarPdf()" [disabled]="exportando">
+            <mat-icon>picture_as_pdf</mat-icon>
+            <span>Exportar PDF</span>
+          </button>
+          <button mat-menu-item (click)="exportarExcel()" [disabled]="exportando">
+            <mat-icon>table_chart</mat-icon>
+            <span>Exportar Excel</span>
+          </button>
+        </mat-menu>
+      }
     </mat-toolbar>
 
     <div class="reportes-container">
@@ -471,6 +488,7 @@ import { NotificationService } from '../../core/services/notification.service';
 export class ReportesComponent implements OnInit {
   reporte: any = null;
   cargando = false;
+  exportando = false;
   error: string | null = null;
   mesActual: number;
   anioActual: number;
@@ -657,5 +675,51 @@ export class ReportesComponent implements OnInit {
 
   volver(): void {
     this.router.navigate(['/dashboard']);
+  }
+
+  exportarPdf(): void {
+    const { desde, hasta } = this.getRangoMes();
+    this.exportando = true;
+    this.apiService.exportarPdf(desde, hasta).subscribe({
+      next: (blob) => {
+        this.descargarArchivo(blob, `gastos_${this.nombreMes(this.mesActual)}_${this.anioActual}.pdf`);
+        this.exportando = false;
+      },
+      error: () => {
+        this.notificationService.error('Error al exportar PDF');
+        this.exportando = false;
+      }
+    });
+  }
+
+  exportarExcel(): void {
+    const { desde, hasta } = this.getRangoMes();
+    this.exportando = true;
+    this.apiService.exportarExcel(desde, hasta).subscribe({
+      next: (blob) => {
+        this.descargarArchivo(blob, `gastos_${this.nombreMes(this.mesActual)}_${this.anioActual}.xlsx`);
+        this.exportando = false;
+      },
+      error: () => {
+        this.notificationService.error('Error al exportar Excel');
+        this.exportando = false;
+      }
+    });
+  }
+
+  private getRangoMes(): { desde: string; hasta: string } {
+    const desde = `${this.anioActual}-${String(this.mesActual).padStart(2, '0')}-01`;
+    const lastDay = new Date(this.anioActual, this.mesActual, 0).getDate();
+    const hasta = `${this.anioActual}-${String(this.mesActual).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+    return { desde, hasta };
+  }
+
+  private descargarArchivo(blob: Blob, filename: string): void {
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    window.URL.revokeObjectURL(url);
   }
 }

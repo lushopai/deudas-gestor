@@ -3,6 +3,8 @@ package com.gastos.gastos_compartidos.repository;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -33,4 +35,12 @@ public interface GastoRepository extends JpaRepository<Gasto, Long> {
     List<Gasto> findByUsuarioIdAndParejaIsNullOrderByFechaGastoDesc(@Param("usuarioId") Long usuarioId);
 
     List<Gasto> findByCategoriaId(Long categoriaId);
+
+    // === Paginated queries ===
+
+    @Query("SELECT g FROM Gasto g WHERE (g.usuario.id = :usuarioId AND g.pareja IS NULL) OR (:parejaId IS NOT NULL AND g.pareja.id = :parejaId) ORDER BY g.fechaGasto DESC")
+    Page<Gasto> findGastosDelUsuario(@Param("usuarioId") Long usuarioId, @Param("parejaId") Long parejaId, Pageable pageable);
+
+    @Query("SELECT g FROM Gasto g WHERE g.pareja.id = :parejaId ORDER BY g.fechaGasto DESC")
+    Page<Gasto> findByParejaidPaginado(@Param("parejaId") Long parejaId, Pageable pageable);
 }

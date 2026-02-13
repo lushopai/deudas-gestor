@@ -8,6 +8,9 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -35,13 +38,12 @@ public class DeudaController {
     }
 
     @GetMapping
-    @Operation(summary = "Listar deudas", description = "Obtiene todas las deudas del usuario")
-    public ResponseEntity<List<DeudaResponseDTO>> obtenerDeudas(
+    @Operation(summary = "Listar deudas (paginado)", description = "Obtiene las deudas del usuario con paginación")
+    public ResponseEntity<Page<DeudaResponseDTO>> obtenerDeudas(
             @AuthenticationPrincipal CustomUserDetails currentUser,
-            @RequestParam(required = false, defaultValue = "false") boolean soloActivas) {
-        List<DeudaResponseDTO> deudas = soloActivas
-                ? deudaService.obtenerDeudasActivas(currentUser.getId())
-                : deudaService.obtenerDeudasUsuario(currentUser.getId());
+            @RequestParam(required = false, defaultValue = "false") boolean soloActivas,
+            @PageableDefault(size = 20) Pageable pageable) {
+        Page<DeudaResponseDTO> deudas = deudaService.obtenerDeudasUsuarioPaginado(currentUser.getId(), soloActivas, pageable);
         return ResponseEntity.ok(deudas);
     }
 

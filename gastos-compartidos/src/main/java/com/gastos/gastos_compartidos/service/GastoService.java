@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -242,6 +244,20 @@ public class GastoService {
                 return gastos.stream()
                                 .map(GastoResponseDTO::fromEntity)
                                 .collect(Collectors.toList());
+        }
+
+        public Page<GastoResponseDTO> obtenerGastosPorUsuarioPaginado(Long usuarioId, Pageable pageable) {
+                Usuario usuario = usuarioRepository.findById(usuarioId)
+                                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
+
+                Long parejaId = usuario.getPareja() != null ? usuario.getPareja().getId() : null;
+                return gastoRepository.findGastosDelUsuario(usuarioId, parejaId, pageable)
+                                .map(GastoResponseDTO::fromEntity);
+        }
+
+        public Page<GastoResponseDTO> obtenerGastosPorParejaPaginado(Long parejaId, Pageable pageable) {
+                return gastoRepository.findByParejaidPaginado(parejaId, pageable)
+                                .map(GastoResponseDTO::fromEntity);
         }
 
         public List<GastoResponseDTO> obtenerGastosRecientes(Long usuarioId, int cantidad) {

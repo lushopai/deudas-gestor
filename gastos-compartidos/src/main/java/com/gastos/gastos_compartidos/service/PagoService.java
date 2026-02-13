@@ -12,6 +12,8 @@ import com.gastos.gastos_compartidos.repository.GastoRepository;
 import com.gastos.gastos_compartidos.repository.PagoRepository;
 import com.gastos.gastos_compartidos.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -80,6 +82,18 @@ public class PagoService {
         return pagos.stream()
             .map(PagoResponseDTO::fromEntity)
             .collect(Collectors.toList());
+    }
+
+    public Page<PagoResponseDTO> obtenerHistorialPagosPaginado(Long usuarioId, Pageable pageable) {
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+            .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
+
+        if (usuario.getPareja() == null) {
+            throw new BadRequestException("El usuario no pertenece a ninguna pareja");
+        }
+
+        return pagoRepository.findByParejaIdPaginado(usuario.getPareja().getId(), pageable)
+            .map(PagoResponseDTO::fromEntity);
     }
 
     public PagoResponseDTO obtenerPagoPorId(Long pagoId, Long usuarioId) {

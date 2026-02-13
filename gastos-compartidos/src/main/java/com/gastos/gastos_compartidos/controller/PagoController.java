@@ -10,12 +10,13 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/pagos")
@@ -37,11 +38,12 @@ public class PagoController {
     }
 
     @GetMapping
-    @Operation(summary = "Obtener historial de pagos", description = "Obtiene todos los pagos de la pareja del usuario autenticado")
-    public ResponseEntity<List<PagoResponseDTO>> obtenerHistorialPagos(
-            @AuthenticationPrincipal CustomUserDetails currentUser) {
+    @Operation(summary = "Obtener historial de pagos (paginado)", description = "Obtiene los pagos de la pareja con paginación")
+    public ResponseEntity<Page<PagoResponseDTO>> obtenerHistorialPagos(
+            @AuthenticationPrincipal CustomUserDetails currentUser,
+            @PageableDefault(size = 20) Pageable pageable) {
 
-        List<PagoResponseDTO> pagos = pagoService.obtenerHistorialPagos(currentUser.getId());
+        Page<PagoResponseDTO> pagos = pagoService.obtenerHistorialPagosPaginado(currentUser.getId(), pageable);
         return ResponseEntity.ok(pagos);
     }
 

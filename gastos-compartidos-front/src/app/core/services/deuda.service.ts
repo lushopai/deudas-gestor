@@ -1,7 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
+import { PageResponse } from '../models/page-response';
 
 export type TipoDeuda =
   | 'TARJETA_CREDITO'
@@ -109,7 +111,7 @@ export const METODO_PAGO_LABELS: Record<MetodoPago, string> = {
 export class DeudaService {
   private apiUrl = `${environment.apiUrl}/deudas`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   // ==================== DEUDAS ====================
 
@@ -117,9 +119,23 @@ export class DeudaService {
     return this.http.post<Deuda>(this.apiUrl, deuda);
   }
 
+  // Obtener deudas paginado
+  obtenerDeudasPaginado(page = 0, size = 20, soloActivas = false): Observable<PageResponse<Deuda>> {
+    const params = new HttpParams()
+      .set('soloActivas', soloActivas.toString())
+      .set('page', page.toString())
+      .set('size', size.toString());
+    return this.http.get<PageResponse<Deuda>>(this.apiUrl, { params });
+  }
+
+  // Obtener todas las deudas (backward compatible)
   obtenerDeudas(soloActivas = false): Observable<Deuda[]> {
-    const params = new HttpParams().set('soloActivas', soloActivas.toString());
-    return this.http.get<Deuda[]>(this.apiUrl, { params });
+    const params = new HttpParams()
+      .set('soloActivas', soloActivas.toString())
+      .set('size', '1000');
+    return this.http.get<PageResponse<Deuda>>(this.apiUrl, { params }).pipe(
+      map(page => page.content)
+    );
   }
 
   obtenerDeuda(id: number): Observable<Deuda> {
