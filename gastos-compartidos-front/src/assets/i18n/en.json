@@ -1,0 +1,67 @@
+{
+    "COMMON": {
+        "CANCEL": "Cancel",
+        "JUMP_BACK": "Go Back",
+        "SAVE": "Save",
+        "CREATE": "Create",
+        "UPDATE": "Update",
+        "DELETE": "Delete",
+        "EDIT": "Edit",
+        "LOADING": "Loading...",
+        "ERROR": "An error occurred",
+        "SUCCESS": "Operation successful",
+        "CONFIRM_DELETE_TITLE": "Delete Record",
+        "CONFIRM_DELETE_MSG": "Are you sure you want to delete this record?"
+    },
+    "AUTH": {
+        "LOGIN_TITLE": "Sign In",
+        "REGISTER_TITLE": "Register",
+        "EMAIL": "Email",
+        "PASSWORD": "Password",
+        "LOGIN_BUTTON": "Sign In",
+        "REGISTER_BUTTON": "Create Account",
+        "GOOGLE_LOGIN": "Continue with Google",
+        "NO_ACCOUNT": "No account? Sign up",
+        "HAS_ACCOUNT": "Already have an account? Sign in"
+    },
+    "DASHBOARD": {
+        "TITLE": "Dashboard",
+        "TOTAL_EXPENSES": "Total Expenses",
+        "RECENT_EXPENSES": "Recent Expenses",
+        "NEW_EXPENSE": "New Expense",
+        "SCAN_RECEIPT": "Scan Receipt",
+        "BUDGETS_MONTH": "Budgets",
+        "RECURRING_EXPENSES": "Recurring Expenses",
+        "DEBTS": "Debts"
+    },
+    "BUDGETS": {
+        "TITLE": "Budgets",
+        "NEW_BUDGET": "New Budget",
+        "EDIT_BUDGET": "Edit Budget",
+        "CATEGORY": "Category",
+        "LIMIT": "Limit",
+        "PERIOD": "Period",
+        "NOTES": "Notes",
+        "Spent": "Spent",
+        "Remaining": "Left",
+        "Exceeded": "Exceeded",
+        "WEEKLY": "Weekly",
+        "MONTHLY": "Monthly",
+        "ANNUAL": "Annual",
+        "GLOBAL": "Global Total",
+        "ACTIVE": "Active",
+        "ALERT": "Alert",
+        "EXCEEDED_COUNT": "Over Budget"
+    },
+    "SETTINGS": {
+        "TITLE": "Settings",
+        "APPEARANCE": "Appearance",
+        "DARK_MODE": "Dark Mode",
+        "NOTIFICATIONS": "Notifications",
+        "PUSH_NOTIFICATIONS": "Push Notifications",
+        "PUSH_DESC": "Receive alerts for recurring expenses",
+        "TEST_PUSH": "Test Notification",
+        "LANGUAGE": "Language",
+        "LOGOUT": "Sign Out"
+    }
+}

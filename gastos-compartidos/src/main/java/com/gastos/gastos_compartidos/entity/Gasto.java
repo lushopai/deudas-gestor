@@ -1,6 +1,8 @@
 package com.gastos.gastos_compartidos.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,6 +14,8 @@ import java.util.List;
 
 @Entity
 @Table(name = "gastos")
+@SQLDelete(sql = "UPDATE gastos SET deleted_at = NOW() WHERE id = ?")
+@SQLRestriction("deleted_at IS NULL")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -61,6 +65,9 @@ public class Gasto {
 
     @Column(nullable = false)
     private LocalDateTime fechaGasto;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
 
     @PrePersist
     protected void onCreate() {

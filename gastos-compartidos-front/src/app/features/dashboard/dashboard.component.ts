@@ -18,16 +18,19 @@ import { GastoService, Gasto, ResumenGastos } from '../../core/services/gasto.se
 import { DeudaService, ResumenDeudas } from '../../core/services/deuda.service';
 import { GastoRecurrenteService, GastoRecurrente } from '../../core/services/gasto-recurrente.service';
 import { ReminderService } from '../../core/services/reminder.service';
+import { PresupuestoService, Presupuesto } from '../../core/services/presupuesto.service';
 import { BalanceCard } from '../deudas/balance-card/balance-card';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state';
 import { SkeletonLoaderComponent } from '../../shared/components/skeleton-loader/skeleton-loader';
 import { PullToRefreshDirective } from '../../shared/directives/pull-to-refresh.directive';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
   imports: [
     CommonModule,
+    TranslateModule,
     RouterLink,
     MatToolbarModule,
     MatButtonModule,
@@ -55,6 +58,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   resumenDeudas: ResumenDeudas | null = null;
   proximosRecurrentes: GastoRecurrente[] = [];
   ejecutadosHoy: GastoRecurrente[] = [];
+  presupuestos: Presupuesto[] = [];
   cargando = true;
   error: string | null = null;
   Object = Object;  // Hacer Object accesible en el template
@@ -65,6 +69,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private deudaService: DeudaService,
     private gastoRecurrenteService: GastoRecurrenteService,
     private reminderService: ReminderService,
+    private presupuestoService: PresupuestoService,
     private router: Router,
     private cdRef: ChangeDetectorRef
   ) { }
@@ -128,6 +133,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
       },
       error: () => {
         this.ejecutadosHoy = [];
+      }
+    });
+
+    // Cargar presupuestos activos
+    this.presupuestoService.listarActivos().pipe(takeUntil(this.destroy$)).subscribe({
+      next: (presupuestos) => {
+        this.presupuestos = presupuestos;
+        this.cdRef.detectChanges();
+      },
+      error: () => {
+        this.presupuestos = [];
       }
     });
   }

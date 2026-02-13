@@ -1,0 +1,67 @@
+{
+    "COMMON": {
+        "CANCEL": "Cancelar",
+        "JUMP_BACK": "Volver",
+        "SAVE": "Guardar",
+        "CREATE": "Crear",
+        "UPDATE": "Actualizar",
+        "DELETE": "Eliminar",
+        "EDIT": "Editar",
+        "LOADING": "Cargando...",
+        "ERROR": "Ha ocurrido un error",
+        "SUCCESS": "Operación exitosa",
+        "CONFIRM_DELETE_TITLE": "Eliminar registro",
+        "CONFIRM_DELETE_MSG": "¿Estás seguro de que deseas eliminar este registro?"
+    },
+    "AUTH": {
+        "LOGIN_TITLE": "Iniciar Sesión",
+        "REGISTER_TITLE": "Registrarse",
+        "EMAIL": "Correo electrónico",
+        "PASSWORD": "Contraseña",
+        "LOGIN_BUTTON": "Ingresar",
+        "REGISTER_BUTTON": "Crear Cuenta",
+        "GOOGLE_LOGIN": "Continuar con Google",
+        "NO_ACCOUNT": "¿No tienes cuenta? Regístrate",
+        "HAS_ACCOUNT": "¿Ya tienes cuenta? Inicia sesión"
+    },
+    "DASHBOARD": {
+        "TITLE": "Resumen",
+        "TOTAL_EXPENSES": "Gastos Totales",
+        "RECENT_EXPENSES": "Gastos Recientes",
+        "NEW_EXPENSE": "Nuevo Gasto",
+        "SCAN_RECEIPT": "Escanear Recibo",
+        "BUDGETS_MONTH": "Presupuestos del Mes",
+        "RECURRING_EXPENSES": "Gastos Recurrentes",
+        "DEBTS": "Deudas Externas"
+    },
+    "BUDGETS": {
+        "TITLE": "Presupuestos",
+        "NEW_BUDGET": "Nuevo Presupuesto",
+        "EDIT_BUDGET": "Editar Presupuesto",
+        "CATEGORY": "Categoría",
+        "LIMIT": "Límite",
+        "PERIOD": "Período",
+        "NOTES": "Notas",
+        "Spent": "Gastado",
+        "Remaining": "Disponible",
+        "Exceeded": "Excedido",
+        "WEEKLY": "Semanal",
+        "MONTHLY": "Mensual",
+        "ANNUAL": "Anual",
+        "GLOBAL": "Total General (Global)",
+        "ACTIVE": "Activos",
+        "ALERT": "Alerta",
+        "EXCEEDED_COUNT": "Excedidos"
+    },
+    "SETTINGS": {
+        "TITLE": "Configuración",
+        "APPEARANCE": "Apariencia",
+        "DARK_MODE": "Modo Oscuro",
+        "NOTIFICATIONS": "Notificaciones",
+        "PUSH_NOTIFICATIONS": "Notificaciones Push",
+        "PUSH_DESC": "Recibir avisos de gastos recurrentes",
+        "TEST_PUSH": "Prueba de notificación",
+        "LANGUAGE": "Idioma",
+        "LOGOUT": "Cerrar Sesión"
+    }
+}

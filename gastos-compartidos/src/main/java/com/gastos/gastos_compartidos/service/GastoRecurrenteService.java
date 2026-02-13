@@ -9,6 +9,7 @@ import com.gastos.gastos_compartidos.repository.GastoRepository;
 import com.gastos.gastos_compartidos.repository.UsuarioRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -20,12 +21,14 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class GastoRecurrenteService {
 
     private final GastoRecurrenteRepository gastoRecurrenteRepository;
     private final GastoRepository gastoRepository;
     private final UsuarioRepository usuarioRepository;
     private final CategoriaRepository categoriaRepository;
+    private final WebPushService webPushService;
 
     @Transactional
     public GastoRecurrenteResponseDTO crear(Long usuarioId, GastoRecurrenteCreateDTO dto) {
@@ -104,14 +107,21 @@ public class GastoRecurrenteService {
             gr.setCategoria(categoria);
         }
 
-        if (dto.getDescripcion() != null) gr.setDescripcion(dto.getDescripcion());
-        if (dto.getMonto() != null) gr.setMonto(dto.getMonto());
-        if (dto.getFrecuencia() != null) gr.setFrecuencia(dto.getFrecuencia());
-        if (dto.getDiaEjecucion() != null) gr.setDiaEjecucion(dto.getDiaEjecucion());
-        if (dto.getFechaInicio() != null) gr.setFechaInicio(dto.getFechaInicio());
+        if (dto.getDescripcion() != null)
+            gr.setDescripcion(dto.getDescripcion());
+        if (dto.getMonto() != null)
+            gr.setMonto(dto.getMonto());
+        if (dto.getFrecuencia() != null)
+            gr.setFrecuencia(dto.getFrecuencia());
+        if (dto.getDiaEjecucion() != null)
+            gr.setDiaEjecucion(dto.getDiaEjecucion());
+        if (dto.getFechaInicio() != null)
+            gr.setFechaInicio(dto.getFechaInicio());
         gr.setFechaFin(dto.getFechaFin());
-        if (dto.getEsCompartido() != null) gr.setEsCompartido(dto.getEsCompartido());
-        if (dto.getNotas() != null) gr.setNotas(dto.getNotas());
+        if (dto.getEsCompartido() != null)
+            gr.setEsCompartido(dto.getEsCompartido());
+        if (dto.getNotas() != null)
+            gr.setNotas(dto.getNotas());
 
         // Recalcular próxima ejecución
         gr.setProximaEjecucion(gr.calcularProximaEjecucion(LocalDate.now()));
@@ -163,7 +173,8 @@ public class GastoRecurrenteService {
     }
 
     /**
-     * Tarea programada: ejecutar gastos recurrentes pendientes cada día a las 6:00 AM
+     * Tarea programada: ejecutar gastos recurrentes pendientes cada día a las 6:00
+     * AM
      */
     @Scheduled(cron = "0 0 6 * * *")
     @Transactional
@@ -171,11 +182,31 @@ public class GastoRecurrenteService {
         LocalDate hoy = LocalDate.now();
         List<GastoRecurrente> pendientes = gastoRecurrenteRepository.findPendientesDeEjecutar(hoy);
 
+        int ejecutados = 0;
+        java.math.BigDecimal totalMonto = java.math.BigDecimal.ZERO;
+        java.util.Map<Long, Integer> ejecutadosPorUsuario = new java.util.HashMap<>();
+
         for (GastoRecurrente gr : pendientes) {
             try {
                 ejecutarGastoRecurrente(gr);
+                ejecutados++;
+                totalMonto = totalMonto.add(gr.getMonto());
+                ejecutadosPorUsuario.merge(gr.getUsuario().getId(), 1, Integer::sum);
             } catch (Exception e) {
-                System.err.println("Error ejecutando gasto recurrente ID " + gr.getId() + ": " + e.getMessage());
+                log.error("Error ejecutando gasto recurrente ID {}: {}", gr.getId(), e.getMessage());
+            }
+        }
+
+        if (ejecutados > 0) {
+            log.info("✅ Ejecutados {} gastos recurrentes por un total de ${}", ejecutados, totalMonto);
+
+            // Enviar push notification a cada usuario afectado
+            for (var entry : ejecutadosPorUsuario.entrySet()) {
+                webPushService.notifyUser(
+                        entry.getKey(),
+                        "Gastos recurrentes registrados 📋",
+                        "Se registraron " + entry.getValue() + " gasto(s) recurrente(s) automáticamente",
+                        "/gastos-recurrentes");
             }
         }
     }

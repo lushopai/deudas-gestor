@@ -60,6 +60,16 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                // Security headers
+                .headers(headers -> headers
+                        .frameOptions(frame -> frame.deny())
+                        .httpStrictTransportSecurity(hsts -> hsts
+                                .includeSubDomains(true)
+                                .maxAgeInSeconds(31536000) // 1 año
+                        )
+                        .contentTypeOptions(content -> {
+                        }) // X-Content-Type-Options: nosniff
+                )
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/public/**").permitAll()
@@ -67,8 +77,9 @@ public class SecurityConfig {
                         .requestMatchers("/actuator/**").permitAll()
                         // Permitir acceso a archivos estáticos del frontend
                         .requestMatchers("/", "/index.html", "/favicon.ico", "/*.css", "/*.js", "/*.map",
-                                        "/assets/**", "/styles/**", "/manifest.webmanifest", "/ngsw-worker.js",
-                                        "/ngsw.json", "/safety-worker.js", "/worker-basic.min.js").permitAll()
+                                "/assets/**", "/styles/**", "/manifest.webmanifest", "/ngsw-worker.js",
+                                "/ngsw.json", "/safety-worker.js", "/worker-basic.min.js")
+                        .permitAll()
                         .anyRequest().authenticated())
                 .authenticationProvider(authenticationProvider());
 

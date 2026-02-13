@@ -3,11 +3,11 @@
   <div class="action-buttons section-spacing">
     <button mat-raised-button color="primary" (click)="abrirNuevoGasto()" class="action-btn">
       <mat-icon>add_circle</mat-icon>
-      <span>Nuevo Gasto</span>
+      <span>{{ 'DASHBOARD.NEW_EXPENSE' | translate }}</span>
     </button>
     <button mat-stroked-button (click)="abrirOCR()" class="action-btn">
       <mat-icon>receipt</mat-icon>
-      <span>Escanear Recibo</span>
+      <span>{{ 'DASHBOARD.SCAN_RECEIPT' | translate }}</span>
     </button>
   </div>
 
@@ -71,11 +71,11 @@
             <mat-icon>account_balance</mat-icon>
           </div>
           <div class="deudas-info">
-            <span class="deudas-label">Deudas Externas</span>
-            <span class="deudas-count">{{ resumenDeudas.cantidadDeudasActivas }} activas</span>
+            <span class="deudas-label">{{ 'DASHBOARD.DEBTS' | translate }}</span>
+            <span class="deudas-count">{{ resumenDeudas.cantidadDeudasActivas }} {{ 'BUDGETS.ACTIVE' | translate }}</span>
           </div>
           <div class="deudas-monto">
-            <span class="monto-label">Total Pendiente</span>
+            <span class="monto-label">{{ 'BUDGETS.REMAINING' | translate }}</span>
             <span class="monto-valor">{{ formatMonto(resumenDeudas.totalDeudaPendiente) }}</span>
           </div>
           <mat-icon class="arrow-icon">chevron_right</mat-icon>
@@ -95,7 +95,7 @@
     <mat-card class="deudas-empty-card" (click)="abrirDeudas()">
       <mat-card-content>
         <mat-icon>account_balance</mat-icon>
-        <span>Registrar Deudas Externas</span>
+        <span>{{ 'DASHBOARD.DEBTS' | translate }}</span>
         <mat-icon class="arrow">chevron_right</mat-icon>
       </mat-card-content>
     </mat-card>
@@ -110,8 +110,8 @@
             <mat-icon>autorenew</mat-icon>
           </div>
           <div class="recurrentes-info">
-            <span class="recurrentes-label">Gastos Recurrentes</span>
-            <span class="recurrentes-count">{{ proximosRecurrentes.length }} próximos en 7 días</span>
+            <span class="recurrentes-label">{{ 'DASHBOARD.RECURRING_EXPENSES' | translate }}</span>
+            <span class="recurrentes-count">{{ proximosRecurrentes.length }}</span>
           </div>
           <mat-icon class="arrow-icon">chevron_right</mat-icon>
         </div>
@@ -142,13 +142,13 @@
       <mat-card class="stat-card">
         <mat-icon class="stat-icon">trending_up</mat-icon>
         <div class="stat-value">${{ resumenGastos.totalGastos | number: '1.2-2' }}</div>
-        <div class="stat-label">Gastos Totales</div>
+        <div class="stat-label">{{ 'DASHBOARD.TOTAL_EXPENSES' | translate }}</div>
         <div class="stat-detail">{{ resumenGastos.cantidadGastos }} transacciones</div>
       </mat-card>
       <mat-card class="stat-card">
         <mat-icon class="stat-icon">calculate</mat-icon>
         <div class="stat-value">${{ resumenGastos.promedioPorGasto | number: '1.2-2' }}</div>
-        <div class="stat-label">Promedio por Gasto</div>
+        <div class="stat-label">Promedio</div>
         <div class="stat-detail">Gasto medio</div>
       </mat-card>
     </div>
@@ -179,11 +179,54 @@
     </mat-card>
   }
 
+  <!-- Presupuestos activos -->
+  @if (!cargando && presupuestos.length > 0) {
+    <mat-card class="presupuestos-card">
+      <mat-card-header>
+        <mat-card-title>{{ 'DASHBOARD.BUDGETS_MONTH' | translate }}</mat-card-title>
+        <button mat-icon-button routerLink="/presupuestos" class="view-all-btn">
+          <mat-icon>arrow_forward</mat-icon>
+        </button>
+      </mat-card-header>
+      <mat-divider></mat-divider>
+      <mat-card-content>
+        @for (p of presupuestos; track p.id) {
+          <div class="presupuesto-item" [class.alerta]="p.estado === 'ALERTA'" [class.excedido]="p.estado === 'EXCEDIDO'">
+            <div class="presupuesto-header">
+              <div class="presupuesto-info">
+                <mat-icon>{{ p.categoriaIcono }}</mat-icon>
+                <span class="presupuesto-nombre">{{ p.categoriaNombre }}</span>
+              </div>
+              <div class="presupuesto-montos">
+                <span class="presupuesto-gastado">${{ p.gastado | number: '1.0-0' }}</span>
+                <span class="presupuesto-separador">/</span>
+                <span class="presupuesto-limite">${{ p.limite | number: '1.0-0' }}</span>
+              </div>
+            </div>
+            <mat-progress-bar
+              mode="determinate"
+              [value]="p.porcentajeUsado > 100 ? 100 : p.porcentajeUsado"
+              [color]="p.estado === 'EXCEDIDO' ? 'warn' : (p.estado === 'ALERTA' ? 'accent' : 'primary')"
+              class="presupuesto-progress">
+            </mat-progress-bar>
+            <div class="presupuesto-footer">
+              <span class="presupuesto-porcentaje">{{ p.porcentajeUsado | number: '1.0-0' }}%</span>
+              @if (p.estado === 'EXCEDIDO') {
+                <span class="presupuesto-estado excedido">Excedido por ${{ -p.disponible | number: '1.0-0' }}</span>
+              } @else {
+                <span class="presupuesto-estado">Disponible: ${{ p.disponible | number: '1.0-0' }}</span>
+              }
+            </div>
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+  }
   <!-- Gastos Recientes -->
   @if (!cargando && gastosRecientes.length > 0) {
     <mat-card class="gastos-card">
       <mat-card-header>
-        <mat-card-title>Gastos Recientes</mat-card-title>
+        <mat-card-title>{{ 'DASHBOARD.RECENT_EXPENSES' | translate }}</mat-card-title>
         <button mat-icon-button routerLink="/gastos" class="view-all-btn">
           <mat-icon>arrow_forward</mat-icon>
         </button>
@@ -211,9 +254,9 @@
   @if (!cargando && gastosRecientes.length === 0) {
     <app-empty-state
       icon="inbox"
-      titulo="Sin gastos aún"
-      subtitulo="Crea tu primer gasto para comenzar a seguir tus gastos compartidos"
-      accionTexto="Crear Primer Gasto"
+      [titulo]="'DASHBOARD.NEW_EXPENSE' | translate"
+      subtitulo="Crea tu primer gasto"
+      [accionTexto]="'COMMON.CREATE' | translate"
       accionIcono="add"
       (accionClick)="abrirNuevoGasto()">
     </app-empty-state>

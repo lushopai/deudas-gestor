@@ -10,7 +10,8 @@
   padding: var(--spacing-md);
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-lg); /* 24px - espaciado mejorado */
+  gap: var(--spacing-lg);
+  /* 24px - espaciado mejorado */
 }
 
 /* (Welcome card removed - not used in current template) */
@@ -73,7 +74,7 @@
     align-items: center;
     gap: 12px;
 
-    > mat-icon {
+    >mat-icon {
       font-size: 28px;
       width: 28px;
       height: 28px;
@@ -134,6 +135,7 @@
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -504,11 +506,139 @@
 }
 
 .categoria-progress {
-  height: 2px; /* Barras ultra delgadas y minimalistas */
+  height: 2px;
+  /* Barras ultra delgadas y minimalistas */
   border-radius: 1px;
 
   ::ng-deep .mdc-linear-progress__bar-inner {
     border-top-width: 2px;
+  }
+}
+
+/* Presupuestos Card */
+.presupuestos-card {
+  margin: 0;
+  box-shadow: var(--shadow-sm);
+
+  mat-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-md);
+    margin: 0;
+  }
+
+  mat-card-title {
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    color: #333;
+  }
+
+  mat-card-content {
+    padding: 0 var(--spacing-md) var(--spacing-md) var(--spacing-md) !important;
+  }
+}
+
+.presupuesto-item {
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.presupuesto-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+
+  .presupuesto-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+      color: #667eea;
+    }
+
+    .presupuesto-nombre {
+      font-size: 14px;
+      font-weight: 500;
+      color: #333;
+    }
+  }
+
+  .presupuesto-montos {
+    font-size: 14px;
+
+    .presupuesto-gastado {
+      font-weight: 700;
+      color: #333;
+    }
+
+    .presupuesto-separador {
+      color: #999;
+      margin: 0 2px;
+    }
+
+    .presupuesto-limite {
+      color: #999;
+    }
+  }
+}
+
+.presupuesto-progress {
+  height: 6px;
+  border-radius: 3px;
+  margin-bottom: 6px;
+
+  ::ng-deep .mdc-linear-progress__bar-inner {
+    border-top-width: 6px;
+  }
+}
+
+.presupuesto-footer {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+
+  .presupuesto-porcentaje {
+    color: #999;
+    font-weight: 500;
+  }
+
+  .presupuesto-estado {
+    color: #4caf50;
+
+    &.excedido {
+      color: #f44336;
+      font-weight: 600;
+    }
+  }
+}
+
+.presupuesto-item.alerta {
+  .presupuesto-info mat-icon {
+    color: #ff9800;
+  }
+
+  .presupuesto-montos .presupuesto-gastado {
+    color: #ff9800;
+  }
+}
+
+.presupuesto-item.excedido {
+  .presupuesto-info mat-icon {
+    color: #f44336;
+  }
+
+  .presupuesto-montos .presupuesto-gastado {
+    color: #f44336;
   }
 }
 

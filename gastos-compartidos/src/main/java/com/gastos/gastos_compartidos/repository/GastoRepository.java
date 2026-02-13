@@ -39,8 +39,27 @@ public interface GastoRepository extends JpaRepository<Gasto, Long> {
     // === Paginated queries ===
 
     @Query("SELECT g FROM Gasto g WHERE (g.usuario.id = :usuarioId AND g.pareja IS NULL) OR (:parejaId IS NOT NULL AND g.pareja.id = :parejaId) ORDER BY g.fechaGasto DESC")
-    Page<Gasto> findGastosDelUsuario(@Param("usuarioId") Long usuarioId, @Param("parejaId") Long parejaId, Pageable pageable);
+    Page<Gasto> findGastosDelUsuario(@Param("usuarioId") Long usuarioId, @Param("parejaId") Long parejaId,
+            Pageable pageable);
 
     @Query("SELECT g FROM Gasto g WHERE g.pareja.id = :parejaId ORDER BY g.fechaGasto DESC")
     Page<Gasto> findByParejaidPaginado(@Param("parejaId") Long parejaId, Pageable pageable);
+
+    // === Budget queries ===
+
+    @Query("SELECT COALESCE(SUM(g.monto), 0) FROM Gasto g WHERE g.usuario.id = :usuarioId " +
+            "AND g.categoria.id = :categoriaId " +
+            "AND g.fechaGasto >= :desde AND g.fechaGasto < :hasta")
+    java.math.BigDecimal sumarGastosPorCategoriaYRango(
+            @Param("usuarioId") Long usuarioId,
+            @Param("categoriaId") Long categoriaId,
+            @Param("desde") LocalDateTime desde,
+            @Param("hasta") LocalDateTime hasta);
+
+    @Query("SELECT COALESCE(SUM(g.monto), 0) FROM Gasto g WHERE g.usuario.id = :usuarioId " +
+            "AND g.fechaGasto >= :desde AND g.fechaGasto < :hasta")
+    java.math.BigDecimal sumarGastosTotalPorRango(
+            @Param("usuarioId") Long usuarioId,
+            @Param("desde") LocalDateTime desde,
+            @Param("hasta") LocalDateTime hasta);
 }

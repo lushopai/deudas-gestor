@@ -48,6 +48,9 @@ export const routes: Routes = [
       { path: 'gastos-recurrentes/nuevo', loadComponent: () => import('./features/gastos-recurrentes/recurrente-form/recurrente-form').then(m => m.RecurrenteForm) },
       { path: 'gastos-recurrentes/:id/editar', loadComponent: () => import('./features/gastos-recurrentes/recurrente-form/recurrente-form').then(m => m.RecurrenteForm) },
 
+      // Lazy: Presupuestos
+      { path: 'presupuestos', loadComponent: () => import('./features/presupuestos/presupuesto-list.component').then(m => m.PresupuestoListComponent) },
+
       // Lazy: Settings
       { path: 'settings', loadComponent: () => import('./features/settings/settings.component').then(m => m.SettingsComponent) }
     ]

@@ -32,20 +32,20 @@ public class JwtTokenProvider {
         SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
 
         return Jwts.builder()
-            .subject(usuarioId.toString())
-            .issuedAt(ahora)
-            .expiration(expiryDate)
-            .signWith(key)
-            .compact();
+                .subject(usuarioId.toString())
+                .issuedAt(ahora)
+                .expiration(expiryDate)
+                .signWith(key)
+                .compact();
     }
 
     public Long obtenerUsuarioIdDesdeToken(String token) {
         SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
         Claims claims = Jwts.parser()
-            .setSigningKey(key)
-            .build()
-            .parseSignedClaims(token)
-            .getPayload();
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
 
         return Long.valueOf(claims.getSubject());
     }
@@ -54,9 +54,9 @@ public class JwtTokenProvider {
         try {
             SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
             Jwts.parser()
-                .setSigningKey(key)
-                .build()
-                .parseSignedClaims(token);
+                    .verifyWith(key)
+                    .build()
+                    .parseSignedClaims(token);
             return true;
         } catch (JwtException ex) {
             throw new JwtException("Token JWT inválido o expirado: " + ex.getMessage());

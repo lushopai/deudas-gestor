@@ -13,6 +13,8 @@ import { ApiService } from '../../core/services/api.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { AuthService } from '../../core/services/auth.service';
 import { GastoRecurrenteService } from '../../core/services/gasto-recurrente.service';
+import { PushNotificationService } from '../../core/services/push-notification.service';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
@@ -35,7 +37,9 @@ interface SettingsData {
     MatToolbarModule,
     MatDividerModule,
     MatSlideToggleModule,
-    MatListModule
+    MatSlideToggleModule,
+    MatListModule,
+    TranslateModule
   ],
   template: `
     <mat-toolbar color="primary">
@@ -46,6 +50,35 @@ interface SettingsData {
     </mat-toolbar>
 
     <div class="settings-container">
+      <!-- Idioma -->
+      <mat-card class="settings-section">
+        <div class="section-header">
+          <mat-icon class="section-icon">language</mat-icon>
+          <span class="section-title">{{ 'SETTINGS.LANGUAGE' | translate }}</span>
+        </div>
+        <mat-divider></mat-divider>
+        
+        <div class="setting-item clickable" (click)="cambiarIdioma('es')">
+          <div class="setting-info">
+            <span class="flag">🇪🇸</span>
+            <div class="setting-text">
+              <span class="setting-label">Español</span>
+            </div>
+          </div>
+          <mat-icon *ngIf="currentLang === 'es'" color="primary">check</mat-icon>
+        </div>
+        
+        <div class="setting-item clickable" (click)="cambiarIdioma('en')">
+          <div class="setting-info">
+             <span class="flag">🇺🇸</span>
+             <div class="setting-text">
+               <span class="setting-label">English</span>
+             </div>
+          </div>
+          <mat-icon *ngIf="currentLang === 'en'" color="primary">check</mat-icon>
+        </div>
+      </mat-card>
+
       <!-- Apariencia -->
       <mat-card class="settings-section">
         <div class="section-header">
@@ -123,6 +156,53 @@ interface SettingsData {
             (change)="guardarSettings()"
             color="primary">
           </mat-slide-toggle>
+        </div>
+      </mat-card>
+
+      <!-- Push Notifications -->
+      <mat-card class="settings-section" *ngIf="pushSupported">
+        <div class="section-header">
+          <mat-icon class="section-icon">phonelink_ring</mat-icon>
+          <span class="section-title">Notificaciones Push</span>
+        </div>
+        <mat-divider></mat-divider>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <mat-icon>{{ pushSubscribed ? 'notifications_active' : 'notifications_off' }}</mat-icon>
+            <div class="setting-text">
+              <span class="setting-label">Notificaciones del servidor</span>
+              <span class="setting-desc">
+                {{ pushSubscribed 
+                   ? 'Recibirás notificaciones cuando se ejecuten gastos recurrentes' 
+                   : 'Activa para recibir avisos automáticos' }}
+              </span>
+            </div>
+          </div>
+          <mat-slide-toggle
+            [checked]="pushSubscribed"
+            (change)="togglePushNotifications()"
+            [disabled]="pushLoading"
+            color="primary">
+          </mat-slide-toggle>
+        </div>
+
+        <div class="setting-item" *ngIf="pushSubscribed">
+          <div class="setting-info">
+            <mat-icon>send</mat-icon>
+            <div class="setting-text">
+              <span class="setting-label">Prueba de notificación</span>
+              <span class="setting-desc">Enviar una notificación de prueba</span>
+            </div>
+          </div>
+          <button mat-stroked-button color="primary" (click)="testPush()" [disabled]="pushLoading">
+            Probar
+          </button>
+        </div>
+
+        <div class="push-info" *ngIf="pushPermission === 'denied'">
+          <mat-icon color="warn">warning</mat-icon>
+          <span>Las notificaciones están bloqueadas. Habilítalas en la configuración de tu navegador.</span>
         </div>
       </mat-card>
 
@@ -419,6 +499,25 @@ interface SettingsData {
         height: 20px;
       }
     }
+
+    /* Push info banner */
+    .push-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px;
+      background: rgba(255, 152, 0, 0.1);
+      border-radius: 8px;
+      margin-top: 8px;
+      font-size: 13px;
+      color: #ff9800;
+    }
+
+    .clickable {
+      cursor: pointer;
+      &:hover { background-color: rgba(0,0,0,0.04); }
+    }
+    .flag { font-size: 24px; margin-right: 8px; }
   `],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -433,6 +532,14 @@ export class SettingsComponent implements OnInit, OnDestroy {
 
   categorias: { id: number; nombre: string; icono: string }[] = [];
 
+  // Push notifications state
+  pushSupported = false;
+  pushSubscribed = false;
+  pushLoading = false;
+  pushPermission: NotificationPermission = 'default';
+
+  currentLang = 'es';
+
   private readonly SETTINGS_KEY = 'gastos_settings';
 
   constructor(
@@ -441,12 +548,85 @@ export class SettingsComponent implements OnInit, OnDestroy {
     private notificationService: NotificationService,
     private authService: AuthService,
     private gastoRecurrenteService: GastoRecurrenteService,
-    private cdr: ChangeDetectorRef
-  ) { }
+    private cdr: ChangeDetectorRef,
+    private pushService: PushNotificationService,
+    private translate: TranslateService
+  ) {
+    this.currentLang = this.translate.currentLang || this.translate.defaultLang || 'es';
+  }
 
   ngOnInit(): void {
     this.cargarSettings();
     this.cargarCategorias();
+    this.initPush();
+    this.currentLang = this.translate.currentLang || 'es';
+  }
+
+  cambiarIdioma(lang: string) {
+    this.translate.use(lang);
+    this.currentLang = lang;
+    localStorage.setItem('gastos_lang', lang);
+  }
+
+  private initPush(): void {
+    this.pushSupported = this.pushService.isSupported();
+    this.pushPermission = this.pushService.getPermissionState();
+    if (this.pushSupported) {
+      this.pushService.isSubscribed$.pipe(takeUntil(this.destroy$)).subscribe(subscribed => {
+        this.pushSubscribed = subscribed;
+        this.cdr.detectChanges();
+      });
+    }
+  }
+
+  togglePushNotifications(): void {
+    this.pushLoading = true;
+    if (this.pushSubscribed) {
+      this.pushService.unsubscribe().pipe(takeUntil(this.destroy$)).subscribe({
+        next: () => {
+          this.notificationService.toast('Notificaciones push desactivadas', 'info');
+          this.pushLoading = false;
+          this.cdr.detectChanges();
+        },
+        error: () => {
+          this.pushLoading = false;
+          this.cdr.detectChanges();
+        }
+      });
+    } else {
+      this.pushService.subscribe().pipe(takeUntil(this.destroy$)).subscribe({
+        next: (result) => {
+          if (result?.error) {
+            this.notificationService.error(result.error);
+          } else {
+            this.notificationService.success('¡Notificaciones push activadas!');
+          }
+          this.pushLoading = false;
+          this.pushPermission = this.pushService.getPermissionState();
+          this.cdr.detectChanges();
+        },
+        error: () => {
+          this.pushLoading = false;
+          this.cdr.detectChanges();
+        }
+      });
+    }
+  }
+
+  testPush(): void {
+    this.pushLoading = true;
+    this.pushService.testNotification().pipe(takeUntil(this.destroy$)).subscribe({
+      next: () => {
+        this.notificationService.toast('Notificación de prueba enviada', 'info');
+        this.pushLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.notificationService.error('No se pudo enviar la notificación');
+        this.pushLoading = false;
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   private cargarSettings(): void {

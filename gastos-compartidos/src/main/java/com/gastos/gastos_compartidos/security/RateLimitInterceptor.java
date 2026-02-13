@@ -21,10 +21,32 @@ public class RateLimitInterceptor implements HandlerInterceptor {
     private final RateLimitConfig rateLimitConfig;
 
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        String key = resolveKey(request);
-        // Configuración por defecto: 50 peticiones por minuto por usuario/IP
-        RateLimitConfig.RateLimitResult result = rateLimitConfig.tryConsume(key, 50, Duration.ofMinutes(1));
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
+            throws Exception {
+        String userKey = resolveKey(request);
+        String path = request.getRequestURI();
+
+        // Determinar límite según endpoint
+        int capacity;
+        Duration duration;
+
+        if (path.startsWith("/api/auth/login") || path.startsWith("/api/auth/registro")) {
+            // Auth endpoints: 5 peticiones cada 15 minutos por IP
+            capacity = 5;
+            duration = Duration.ofMinutes(15);
+        } else if (path.startsWith("/api/ocr/")) {
+            // OCR: costoso, 10 peticiones por minuto
+            capacity = 10;
+            duration = Duration.ofMinutes(1);
+        } else {
+            // Default: 50 peticiones por minuto
+            capacity = 50;
+            duration = Duration.ofMinutes(1);
+        }
+
+        // Clave incluye el grupo de endpoint para límites independientes
+        String rateLimitKey = userKey + ":" + resolveEndpointGroup(path);
+        RateLimitConfig.RateLimitResult result = rateLimitConfig.tryConsume(rateLimitKey, capacity, duration);
 
         if (result.isConsumed()) {
             response.addHeader("X-Rate-Limit-Remaining", String.valueOf(result.getRemainingTokens()));
@@ -38,9 +60,21 @@ public class RateLimitInterceptor implements HandlerInterceptor {
 
     private String resolveKey(HttpServletRequest request) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.isAuthenticated() && !"anonymousUser".equals(authentication.getPrincipal())) {
+        if (authentication != null && authentication.isAuthenticated()
+                && !"anonymousUser".equals(authentication.getPrincipal())) {
             return "user:" + authentication.getName();
         }
         return "ip:" + request.getRemoteAddr();
+    }
+
+    /**
+     * Agrupa endpoints para aplicar rate limits por grupo en vez de por URL exacta.
+     */
+    private String resolveEndpointGroup(String path) {
+        if (path.startsWith("/api/auth/"))
+            return "auth";
+        if (path.startsWith("/api/ocr/"))
+            return "ocr";
+        return "general";
     }
 }

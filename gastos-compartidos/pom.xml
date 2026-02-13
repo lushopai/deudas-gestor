@@ -149,6 +149,18 @@
 			<version>5.3.0</version>
 		</dependency>
 
+		<!-- Web Push Notifications (VAPID) -->
+		<dependency>
+			<groupId>nl.martijndwars</groupId>
+			<artifactId>web-push</artifactId>
+			<version>5.1.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcprov-jdk18on</artifactId>
+			<version>1.78.1</version>
+		</dependency>
+
 		<!-- Testing -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
