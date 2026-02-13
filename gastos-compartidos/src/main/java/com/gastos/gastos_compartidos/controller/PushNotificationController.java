@@ -73,8 +73,8 @@ public class PushNotificationController {
         CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
         Long userId = userDetails.getId();
         webPushService.notifyUser(userId,
-                "¡Prueba exitosa! 🎉",
-                "Las notificaciones push están funcionando correctamente",
+                "¡Prueba exitosa! ",
+                "The game",
                 "/dashboard");
 
         return ResponseEntity.ok(Map.of("mensaje", "Notificación de prueba enviada"));

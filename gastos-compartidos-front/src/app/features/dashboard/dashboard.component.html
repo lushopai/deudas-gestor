@@ -162,19 +162,13 @@
       </mat-card-header>
       <mat-divider></mat-divider>
       <mat-card-content>
-        @for (categoria of Object.keys(resumenGastos.gastosPorCategoria); track categoria) {
-          <div class="categoria-item">
-            <div class="categoria-header">
-              <span class="categoria-nombre">{{ categoria }}</span>
-              <span class="categoria-monto">${{ resumenGastos.gastosPorCategoria[categoria] | number: '1.2-2' }}</span>
-            </div>
-            <mat-progress-bar
-              mode="determinate"
-              [value]="obtenerPorcentaje(resumenGastos.gastosPorCategoria[categoria], resumenGastos.totalGastos)"
-              class="categoria-progress"
-            ></mat-progress-bar>
-          </div>
-        }
+        <div style="display: block; height: 250px;">
+          <canvas baseChart
+            [data]="pieChartData"
+            [type]="pieChartType"
+            [options]="pieChartOptions">
+          </canvas>
+        </div>
       </mat-card-content>
     </mat-card>
   }

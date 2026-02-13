@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ChildrenOutletContexts, RouterOutlet, Router, NavigationEnd } from '@angular/router';
+import { ChildrenOutletContexts, RouterOutlet, Router, NavigationEnd, RouterLink, RouterLinkActive } from '@angular/router';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Observable, Subject } from 'rxjs';
 import { map, filter, takeUntil, withLatestFrom } from 'rxjs/operators';
@@ -19,6 +19,7 @@ interface NavItem {
   icon: string;
   route: string;
   badge?: number;
+  isFab?: boolean;
 }
 
 @Component({
@@ -27,6 +28,8 @@ interface NavItem {
   imports: [
     CommonModule,
     RouterOutlet,
+    RouterLink,
+    RouterLinkActive,
     MatToolbarModule,
     MatSidenavModule,
     MatButtonModule,
@@ -51,41 +54,21 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
   menuItems: NavItem[] = [
     {
       label: 'Dashboard',
-      icon: 'dashboard_outlined',
+      icon: 'dashboard',
       route: '/dashboard'
     },
     {
-      label: 'Nuevo Gasto',
-      icon: 'add_circle_outline',
-      route: '/gastos/nuevo'
-    },
-    {
-      label: 'Escanear Recibo',
+      label: 'Mis Gastos',
       icon: 'receipt_long',
-      route: '/gastos/ocr'
-    },
-    {
-      label: 'Ver Gastos',
-      icon: 'list_alt',
       route: '/gastos'
     },
     {
-      label: 'Abonar Pago',
-      icon: 'payment',
+      label: 'Deudas',
+      icon: 'attach_money',
       route: '/deudas/abonar'
     },
     {
-      label: 'Historial Pagos',
-      icon: 'history',
-      route: '/deudas/historial'
-    },
-    {
-      label: 'Mis Deudas',
-      icon: 'account_balance',
-      route: '/deudas-externas'
-    },
-    {
-      label: 'Gastos Recurrentes',
+      label: 'Recurrentes',
       icon: 'autorenew',
       route: '/gastos-recurrentes'
     },
@@ -95,10 +78,28 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
       route: '/reportes'
     },
     {
+      label: 'Historial',
+      icon: 'history',
+      route: '/deudas/historial'
+    },
+    {
+      label: 'Deudas Externas',
+      icon: 'account_balance',
+      route: '/deudas-externas'
+    },
+    {
       label: 'Configuración',
       icon: 'settings',
       route: '/settings'
     }
+  ];
+
+  bottomNavItems: NavItem[] = [
+    { label: 'Inicio', icon: 'home', route: '/dashboard' },
+    { label: 'Gastos', icon: 'receipt', route: '/gastos' },
+    { label: 'Nuevo', icon: 'add_circle', route: '/gastos/nuevo' },
+    { label: 'Deudas', icon: 'attach_money', route: '/deudas/abonar' },
+    { label: 'Perfil', icon: 'person', route: '/perfil' }
   ];
 
   isMobile$: Observable<boolean>;

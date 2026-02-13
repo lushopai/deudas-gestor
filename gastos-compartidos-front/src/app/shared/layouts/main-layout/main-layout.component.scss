@@ -193,45 +193,93 @@ mat-nav-list {
   }
 }
 
+/* Mobile Bottom Nav */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 64px;
+  background: var(--bg-primary, #ffffff);
+  border-top: 1px solid var(--border-color, rgba(0, 0, 0, 0.08));
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 1000;
+  padding-bottom: env(safe-area-inset-bottom);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: var(--text-disabled, rgba(0, 0, 0, 0.38));
+    flex: 1;
+    height: 100%;
+    transition: color 0.2s;
+
+    mat-icon {
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+      margin-bottom: 4px;
+    }
+
+    .label {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+    }
+
+    &.active {
+      color: var(--primary-color, #1976d2);
+
+      .label {
+        font-weight: 700;
+      }
+    }
+
+    /* Efecto "ripple" sutil al tocar */
+    &:active {
+      background-color: rgba(0, 0, 0, 0.03);
+    }
+  }
+
+  .fab-item {
+    color: var(--primary-color);
+
+    mat-icon {
+      font-size: 32px;
+      width: 32px;
+      height: 32px;
+      margin-bottom: 0;
+    }
+  }
+}
+
+.content-wrapper.with-bottom-nav {
+  /* Espacio extra abajo para que no tape el contenido */
+  padding-bottom: calc(80px + env(safe-area-inset-bottom));
+}
+
 /* Responsive */
-@media (max-width: 768px) {
+@media (max-width: 960px) {
+
+  /* Cambiado a 960px para coincidir con el layout */
   .sidenav {
     width: 240px;
+    /* En mobile, el sidenav desaparece del flujo normal si usamos bottom-nav */
   }
 
   .sidenav-user-section {
     padding: var(--spacing-sm);
   }
 
-  .sidenav-avatar-container {
-    width: 40px;
-    height: 40px;
-  }
-
-  .sidenav-avatar-initials {
-    font-size: 16px;
-  }
-
-  .user-name {
-    font-size: 13px;
-  }
-
-  .user-email {
-    font-size: 10px;
-  }
-
   .logo-text {
     font-size: 16px;
   }
-}
 
-@media (max-width: 480px) {
-  .sidenav {
-    position: fixed;
-    z-index: 1000;
-  }
-
-  .logo-text {
-    display: none;
-  }
+  /* Ocultar elementos en mobile si es necesario */
 }

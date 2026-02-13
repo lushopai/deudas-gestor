@@ -34,7 +34,12 @@
         "/api/parejas/**",
         "/api/gastos/**",
         "/api/reportes/**",
-        "/api/usuarios/me"
+        "/api/usuarios/me",
+        "/api/presupuestos/**",
+        "/api/deudas/**",
+        "/api/deudas-externas/**",
+        "/api/gastos-recurrentes/**",
+        "/api/dashboard/**"
       ],
       "cacheConfig": {
         "maxSize": 50,

@@ -40,23 +40,35 @@
   </mat-sidenav>
 
   <!-- Main Content -->
-  <mat-sidenav-content>
-    <!-- Header -->
+  <mat-sidenav-content class="main-content">
+    <!-- Header (Desktop & Mobile) -->
     <mat-toolbar color="primary" class="header">
-      <button mat-icon-button (click)="sidenav.toggle()" class="menu-button">
+      <!-- Hamburger only on Desktop if collapsible, or hidden on mobile if bottom nav used -->
+      <button mat-icon-button (click)="sidenav.toggle()" class="menu-button" *ngIf="!(isMobile$ | async)">
         <mat-icon>menu</mat-icon>
       </button>
+      
       <div class="logo">
         <mat-icon class="logo-icon">account_balance_wallet</mat-icon>
         <span class="logo-text">Gastos Compartidos</span>
       </div>
+      
       <span class="spacer"></span>
+      
       <button mat-icon-button (click)="toggleDarkMode()" class="theme-toggle">
         <mat-icon>{{ darkMode ? 'light_mode' : 'dark_mode' }}</mat-icon>
       </button>
-      <button mat-icon-button [matMenuTriggerFor]="headerMenu">
+      
+      <!-- Profile Action (Desktop) -->
+      <button mat-icon-button [matMenuTriggerFor]="headerMenu" *ngIf="!(isMobile$ | async)">
         <mat-icon>more_vert</mat-icon>
       </button>
+      
+      <!-- Profile Icon (Mobile) -->
+      <button mat-icon-button (click)="abrirPerfil()" *ngIf="isMobile$ | async">
+         <mat-icon>account_circle</mat-icon>
+      </button>
+
       <mat-menu #headerMenu="matMenu">
         <button mat-menu-item (click)="abrirPerfil()">
           <mat-icon>person_outline</mat-icon>
@@ -75,15 +87,23 @@
     </mat-toolbar>
 
     <!-- Page Content -->
-    <div class="content-wrapper" [@routeAnimation]="getRouteAnimationData()">
+    <div class="content-wrapper" [class.with-bottom-nav]="isMobile$ | async" [@routeAnimation]="getRouteAnimationData()">
       <router-outlet></router-outlet>
     </div>
 
-    <!-- FAB: Nuevo Gasto (solo en dashboard y lista de gastos) -->
-    @if (showFab) {
-      <button mat-fab class="fab-button" (click)="fabAction()" aria-label="Nuevo gasto">
-        <mat-icon>add</mat-icon>
-      </button>
+    <!-- Bottom Navigation (Mobile Only) -->
+    @if (isMobile$ | async) {
+      <nav class="bottom-nav">
+        @for (item of bottomNavItems; track item.label) {
+          <a [routerLink]="item.route" 
+             routerLinkActive="active" 
+             class="nav-item"
+             [class.fab-item]="item.icon === 'add_circle'">
+            <mat-icon>{{ item.icon }}</mat-icon>
+            <span class="label">{{ item.label }}</span>
+          </a>
+        }
+      </nav>
     }
   </mat-sidenav-content>
 </mat-sidenav-container>
