@@ -8,9 +8,9 @@
 CREATE INDEX IF NOT EXISTS idx_gastos_pareja_fecha
     ON gastos (pareja_id, fecha_gasto DESC);
 
--- Usado por: findByUsuarioRegistradorIdOrderByFechaGastoDesc (paginado)
+-- Usado por: consultas por usuario (corregido de usuario_registrador_id a usuario_id)
 CREATE INDEX IF NOT EXISTS idx_gastos_usuario_fecha
-    ON gastos (usuario_registrador_id, fecha_gasto DESC);
+    ON gastos (usuario_id, fecha_gasto DESC);
 
 -- Usado por: findByParejaidAndFechaRango (exportación PDF/Excel)
 CREATE INDEX IF NOT EXISTS idx_gastos_pareja_rango

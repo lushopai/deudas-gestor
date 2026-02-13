@@ -65,7 +65,7 @@ public class WebPushService {
             pushService.setSubject(vapidSubject);
             pushEnabled = true;
             log.info("Push notifications habilitadas");
-        } catch (GeneralSecurityException e) {
+        } catch (Exception e) {
             log.error("Error al inicializar Push Service: {}", e.getMessage());
         }
     }
