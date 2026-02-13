@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -14,6 +14,8 @@ import { PagoService, MetodoPago, ResumenDeuda } from '../../../core/services/pa
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { LoadingService } from '../../../core/services/loading.service';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-pago-form',
@@ -32,8 +34,10 @@ import { LoadingService } from '../../../core/services/loading.service';
   ],
   templateUrl: './pago-form.html',
   styleUrl: './pago-form.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class PagoForm implements OnInit {
+export class PagoForm implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
   formulario!: FormGroup;
   cargando = false;
   cargandoResumen = true;
@@ -55,7 +59,7 @@ export class PagoForm implements OnInit {
     private notificationService: NotificationService,
     private loadingService: LoadingService,
     private cdr: ChangeDetectorRef
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.formulario = this.fb.group({
@@ -71,7 +75,7 @@ export class PagoForm implements OnInit {
     this.cargandoResumen = true;
     this.errorPareja = false;
 
-    this.pagoService.obtenerResumenDeuda().subscribe({
+    this.pagoService.obtenerResumenDeuda().pipe(takeUntil(this.destroy$)).subscribe({
       next: (resumen) => {
         this.resumen = resumen;
         this.cargandoResumen = false;
@@ -137,7 +141,7 @@ export class PagoForm implements OnInit {
       monto: this.formulario.value.monto,
       concepto: this.formulario.value.concepto || undefined,
       metodoPago: this.formulario.value.metodoPago
-    }).subscribe({
+    }).pipe(takeUntil(this.destroy$)).subscribe({
       next: () => {
         this.loadingService.hide();
         this.notificationService.success('Pago registrado exitosamente');
@@ -154,5 +158,10 @@ export class PagoForm implements OnInit {
 
   volver(): void {
     this.router.navigate(['/dashboard']);
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

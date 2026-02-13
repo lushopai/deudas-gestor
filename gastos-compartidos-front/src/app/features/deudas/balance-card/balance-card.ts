@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -6,6 +6,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { PagoService, ResumenDeuda } from '../../../core/services/pago.service';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-balance-card',
@@ -19,8 +21,10 @@ import { PagoService, ResumenDeuda } from '../../../core/services/pago.service';
   ],
   templateUrl: './balance-card.html',
   styleUrl: './balance-card.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class BalanceCard implements OnInit {
+export class BalanceCard implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
   resumen: ResumenDeuda | null = null;
   cargando = true;
   error: string | null = null;
@@ -30,7 +34,7 @@ export class BalanceCard implements OnInit {
     private pagoService: PagoService,
     private router: Router,
     private cdr: ChangeDetectorRef
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.cargarResumen();
@@ -41,7 +45,7 @@ export class BalanceCard implements OnInit {
     this.error = null;
     this.necesitaPareja = false;
 
-    this.pagoService.obtenerResumenDeuda().subscribe({
+    this.pagoService.obtenerResumenDeuda().pipe(takeUntil(this.destroy$)).subscribe({
       next: (resumen) => {
         this.resumen = resumen;
         this.cargando = false;
@@ -81,5 +85,10 @@ export class BalanceCard implements OnInit {
       return 'balanced'; // Verde si están a mano
     }
     return this.resumen.deudor ? 'owe' : 'owed'; // Naranja si debes, azul si te deben
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

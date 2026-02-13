@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -19,6 +19,8 @@ import {
   METODO_PAGO_LABELS
 } from '../../../core/services/deuda.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-abono-form',
@@ -37,9 +39,11 @@ import { NotificationService } from '../../../core/services/notification.service
     MatProgressSpinnerModule
   ],
   templateUrl: './abono-form.html',
-  styleUrl: './abono-form.scss'
+  styleUrl: './abono-form.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AbonoForm implements OnInit {
+export class AbonoForm implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
   formulario: FormGroup;
   deuda: Deuda | null = null;
   cargando = true;
@@ -77,7 +81,7 @@ export class AbonoForm implements OnInit {
 
   cargarDeuda(): void {
     this.cargando = true;
-    this.deudaService.obtenerDeuda(this.deudaId).subscribe({
+    this.deudaService.obtenerDeuda(this.deudaId).pipe(takeUntil(this.destroy$)).subscribe({
       next: (deuda) => {
         this.deuda = deuda;
 
@@ -111,7 +115,7 @@ export class AbonoForm implements OnInit {
       fechaPago: this.formatDate(this.formulario.value.fechaPago)
     };
 
-    this.deudaService.registrarAbono(this.deudaId, datos).subscribe({
+    this.deudaService.registrarAbono(this.deudaId, datos).pipe(takeUntil(this.destroy$)).subscribe({
       next: () => {
         this.guardando = false;
         this.notificationService.success('Abono registrado exitosamente');
@@ -152,5 +156,10 @@ export class AbonoForm implements OnInit {
   tieneError(campo: string): boolean {
     const control = this.formulario.get(campo);
     return !!(control && control.invalid && control.touched);
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

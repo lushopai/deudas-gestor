@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -20,6 +20,8 @@ import {
 } from '../../../core/services/gasto-recurrente.service';
 import { GastoService, Categoria } from '../../../core/services/gasto.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-recurrente-form',
@@ -39,9 +41,11 @@ import { NotificationService } from '../../../core/services/notification.service
     MatCheckboxModule
   ],
   templateUrl: './recurrente-form.html',
-  styleUrl: './recurrente-form.scss'
+  styleUrl: './recurrente-form.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class RecurrenteForm implements OnInit {
+export class RecurrenteForm implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
   formulario: FormGroup;
   categorias: Categoria[] = [];
   cargando = false;
@@ -87,7 +91,7 @@ export class RecurrenteForm implements OnInit {
   }
 
   cargarCategorias(): void {
-    this.gastoService.obtenerCategorias().subscribe({
+    this.gastoService.obtenerCategorias().pipe(takeUntil(this.destroy$)).subscribe({
       next: (categorias) => {
         this.categorias = categorias.filter(c => c.activo);
         this.cdr.detectChanges();
@@ -99,7 +103,7 @@ export class RecurrenteForm implements OnInit {
     if (!this.gastoId) return;
 
     this.cargando = true;
-    this.gastoRecurrenteService.obtener(this.gastoId).subscribe({
+    this.gastoRecurrenteService.obtener(this.gastoId).pipe(takeUntil(this.destroy$)).subscribe({
       next: (gasto) => {
         this.formulario.patchValue({
           descripcion: gasto.descripcion,
@@ -146,7 +150,7 @@ export class RecurrenteForm implements OnInit {
       ? this.gastoRecurrenteService.actualizar(this.gastoId, datos)
       : this.gastoRecurrenteService.crear(datos);
 
-    operacion.subscribe({
+    operacion.pipe(takeUntil(this.destroy$)).subscribe({
       next: () => {
         this.guardando = false;
         this.notificationService.success(
@@ -180,5 +184,10 @@ export class RecurrenteForm implements OnInit {
   get necesitaDia(): boolean {
     const freq = this.formulario.get('frecuencia')?.value;
     return freq && freq !== 'DIARIA' && freq !== 'SEMANAL';
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

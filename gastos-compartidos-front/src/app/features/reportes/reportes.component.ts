@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -11,6 +11,8 @@ import { Router } from '@angular/router';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartData } from 'chart.js';
 import { ApiService } from '../../core/services/api.service';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { NotificationService } from '../../core/services/notification.service';
 
 @Component({
@@ -483,9 +485,11 @@ import { NotificationService } from '../../core/services/notification.service';
       transition: width 0.5s ease;
       min-width: 2%;
     }
-  `]
+  `],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ReportesComponent implements OnInit {
+export class ReportesComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
   reporte: any = null;
   cargando = false;
   exportando = false;
@@ -581,7 +585,7 @@ export class ReportesComponent implements OnInit {
   cargarReporte(): void {
     this.cargando = true;
     this.error = null;
-    this.apiService.getReporteMensual(this.mesActual, this.anioActual).subscribe({
+    this.apiService.getReporteMensual(this.mesActual, this.anioActual).pipe(takeUntil(this.destroy$)).subscribe({
       next: (data) => {
         this.reporte = data;
         this.buildCharts();
@@ -680,7 +684,7 @@ export class ReportesComponent implements OnInit {
   exportarPdf(): void {
     const { desde, hasta } = this.getRangoMes();
     this.exportando = true;
-    this.apiService.exportarPdf(desde, hasta).subscribe({
+    this.apiService.exportarPdf(desde, hasta).pipe(takeUntil(this.destroy$)).subscribe({
       next: (blob) => {
         this.descargarArchivo(blob, `gastos_${this.nombreMes(this.mesActual)}_${this.anioActual}.pdf`);
         this.exportando = false;
@@ -695,7 +699,7 @@ export class ReportesComponent implements OnInit {
   exportarExcel(): void {
     const { desde, hasta } = this.getRangoMes();
     this.exportando = true;
-    this.apiService.exportarExcel(desde, hasta).subscribe({
+    this.apiService.exportarExcel(desde, hasta).pipe(takeUntil(this.destroy$)).subscribe({
       next: (blob) => {
         this.descargarArchivo(blob, `gastos_${this.nombreMes(this.mesActual)}_${this.anioActual}.xlsx`);
         this.exportando = false;
@@ -721,5 +725,10 @@ export class ReportesComponent implements OnInit {
     a.download = filename;
     a.click();
     window.URL.revokeObjectURL(url);
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

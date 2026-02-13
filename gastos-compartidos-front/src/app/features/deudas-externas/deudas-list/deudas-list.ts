@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -17,6 +17,8 @@ import {
   ESTADO_DEUDA_LABELS
 } from '../../../core/services/deuda.service';
 import { PageResponse } from '../../../core/models/page-response';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { NotificationService } from '../../../core/services/notification.service';
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state';
 import { SkeletonLoaderComponent } from '../../../shared/components/skeleton-loader/skeleton-loader';
@@ -38,9 +40,11 @@ import { SkeletonLoaderComponent } from '../../../shared/components/skeleton-loa
     SkeletonLoaderComponent
   ],
   templateUrl: './deudas-list.html',
-  styleUrl: './deudas-list.scss'
+  styleUrl: './deudas-list.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DeudasList implements OnInit {
+export class DeudasList implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
   deudas: Deuda[] = [];
   resumen: ResumenDeudas | null = null;
   cargando = true;
@@ -73,7 +77,7 @@ export class DeudasList implements OnInit {
     this.deudas = [];
 
     // Cargar deudas paginadas y resumen en paralelo
-    this.deudaService.obtenerDeudasPaginado(0, this.pageSize).subscribe({
+    this.deudaService.obtenerDeudasPaginado(0, this.pageSize).pipe(takeUntil(this.destroy$)).subscribe({
       next: (page: PageResponse<Deuda>) => {
         this.deudas = page.content;
         this.totalElementos = page.totalElements;
@@ -87,7 +91,7 @@ export class DeudasList implements OnInit {
       }
     });
 
-    this.deudaService.obtenerResumen().subscribe({
+    this.deudaService.obtenerResumen().pipe(takeUntil(this.destroy$)).subscribe({
       next: (resumen) => {
         this.resumen = resumen;
         this.cdr.detectChanges();
@@ -100,7 +104,7 @@ export class DeudasList implements OnInit {
     this.cargandoMas = true;
     this.paginaActual++;
 
-    this.deudaService.obtenerDeudasPaginado(this.paginaActual, this.pageSize).subscribe({
+    this.deudaService.obtenerDeudasPaginado(this.paginaActual, this.pageSize).pipe(takeUntil(this.destroy$)).subscribe({
       next: (page: PageResponse<Deuda>) => {
         this.deudas = [...this.deudas, ...page.content];
         this.esUltimaPagina = page.last;
@@ -153,7 +157,7 @@ export class DeudasList implements OnInit {
     );
 
     if (confirmado) {
-      this.deudaService.eliminarDeuda(deuda.id).subscribe({
+      this.deudaService.eliminarDeuda(deuda.id).pipe(takeUntil(this.destroy$)).subscribe({
         next: () => {
           this.notificationService.success('Deuda eliminada');
           this.cargarDatos();
@@ -193,5 +197,10 @@ export class DeudasList implements OnInit {
       currency: 'CLP',
       minimumFractionDigits: 0
     }).format(monto);
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

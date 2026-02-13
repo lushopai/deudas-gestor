@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -19,6 +19,8 @@ import {
   TIPO_DEUDA_LABELS
 } from '../../../core/services/deuda.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-deuda-form',
@@ -37,9 +39,11 @@ import { NotificationService } from '../../../core/services/notification.service
     MatProgressSpinnerModule
   ],
   templateUrl: './deuda-form.html',
-  styleUrl: './deuda-form.scss'
+  styleUrl: './deuda-form.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DeudaForm implements OnInit {
+export class DeudaForm implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
   formulario: FormGroup;
   cargando = false;
   guardando = false;
@@ -84,7 +88,7 @@ export class DeudaForm implements OnInit {
     if (!this.deudaId) return;
 
     this.cargando = true;
-    this.deudaService.obtenerDeuda(this.deudaId).subscribe({
+    this.deudaService.obtenerDeuda(this.deudaId).pipe(takeUntil(this.destroy$)).subscribe({
       next: (deuda) => {
         this.formulario.patchValue({
           acreedor: deuda.acreedor,
@@ -130,7 +134,7 @@ export class DeudaForm implements OnInit {
       ? this.deudaService.actualizarDeuda(this.deudaId, datos)
       : this.deudaService.crearDeuda(datos);
 
-    operacion.subscribe({
+    operacion.pipe(takeUntil(this.destroy$)).subscribe({
       next: () => {
         this.guardando = false;
         this.notificationService.success(
@@ -159,5 +163,10 @@ export class DeudaForm implements OnInit {
   tieneError(campo: string): boolean {
     const control = this.formulario.get(campo);
     return !!(control && control.invalid && control.touched);
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -19,6 +19,8 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { GastoService, Gasto, Categoria } from '../../core/services/gasto.service';
 import { PageResponse } from '../../core/models/page-response';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { NotificationService } from '../../core/services/notification.service';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state';
 import { SkeletonLoaderComponent } from '../../shared/components/skeleton-loader/skeleton-loader';
@@ -49,9 +51,11 @@ import { SkeletonLoaderComponent } from '../../shared/components/skeleton-loader
     SkeletonLoaderComponent
   ],
   templateUrl: './gastos-list.component.html',
-  styleUrls: ['./gastos-list.component.scss']
+  styleUrls: ['./gastos-list.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class GastosListComponent implements OnInit {
+export class GastosListComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
   gastos: Gasto[] = [];
   gastosFiltrados: Gasto[] = [];
   categorias: Categoria[] = [];
@@ -83,7 +87,7 @@ export class GastosListComponent implements OnInit {
 
   ngOnInit() {
     this.cargarGastos();
-    this.gastoService.obtenerCategorias().subscribe({
+    this.gastoService.obtenerCategorias().pipe(takeUntil(this.destroy$)).subscribe({
       next: (cats) => this.categorias = cats.filter(c => c.activo),
       error: () => { }
     });
@@ -95,7 +99,7 @@ export class GastosListComponent implements OnInit {
     this.paginaActual = 0;
     this.gastos = [];
 
-    this.gastoService.obtenerGastosPaginado(0, this.pageSize).subscribe({
+    this.gastoService.obtenerGastosPaginado(0, this.pageSize).pipe(takeUntil(this.destroy$)).subscribe({
       next: (page: PageResponse<Gasto>) => {
         this.gastos = page.content;
         this.totalPaginas = page.totalPages;
@@ -124,7 +128,7 @@ export class GastosListComponent implements OnInit {
     this.cargandoMas = true;
     this.paginaActual++;
 
-    this.gastoService.obtenerGastosPaginado(this.paginaActual, this.pageSize).subscribe({
+    this.gastoService.obtenerGastosPaginado(this.paginaActual, this.pageSize).pipe(takeUntil(this.destroy$)).subscribe({
       next: (page: PageResponse<Gasto>) => {
         this.gastos = [...this.gastos, ...page.content];
         this.esUltimaPagina = page.last;
@@ -206,7 +210,7 @@ export class GastosListComponent implements OnInit {
     if (confirmed) {
       this.notificationService.showLoading('Eliminando gasto...');
 
-      this.gastoService.eliminarGasto(id).subscribe({
+      this.gastoService.eliminarGasto(id).pipe(takeUntil(this.destroy$)).subscribe({
         next: () => {
           this.notificationService.closeLoading();
           this.notificationService.success('El gasto se eliminó correctamente');
@@ -235,5 +239,10 @@ export class GastosListComponent implements OnInit {
 
   reintentar() {
     this.cargarGastos();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

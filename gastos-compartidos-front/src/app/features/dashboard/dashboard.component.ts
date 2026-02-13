@@ -1,7 +1,8 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, Router } from '@angular/router';
-import { forkJoin } from 'rxjs';
+import { forkJoin, Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -44,9 +45,11 @@ import { PullToRefreshDirective } from '../../shared/directives/pull-to-refresh.
     PullToRefreshDirective
   ],
   templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.scss']
+  styleUrls: ['./dashboard.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
   gastosRecientes: Gasto[] = [];
   resumenGastos: ResumenGastos | null = null;
   resumenDeudas: ResumenDeudas | null = null;
@@ -79,7 +82,7 @@ export class DashboardComponent implements OnInit {
     forkJoin({
       recent: this.gastoService.obtenerGastosRecientes(5),
       summary: this.gastoService.obtenerResumenGastos()
-    }).subscribe({
+    }).pipe(takeUntil(this.destroy$)).subscribe({
       next: ({ recent, summary }) => {
         this.gastosRecientes = recent;
         this.resumenGastos = summary;
@@ -95,7 +98,7 @@ export class DashboardComponent implements OnInit {
     });
 
     // Cargar resumen de deudas externas (separado para no bloquear si falla)
-    this.deudaService.obtenerResumen().subscribe({
+    this.deudaService.obtenerResumen().pipe(takeUntil(this.destroy$)).subscribe({
       next: (resumen) => {
         this.resumenDeudas = resumen;
         this.cdRef.detectChanges();
@@ -106,7 +109,7 @@ export class DashboardComponent implements OnInit {
     });
 
     // Cargar próximos gastos recurrentes (próximos 7 días)
-    this.gastoRecurrenteService.proximos(7).subscribe({
+    this.gastoRecurrenteService.proximos(7).pipe(takeUntil(this.destroy$)).subscribe({
       next: (proximos) => {
         this.proximosRecurrentes = proximos;
         this.cdRef.detectChanges();
@@ -117,7 +120,7 @@ export class DashboardComponent implements OnInit {
     });
 
     // Detectar gastos recurrentes ejecutados hoy
-    this.gastoRecurrenteService.listar(true).subscribe({
+    this.gastoRecurrenteService.listar(true).pipe(takeUntil(this.destroy$)).subscribe({
       next: (activos) => {
         const hoy = new Date().toISOString().split('T')[0];
         this.ejecutadosHoy = activos.filter(gr => gr.ultimaEjecucion === hoy);
@@ -127,6 +130,11 @@ export class DashboardComponent implements OnInit {
         this.ejecutadosHoy = [];
       }
     });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   obtenerPorcentaje(monto: number, total: number): number {

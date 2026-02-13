@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -13,6 +13,8 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatDividerModule } from '@angular/material/divider';
 import { Router, ActivatedRoute } from '@angular/router';
 import { OcrService } from '../../core/services/ocr.service';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
 import { NotificationService } from '../../core/services/notification.service';
@@ -36,9 +38,11 @@ import { NotificationService } from '../../core/services/notification.service';
     MatDividerModule
   ],
   templateUrl: './gasto-form.component.html',
-  styleUrls: ['./gasto-form.component.scss']
+  styleUrls: ['./gasto-form.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class GastoFormComponent implements OnInit {
+export class GastoFormComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
   formulario: FormGroup;
   categorias: any[] = [];
   cargando = false;
@@ -71,7 +75,7 @@ export class GastoFormComponent implements OnInit {
     this.cargarCategorias();
 
     // Detectar si estamos en modo edición
-    this.route.params.subscribe(params => {
+    this.route.params.pipe(takeUntil(this.destroy$)).subscribe(params => {
       if (params['id']) {
         this.gastoId = +params['id'];
         this.modoEdicion = true;
@@ -86,7 +90,7 @@ export class GastoFormComponent implements OnInit {
   }
 
   cargarCategorias(): void {
-    this.apiService.getCategorias().subscribe({
+    this.apiService.getCategorias().pipe(takeUntil(this.destroy$)).subscribe({
       next: (response) => {
         this.categorias = response.value || response;
         this.cdRef.detectChanges();
@@ -104,7 +108,7 @@ export class GastoFormComponent implements OnInit {
 
   cargarGasto(id: number): void {
     this.cargando = true;
-    this.apiService.getGasto(id).subscribe({
+    this.apiService.getGasto(id).pipe(takeUntil(this.destroy$)).subscribe({
       next: (gasto) => {
         this.formulario.patchValue({
           descripcion: gasto.descripcion,
@@ -161,7 +165,7 @@ export class GastoFormComponent implements OnInit {
 
     const mensajeExito = this.modoEdicion ? 'El gasto se actualizó correctamente' : 'El gasto se guardó correctamente';
 
-    operacion.subscribe({
+    operacion.pipe(takeUntil(this.destroy$)).subscribe({
       next: () => {
         this.notificationService.success(mensajeExito).then(() => {
           this.router.navigate(['/gastos']);
@@ -245,5 +249,10 @@ export class GastoFormComponent implements OnInit {
 
   volver(): void {
     this.router.navigate(['/dashboard']);
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

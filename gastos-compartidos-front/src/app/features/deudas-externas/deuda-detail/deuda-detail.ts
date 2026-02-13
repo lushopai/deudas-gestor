@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -18,6 +18,8 @@ import {
   METODO_PAGO_LABELS
 } from '../../../core/services/deuda.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-deuda-detail',
@@ -34,9 +36,11 @@ import { NotificationService } from '../../../core/services/notification.service
     MatListModule
   ],
   templateUrl: './deuda-detail.html',
-  styleUrl: './deuda-detail.scss'
+  styleUrl: './deuda-detail.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DeudaDetail implements OnInit {
+export class DeudaDetail implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
   deuda: Deuda | null = null;
   abonos: AbonoDeuda[] = [];
   cargando = true;
@@ -52,7 +56,7 @@ export class DeudaDetail implements OnInit {
     private router: Router,
     private notificationService: NotificationService,
     private cdr: ChangeDetectorRef
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
@@ -65,7 +69,7 @@ export class DeudaDetail implements OnInit {
 
   cargarDeuda(): void {
     this.cargando = true;
-    this.deudaService.obtenerDeuda(this.deudaId).subscribe({
+    this.deudaService.obtenerDeuda(this.deudaId).pipe(takeUntil(this.destroy$)).subscribe({
       next: (deuda) => {
         this.deuda = deuda;
         this.cargando = false;
@@ -79,7 +83,7 @@ export class DeudaDetail implements OnInit {
   }
 
   cargarAbonos(): void {
-    this.deudaService.obtenerAbonos(this.deudaId).subscribe({
+    this.deudaService.obtenerAbonos(this.deudaId).pipe(takeUntil(this.destroy$)).subscribe({
       next: (abonos) => {
         this.abonos = abonos;
         this.cdr.detectChanges();
@@ -106,7 +110,7 @@ export class DeudaDetail implements OnInit {
     );
 
     if (confirmado) {
-      this.deudaService.eliminarAbono(this.deudaId, abono.id).subscribe({
+      this.deudaService.eliminarAbono(this.deudaId, abono.id).pipe(takeUntil(this.destroy$)).subscribe({
         next: () => {
           this.notificationService.success('Abono eliminado');
           this.cargarDeuda();
@@ -155,5 +159,10 @@ export class DeudaDetail implements OnInit {
       month: 'short',
       year: 'numeric'
     });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

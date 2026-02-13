@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -14,6 +14,8 @@ import { ParejaService, Pareja } from '../../../core/services/pareja.service';
 import { ClipboardModule } from '@angular/cdk/clipboard';
 import { NotificationService } from '../../../core/services/notification.service';
 import { LoadingService } from '../../../core/services/loading.service';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-pareja-setup',
@@ -33,8 +35,10 @@ import { LoadingService } from '../../../core/services/loading.service';
   ],
   templateUrl: './pareja-setup.html',
   styleUrl: './pareja-setup.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ParejaSetup implements OnInit {
+export class ParejaSetup implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
   formularioUnirse!: FormGroup;
   codigoInvitacion: string | null = null;
   pareja: Pareja | null = null;
@@ -48,7 +52,7 @@ export class ParejaSetup implements OnInit {
     private notificationService: NotificationService,
     private loadingService: LoadingService,
     private cdr: ChangeDetectorRef
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.formularioUnirse = this.fb.group({
@@ -61,7 +65,7 @@ export class ParejaSetup implements OnInit {
   cargarMiPareja(): void {
     this.cargandoCodigo = true;
 
-    this.parejaService.obtenerMiPareja().subscribe({
+    this.parejaService.obtenerMiPareja().pipe(takeUntil(this.destroy$)).subscribe({
       next: (pareja) => {
         this.pareja = pareja;
         // Si tiene pareja pero está incompleta (solo 1 miembro), mostrar el código
@@ -79,7 +83,7 @@ export class ParejaSetup implements OnInit {
   }
 
   cargarCodigoInvitacion(): void {
-    this.parejaService.obtenerCodigoInvitacion().subscribe({
+    this.parejaService.obtenerCodigoInvitacion().pipe(takeUntil(this.destroy$)).subscribe({
       next: (codigo) => {
         this.codigoInvitacion = codigo;
         this.cargandoCodigo = false;
@@ -103,7 +107,7 @@ export class ParejaSetup implements OnInit {
     this.loadingService.show('Uniéndose a la pareja...');
     const codigo = this.formularioUnirse.value.codigoInvitacion;
 
-    this.parejaService.unirseAPareja(codigo).subscribe({
+    this.parejaService.unirseAPareja(codigo).pipe(takeUntil(this.destroy$)).subscribe({
       next: (pareja) => {
         this.loadingService.hide();
         this.notificationService.success('Te has unido exitosamente a la pareja');
@@ -124,5 +128,10 @@ export class ParejaSetup implements OnInit {
 
   irADashboard(): void {
     this.router.navigate(['/dashboard']);
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

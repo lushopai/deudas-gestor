@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -13,6 +13,8 @@ import { PageResponse } from '../../../core/models/page-response';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { LoadingService } from '../../../core/services/loading.service';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state';
 import { SkeletonLoaderComponent } from '../../../shared/components/skeleton-loader/skeleton-loader';
 
@@ -33,8 +35,10 @@ import { SkeletonLoaderComponent } from '../../../shared/components/skeleton-loa
   ],
   templateUrl: './historial-pagos.html',
   styleUrl: './historial-pagos.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class HistorialPagos implements OnInit {
+export class HistorialPagos implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
   pagos: Pago[] = [];
   cargando = true;
   cargandoMas = false;
@@ -70,7 +74,7 @@ export class HistorialPagos implements OnInit {
     this.paginaActual = 0;
     this.pagos = [];
 
-    this.pagoService.obtenerHistorialPaginado(0, this.pageSize).subscribe({
+    this.pagoService.obtenerHistorialPaginado(0, this.pageSize).pipe(takeUntil(this.destroy$)).subscribe({
       next: (page: PageResponse<Pago>) => {
         this.pagos = page.content;
         this.totalElementos = page.totalElements;
@@ -97,7 +101,7 @@ export class HistorialPagos implements OnInit {
     this.cargandoMas = true;
     this.paginaActual++;
 
-    this.pagoService.obtenerHistorialPaginado(this.paginaActual, this.pageSize).subscribe({
+    this.pagoService.obtenerHistorialPaginado(this.paginaActual, this.pageSize).pipe(takeUntil(this.destroy$)).subscribe({
       next: (page: PageResponse<Pago>) => {
         this.pagos = [...this.pagos, ...page.content];
         this.esUltimaPagina = page.last;
@@ -124,7 +128,7 @@ export class HistorialPagos implements OnInit {
 
     if (confirmed) {
       this.loadingService.show('Cancelando pago...');
-      this.pagoService.cancelarPago(pago.id).subscribe({
+      this.pagoService.cancelarPago(pago.id).pipe(takeUntil(this.destroy$)).subscribe({
         next: () => {
           this.loadingService.hide();
           this.notificationService.success('Pago cancelado exitosamente');
@@ -168,5 +172,10 @@ export class HistorialPagos implements OnInit {
       OTRO: 'more_horiz'
     };
     return icons[metodo] || 'payment';
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

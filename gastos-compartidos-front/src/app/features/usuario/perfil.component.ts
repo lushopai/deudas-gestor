@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, Router } from '@angular/router';
 import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
@@ -15,6 +15,8 @@ import { AuthService } from '../../core/services/auth.service';
 import { ApiService } from '../../core/services/api.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { LoadingService } from '../../core/services/loading.service';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-perfil',
@@ -34,9 +36,11 @@ import { LoadingService } from '../../core/services/loading.service';
     MatMenuModule
   ],
   templateUrl: './perfil.component.html',
-  styleUrls: ['./perfil.component.scss']
+  styleUrls: ['./perfil.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class PerfilComponent implements OnInit {
+export class PerfilComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
   perfilForm!: FormGroup;
   passwordForm!: FormGroup;
   usuario: any;
@@ -69,7 +73,7 @@ export class PerfilComponent implements OnInit {
   cargarPerfil() {
     this.cargando = true;
     this.error = null;
-    this.apiService.obtenerPerfil().subscribe({
+    this.apiService.obtenerPerfil().pipe(takeUntil(this.destroy$)).subscribe({
       next: (usuario) => {
         this.usuario = usuario;
         this.previewFoto = usuario.fotoPerfil;
@@ -160,7 +164,7 @@ export class PerfilComponent implements OnInit {
       fotoPerfil: this.previewFoto
     };
 
-    this.apiService.actualizarPerfil(datos).subscribe({
+    this.apiService.actualizarPerfil(datos).pipe(takeUntil(this.destroy$)).subscribe({
       next: (usuarioActualizado) => {
         this.usuario = usuarioActualizado;
         // Actualizar datos en localStorage para mantener sincronización
@@ -222,7 +226,7 @@ export class PerfilComponent implements OnInit {
       passwordNueva: this.passwordForm.get('passwordNueva')?.value
     };
 
-    this.apiService.cambiarPassword(datos).subscribe({
+    this.apiService.cambiarPassword(datos).pipe(takeUntil(this.destroy$)).subscribe({
       next: () => {
         this.guardandoPassword = false;
         this.loadingService.hide();
@@ -258,5 +262,10 @@ export class PerfilComponent implements OnInit {
   cerrarSesion() {
     this.authService.logout();
     this.router.navigate(['/login']);
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

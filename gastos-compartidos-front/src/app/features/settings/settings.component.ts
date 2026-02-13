@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -13,6 +13,8 @@ import { ApiService } from '../../core/services/api.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { AuthService } from '../../core/services/auth.service';
 import { GastoRecurrenteService } from '../../core/services/gasto-recurrente.service';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 interface SettingsData {
   darkMode: boolean;
@@ -417,9 +419,11 @@ interface SettingsData {
         height: 20px;
       }
     }
-  `]
+  `],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SettingsComponent implements OnInit {
+export class SettingsComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
   settings: SettingsData = {
     darkMode: false,
     recordatoriosActivos: true,
@@ -436,8 +440,9 @@ export class SettingsComponent implements OnInit {
     private apiService: ApiService,
     private notificationService: NotificationService,
     private authService: AuthService,
-    private gastoRecurrenteService: GastoRecurrenteService
-  ) {}
+    private gastoRecurrenteService: GastoRecurrenteService,
+    private cdr: ChangeDetectorRef
+  ) { }
 
   ngOnInit(): void {
     this.cargarSettings();
@@ -481,16 +486,18 @@ export class SettingsComponent implements OnInit {
   }
 
   private cargarCategorias(): void {
-    this.apiService.getCategorias().subscribe({
+    this.apiService.getCategorias().pipe(takeUntil(this.destroy$)).subscribe({
       next: (cats: any[]) => {
         this.categorias = cats.map(c => ({
           id: c.id,
           nombre: c.nombre,
           icono: c.icono || ''
         }));
+        this.cdr.detectChanges();
       },
       error: () => {
         this.categorias = [];
+        this.cdr.detectChanges();
       }
     });
   }
@@ -502,7 +509,7 @@ export class SettingsComponent implements OnInit {
 
     this.notificationService.toast('Generando archivo...', 'info');
 
-    this.apiService.exportarExcel(desde, hasta).subscribe({
+    this.apiService.exportarExcel(desde, hasta).pipe(takeUntil(this.destroy$)).subscribe({
       next: (blob) => {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -533,5 +540,10 @@ export class SettingsComponent implements OnInit {
 
   volver(): void {
     this.router.navigate(['/dashboard']);
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

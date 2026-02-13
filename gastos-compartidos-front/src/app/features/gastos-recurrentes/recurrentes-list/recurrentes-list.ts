@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -16,6 +16,8 @@ import {
 import { NotificationService } from '../../../core/services/notification.service';
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state';
 import { SkeletonLoaderComponent } from '../../../shared/components/skeleton-loader/skeleton-loader';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-recurrentes-list',
@@ -33,9 +35,11 @@ import { SkeletonLoaderComponent } from '../../../shared/components/skeleton-loa
     SkeletonLoaderComponent
   ],
   templateUrl: './recurrentes-list.html',
-  styleUrl: './recurrentes-list.scss'
+  styleUrl: './recurrentes-list.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class RecurrentesList implements OnInit {
+export class RecurrentesList implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
   gastos: GastoRecurrente[] = [];
   cargando = true;
   filtroActivo = 'todos'; // 'todos' | 'activos' | 'inactivos'
@@ -47,7 +51,7 @@ export class RecurrentesList implements OnInit {
     private router: Router,
     private notificationService: NotificationService,
     private cdr: ChangeDetectorRef
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.cargarDatos();
@@ -55,7 +59,7 @@ export class RecurrentesList implements OnInit {
 
   cargarDatos(): void {
     this.cargando = true;
-    this.gastoRecurrenteService.listar().subscribe({
+    this.gastoRecurrenteService.listar().pipe(takeUntil(this.destroy$)).subscribe({
       next: (gastos) => {
         this.gastos = gastos;
         this.cargando = false;
@@ -114,7 +118,7 @@ export class RecurrentesList implements OnInit {
   }
 
   toggleActivo(gasto: GastoRecurrente): void {
-    this.gastoRecurrenteService.toggleActivo(gasto.id).subscribe({
+    this.gastoRecurrenteService.toggleActivo(gasto.id).pipe(takeUntil(this.destroy$)).subscribe({
       next: (updated) => {
         const idx = this.gastos.findIndex(g => g.id === gasto.id);
         if (idx !== -1) this.gastos[idx] = updated;
@@ -130,7 +134,7 @@ export class RecurrentesList implements OnInit {
   }
 
   ejecutarManualmente(gasto: GastoRecurrente): void {
-    this.gastoRecurrenteService.ejecutarManualmente(gasto.id).subscribe({
+    this.gastoRecurrenteService.ejecutarManualmente(gasto.id).pipe(takeUntil(this.destroy$)).subscribe({
       next: () => {
         this.notificationService.success('Gasto generado exitosamente');
         this.cargarDatos();
@@ -148,7 +152,7 @@ export class RecurrentesList implements OnInit {
     );
 
     if (confirmado) {
-      this.gastoRecurrenteService.eliminar(gasto.id).subscribe({
+      this.gastoRecurrenteService.eliminar(gasto.id).pipe(takeUntil(this.destroy$)).subscribe({
         next: () => {
           this.notificationService.success('Gasto recurrente eliminado');
           this.cargarDatos();
@@ -200,5 +204,10 @@ export class RecurrentesList implements OnInit {
   formatFecha(fecha: string): string {
     if (!fecha) return '-';
     return new Date(fecha).toLocaleDateString('es-CL');
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

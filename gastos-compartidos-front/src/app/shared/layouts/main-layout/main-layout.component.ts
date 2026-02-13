@@ -1,9 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ChildrenOutletContexts, RouterOutlet, Router, NavigationEnd } from '@angular/router';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { Observable } from 'rxjs';
-import { map, filter } from 'rxjs/operators';
+import { Observable, Subject } from 'rxjs';
+import { map, filter, takeUntil, withLatestFrom } from 'rxjs/operators';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatButtonModule } from '@angular/material/button';
@@ -37,9 +37,11 @@ interface NavItem {
   ],
   templateUrl: './main-layout.component.html',
   styleUrls: ['./main-layout.component.scss'],
-  animations: [routeFadeAnimation]
+  animations: [routeFadeAnimation],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class MainLayoutComponent implements OnInit {
+export class MainLayoutComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
   sidenavAberto = false;
   usuario$;
   darkMode = false;
@@ -107,7 +109,8 @@ export class MainLayoutComponent implements OnInit {
     private authService: AuthService,
     private router: Router,
     private breakpointObserver: BreakpointObserver,
-    private contexts: ChildrenOutletContexts
+    private contexts: ChildrenOutletContexts,
+    private cdr: ChangeDetectorRef
   ) {
     this.usuario$ = this.authService.usuario$;
     this.isMobile$ = this.breakpointObserver.observe('(max-width: 960px)')
@@ -131,18 +134,24 @@ export class MainLayoutComponent implements OnInit {
 
     // Cerrar sidenav y actualizar FAB al navegar
     this.router.events.pipe(
-      filter(event => event instanceof NavigationEnd)
-    ).subscribe((event) => {
+      filter(event => event instanceof NavigationEnd),
+      withLatestFrom(this.isMobile$),
+      takeUntil(this.destroy$)
+    ).subscribe(([event, isMobile]) => {
       const navEnd = event as NavigationEnd;
       this.currentRoute = navEnd.urlAfterRedirects || navEnd.url;
       this.showFab = this.fabRoutes.some(r => this.currentRoute === r);
 
-      this.isMobile$.subscribe(isMobile => {
-        if (isMobile) {
-          this.sidenavAberto = false;
-        }
-      });
+      if (isMobile) {
+        this.sidenavAberto = false;
+      }
+      this.cdr.markForCheck();
     });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   toggleSidenav() {
