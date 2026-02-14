@@ -24,8 +24,9 @@ import { EmptyStateComponent } from '../../shared/components/empty-state/empty-s
 import { SkeletonLoaderComponent } from '../../shared/components/skeleton-loader/skeleton-loader';
 import { PullToRefreshDirective } from '../../shared/directives/pull-to-refresh.directive';
 import { TranslateModule } from '@ngx-translate/core';
-import { BaseChartDirective } from 'ng2-charts';
-import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
+import { DashboardSummaryCardComponent } from './components/dashboard-summary-card';
+import { DashboardChartComponent } from './components/dashboard-chart';
+import { DashboardRecentGastosComponent } from './components/dashboard-recent-gastos';
 
 @Component({
   selector: 'app-dashboard',
@@ -48,7 +49,9 @@ import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
     EmptyStateComponent,
     SkeletonLoaderComponent,
     PullToRefreshDirective,
-    BaseChartDirective
+    DashboardSummaryCardComponent,
+    DashboardChartComponent,
+    DashboardRecentGastosComponent
   ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
@@ -65,35 +68,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   cargando = true;
   error: string | null = null;
   Object = Object;  // Hacer Object accesible en el template
-
-  // Chart configuration
-  public pieChartOptions: ChartConfiguration<'doughnut'>['options'] = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        display: true,
-        position: 'right',
-        labels: {
-          font: { size: 11 },
-          boxWidth: 12
-        }
-      },
-    },
-    cutout: '60%' // Doughnut style
-  };
-
-  public pieChartData: ChartData<'doughnut', number[], string | string[]> = {
-    labels: [],
-    datasets: [{
-      data: [],
-      backgroundColor: [],
-      borderColor: '#ffffff',
-      borderWidth: 2
-    }]
-  };
-  
-  public pieChartType = 'doughnut' as const;
 
   constructor(
     public authService: AuthService,
@@ -123,24 +97,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
       next: ({ recent, summary }) => {
         this.gastosRecientes = recent;
         this.resumenGastos = summary;
-
-        // Update Chart Data
-        if (summary && summary.gastosPorCategoria) {
-          const labels = Object.keys(summary.gastosPorCategoria);
-          const data = Object.values(summary.gastosPorCategoria);
-          const backgroundColors = this.generarColores(labels.length);
-
-          this.pieChartData = {
-            labels: labels,
-            datasets: [{
-              data: data,
-              backgroundColor: backgroundColors,
-              borderColor: document.documentElement.getAttribute('data-theme') === 'dark' ? '#1e1e1e' : '#ffffff',
-              borderWidth: 2
-            }]
-          };
-        }
-
         this.cargando = false;
         this.cdRef.detectChanges();
       },
@@ -246,18 +202,5 @@ export class DashboardComponent implements OnInit, OnDestroy {
       currency: 'CLP',
       minimumFractionDigits: 0
     }).format(monto);
-  }
-
-  generarColores(cantidad: number): string[] {
-    const baseColors = [
-      '#4caf50', '#2196f3', '#ff9800', '#f44336', '#9c27b0',
-      '#00bcd4', '#ffeb3b', '#795548', '#607d8b', '#e91e63'
-    ];
-
-    const colores = [];
-    for (let i = 0; i < cantidad; i++) {
-      colores.push(baseColors[i % baseColors.length]);
-    }
-    return colores;
   }
 }

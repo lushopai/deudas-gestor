@@ -1,9 +1,10 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, BehaviorSubject } from 'rxjs';
+import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { tap, map, switchMap } from 'rxjs/operators';
 import { PageResponse } from '../models/page-response';
+import { toObservable } from '@angular/core/rxjs-interop';
 
 export interface Usuario {
   id: number;
@@ -69,8 +70,15 @@ export enum EstadoPago {
 })
 export class PagoService {
   private apiUrl = `${environment.apiUrl}/pagos`;
-  private resumenDeudaSubject = new BehaviorSubject<ResumenDeuda | null>(null);
-  public resumenDeuda$ = this.resumenDeudaSubject.asObservable();
+
+  // Signal privado para el resumen de deuda
+  private _resumenDeuda = signal<ResumenDeuda | null>(null);
+
+  // Signal público readonly
+  resumenDeuda = this._resumenDeuda.asReadonly();
+
+  // Observable para compatibilidad con componentes que aún no migran
+  resumenDeuda$ = toObservable(this._resumenDeuda);
 
   constructor(private http: HttpClient) { }
 
@@ -121,12 +129,12 @@ export class PagoService {
   // Obtener resumen de deuda
   obtenerResumenDeuda(): Observable<ResumenDeuda> {
     return this.http.get<ResumenDeuda>(`${this.apiUrl}/resumen`).pipe(
-      tap(resumen => this.resumenDeudaSubject.next(resumen))
+      tap(resumen => this._resumenDeuda.set(resumen))
     );
   }
 
   // Limpiar estado
   limpiarEstado(): void {
-    this.resumenDeudaSubject.next(null);
+    this._resumenDeuda.set(null);
   }
 }

@@ -1,9 +1,10 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal, computed } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, BehaviorSubject } from 'rxjs';
+import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { map, tap } from 'rxjs/operators';
 import { PageResponse } from '../models/page-response';
+import { toObservable } from '@angular/core/rxjs-interop';
 
 export interface Gasto {
   id: number;
@@ -39,8 +40,26 @@ export interface ResumenGastos {
 })
 export class GastoService {
   private apiUrl = `${environment.apiUrl}/gastos`;
-  private gastosSubject = new BehaviorSubject<Gasto[]>([]);
-  public gastos$ = this.gastosSubject.asObservable();
+
+  // Signals para el estado
+  private _gastos = signal<Gasto[]>([]);
+  private _cargando = signal(false);
+  private _error = signal<string | null>(null);
+
+  // Signals públicos readonly
+  gastos = this._gastos.asReadonly();
+  cargando = this._cargando.asReadonly();
+  error = this._error.asReadonly();
+
+  // Computed signals
+  totalGastos = computed(() =>
+    this._gastos().reduce((sum, g) => sum + g.monto, 0)
+  );
+
+  cantidadGastos = computed(() => this._gastos().length);
+
+  // Observable para compatibilidad con componentes que aún no migran
+  gastos$ = toObservable(this._gastos);
 
   constructor(private http: HttpClient) {}
 
@@ -54,11 +73,22 @@ export class GastoService {
 
   // Obtener todos los gastos (extrae content de la respuesta paginada)
   obtenerGastos(): Observable<Gasto[]> {
+    this._cargando.set(true);
+    this._error.set(null);
     return this.http.get<PageResponse<Gasto>>(this.apiUrl, {
       params: new HttpParams().set('size', '1000')
     }).pipe(
       map(page => page.content),
-      tap(gastos => this.gastosSubject.next(gastos))
+      tap({
+        next: gastos => {
+          this._gastos.set(gastos);
+          this._cargando.set(false);
+        },
+        error: () => {
+          this._error.set('Error al cargar gastos');
+          this._cargando.set(false);
+        }
+      })
     );
   }
 
@@ -81,9 +111,9 @@ export class GastoService {
   crearGasto(gasto: Partial<Gasto>): Observable<Gasto> {
     return this.http.post<Gasto>(`${this.apiUrl}`, gasto).pipe(
       tap(nuevoGasto => {
-        // Optimistic update: agregar el nuevo gasto al estado actual
-        const gastosActuales = this.gastosSubject.value;
-        this.gastosSubject.next([...gastosActuales, nuevoGasto]);
+        // Optimistic update: agregar el nuevo gasto al estado actual usando signals
+        this._gastos.update(gastos => [...gastos, nuevoGasto]);
+        this._error.set(null);
       })
     );
   }
@@ -92,12 +122,11 @@ export class GastoService {
   actualizarGasto(id: number, gasto: Partial<Gasto>): Observable<Gasto> {
     return this.http.put<Gasto>(`${this.apiUrl}/${id}`, gasto).pipe(
       tap(gastoActualizado => {
-        // Optimistic update: reemplazar el gasto en el estado actual
-        const gastosActuales = this.gastosSubject.value;
-        const gastosActualizados = gastosActuales.map(g =>
-          g.id === id ? gastoActualizado : g
+        // Optimistic update: reemplazar el gasto en el estado actual usando signals
+        this._gastos.update(gastos =>
+          gastos.map(g => (g.id === id ? gastoActualizado : g))
         );
-        this.gastosSubject.next(gastosActualizados);
+        this._error.set(null);
       })
     );
   }
@@ -106,10 +135,9 @@ export class GastoService {
   eliminarGasto(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
       tap(() => {
-        // Optimistic update: eliminar el gasto del estado actual
-        const gastosActuales = this.gastosSubject.value;
-        const gastosFiltrados = gastosActuales.filter(g => g.id !== id);
-        this.gastosSubject.next(gastosFiltrados);
+        // Optimistic update: eliminar el gasto del estado actual usando signals
+        this._gastos.update(gastos => gastos.filter(g => g.id !== id));
+        this._error.set(null);
       })
     );
   }

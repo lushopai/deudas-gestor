@@ -1,7 +1,8 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Injectable, signal, computed } from '@angular/core';
+import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { ApiService } from './api.service';
+import { toObservable } from '@angular/core/rxjs-interop';
 
 @Injectable({
   providedIn: 'root'
@@ -9,9 +10,23 @@ import { ApiService } from './api.service';
 export class AuthService {
   private tokenKey = 'gastos_token';
   private usuarioKey = 'gastos_usuario';
-  private usuarioSubject = new BehaviorSubject<any>(this.getUsuarioDelLocalStorage());
 
-  usuario$ = this.usuarioSubject.asObservable();
+  // Signal privado para el estado del usuario
+  private _usuario = signal<any>(this.getUsuarioDelLocalStorage());
+
+  // Signal público readonly
+  usuario = this._usuario.asReadonly();
+
+  // Observable para compatibilidad con componentes que aún no migran
+  usuario$ = toObservable(this._usuario);
+
+  // Computed signal para saber si está autenticado
+  estaAutenticadoSignal = computed(() => {
+    const token = this.obtenerToken();
+    if (!token) return false;
+    if (this.tokenExpirado(token)) return false;
+    return this._usuario() !== null;
+  });
 
   constructor(private apiService: ApiService) {}
 
@@ -20,7 +35,7 @@ export class AuthService {
       tap(response => {
         this.guardarToken(response.token);
         this.guardarUsuario(response.usuario);
-        this.usuarioSubject.next(response.usuario);
+        this._usuario.set(response.usuario);
       })
     );
   }
@@ -30,7 +45,7 @@ export class AuthService {
       tap(response => {
         this.guardarToken(response.token);
         this.guardarUsuario(response.usuario);
-        this.usuarioSubject.next(response.usuario);
+        this._usuario.set(response.usuario);
       })
     );
   }
@@ -40,7 +55,7 @@ export class AuthService {
       tap(response => {
         this.guardarToken(response.token);
         this.guardarUsuario(response.usuario);
-        this.usuarioSubject.next(response.usuario);
+        this._usuario.set(response.usuario);
       })
     );
   }
@@ -68,11 +83,11 @@ export class AuthService {
   logout(): void {
     localStorage.removeItem(this.tokenKey);
     localStorage.removeItem(this.usuarioKey);
-    this.usuarioSubject.next(null);
+    this._usuario.set(null);
   }
 
   obtenerUsuario(): any {
-    return this.usuarioSubject.value;
+    return this._usuario();
   }
 
   /**

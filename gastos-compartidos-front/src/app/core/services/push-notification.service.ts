@@ -1,9 +1,10 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { SwPush } from '@angular/service-worker';
-import { BehaviorSubject, Observable, from, of } from 'rxjs';
+import { Observable, from, of } from 'rxjs';
 import { catchError, switchMap, tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
+import { toObservable } from '@angular/core/rxjs-interop';
 
 export interface PushConfig {
     enabled: boolean;
@@ -16,10 +17,15 @@ export interface PushConfig {
 })
 export class PushNotificationService {
     private readonly apiUrl = environment.apiUrl;
-    private subscriptionState$ = new BehaviorSubject<boolean>(false);
 
-    /** Observable que indica si el usuario está suscrito a notificaciones */
-    isSubscribed$ = this.subscriptionState$.asObservable();
+    // Signal privado para el estado de suscripción
+    private _isSubscribed = signal<boolean>(false);
+
+    // Signal público readonly
+    isSubscribed = this._isSubscribed.asReadonly();
+
+    // Observable para compatibilidad con componentes que aún no migran
+    isSubscribed$ = toObservable(this._isSubscribed);
 
     constructor(
         private http: HttpClient,
@@ -28,7 +34,7 @@ export class PushNotificationService {
         // Verificar estado actual de suscripción
         if (this.swPush.isEnabled) {
             this.swPush.subscription.subscribe(sub => {
-                this.subscriptionState$.next(!!sub);
+                this._isSubscribed.set(!!sub);
             });
 
             // Manejar clicks en notificaciones
@@ -88,7 +94,7 @@ export class PushNotificationService {
                             }
                         });
                     }),
-                    tap(() => this.subscriptionState$.next(true))
+                    tap(() => this._isSubscribed.set(true))
                 );
             }),
             catchError(err => {
@@ -109,7 +115,7 @@ export class PushNotificationService {
                 const endpoint = sub.endpoint;
                 return from(sub.unsubscribe()).pipe(
                     switchMap(() => this.http.post(`${this.apiUrl}/push/unsubscribe`, { endpoint })),
-                    tap(() => this.subscriptionState$.next(false))
+                    tap(() => this._isSubscribed.set(false))
                 );
             }),
             catchError(err => {

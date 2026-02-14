@@ -139,38 +139,27 @@
   <!-- Stats -->
   @if (!cargando && resumenGastos) {
     <div class="stats-grid">
-      <mat-card class="stat-card">
-        <mat-icon class="stat-icon">trending_up</mat-icon>
-        <div class="stat-value">${{ resumenGastos.totalGastos | number: '1.2-2' }}</div>
-        <div class="stat-label">{{ 'DASHBOARD.TOTAL_EXPENSES' | translate }}</div>
-        <div class="stat-detail">{{ resumenGastos.cantidadGastos }} transacciones</div>
-      </mat-card>
-      <mat-card class="stat-card">
-        <mat-icon class="stat-icon">calculate</mat-icon>
-        <div class="stat-value">${{ resumenGastos.promedioPorGasto | number: '1.2-2' }}</div>
-        <div class="stat-label">Promedio</div>
-        <div class="stat-detail">Gasto medio</div>
-      </mat-card>
+      <app-dashboard-summary-card
+        icon="trending_up"
+        [value]="'$' + (resumenGastos.totalGastos | number: '1.2-2')"
+        [label]="'DASHBOARD.TOTAL_EXPENSES' | translate"
+        [detail]="resumenGastos.cantidadGastos + ' transacciones'">
+      </app-dashboard-summary-card>
+      <app-dashboard-summary-card
+        icon="calculate"
+        [value]="'$' + (resumenGastos.promedioPorGasto | number: '1.2-2')"
+        label="Promedio"
+        detail="Gasto medio">
+      </app-dashboard-summary-card>
     </div>
   }
 
   <!-- Gastos por Categoría -->
   @if (!cargando && resumenGastos && Object.keys(resumenGastos.gastosPorCategoria).length > 0) {
-    <mat-card class="categorias-card">
-      <mat-card-header>
-        <mat-card-title>Gastos por Categoría</mat-card-title>
-      </mat-card-header>
-      <mat-divider></mat-divider>
-      <mat-card-content>
-        <div style="display: block; height: 250px;">
-          <canvas baseChart
-            [data]="pieChartData"
-            [type]="pieChartType"
-            [options]="pieChartOptions">
-          </canvas>
-        </div>
-      </mat-card-content>
-    </mat-card>
+    <app-dashboard-chart
+      [gastosPorCategoria]="resumenGastos.gastosPorCategoria"
+      title="Gastos por Categoría">
+    </app-dashboard-chart>
   }
 
   <!-- Presupuestos activos -->
@@ -218,30 +207,7 @@
   }
   <!-- Gastos Recientes -->
   @if (!cargando && gastosRecientes.length > 0) {
-    <mat-card class="gastos-card">
-      <mat-card-header>
-        <mat-card-title>{{ 'DASHBOARD.RECENT_EXPENSES' | translate }}</mat-card-title>
-        <button mat-icon-button routerLink="/gastos" class="view-all-btn">
-          <mat-icon>arrow_forward</mat-icon>
-        </button>
-      </mat-card-header>
-      <mat-divider></mat-divider>
-      <mat-card-content>
-        @for (gasto of gastosRecientes; track gasto.id) {
-          <div class="gasto-item">
-            <div class="gasto-row">
-              <div class="gasto-info">
-                <div class="gasto-descripcion">{{ gasto.descripcion }}</div>
-                <div class="gasto-fecha">{{ gasto.fechaCreacion | date: 'dd/MM/yyyy HH:mm' }}</div>
-              </div>
-              <div class="gasto-monto">
-                ${{ gasto.monto | number: '1.2-2' }}
-              </div>
-            </div>
-          </div>
-        }
-      </mat-card-content>
-    </mat-card>
+    <app-dashboard-recent-gastos [gastos]="gastosRecientes"></app-dashboard-recent-gastos>
   }
 
   <!-- Empty State -->

@@ -4,23 +4,23 @@
     <!-- User Profile Section -->
     <div class="sidenav-user-section">
       <!-- Avatar con foto o iniciales -->
-      @if (usuario$ | async; as usuario) {
+      @if (usuario(); as user) {
         <div class="sidenav-avatar-container">
-          @if (usuario.fotoPerfil) {
+          @if (user.fotoPerfil) {
             <img
-              [src]="usuario.fotoPerfil"
+              [src]="user.fotoPerfil"
               alt="Avatar"
               class="sidenav-avatar"
             />
           } @else {
             <div class="sidenav-avatar-initials">
-              {{ getInitials(usuario.nombre) }}
+              {{ getInitials(user.nombre) }}
             </div>
           }
         </div>
         <div class="sidenav-user-info">
-          <div class="user-name">{{ usuario.nombre || 'Usuario' }}</div>
-          <div class="user-email">{{ usuario.email }}</div>
+          <div class="user-name">{{ user.nombre || 'Usuario' }}</div>
+          <div class="user-email">{{ user.email }}</div>
         </div>
       }
     </div>

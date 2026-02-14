@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { LoadingService } from '../../../core/services/loading.service';
@@ -7,8 +7,9 @@ import { LoadingService } from '../../../core/services/loading.service';
   selector: 'app-loading-overlay',
   standalone: true,
   imports: [CommonModule, MatProgressSpinnerModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    @if (loadingService.loading$ | async) {
+    @if (loadingService.loading()) {
       <div class="loading-overlay">
         <div class="loading-content">
           <mat-progress-spinner
@@ -16,7 +17,7 @@ import { LoadingService } from '../../../core/services/loading.service';
             mode="indeterminate"
             color="primary">
           </mat-progress-spinner>
-          <div class="loading-message">{{ loadingService.message$ | async }}</div>
+          <div class="loading-message">{{ loadingService.message() }}</div>
         </div>
       </div>
     }

@@ -46,7 +46,10 @@ interface NavItem {
 export class MainLayoutComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   sidenavAberto = false;
-  usuario$;
+
+  // Signals del AuthService
+  usuario = this.authService.usuario;
+
   darkMode = false;
   currentRoute = '';
   showFab = false;
@@ -113,7 +116,6 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
     private contexts: ChildrenOutletContexts,
     private cdr: ChangeDetectorRef
   ) {
-    this.usuario$ = this.authService.usuario$;
     this.isMobile$ = this.breakpointObserver.observe('(max-width: 960px)')
       .pipe(map(result => result.matches));
   }
