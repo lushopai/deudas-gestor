@@ -66,10 +66,14 @@ mat-spinner {
 
 /* Error Card */
 .error-card {
-  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
-  color: white;
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%) !important;
+  color: white !important;
   text-align: center;
   padding: 24px;
+
+  * {
+    color: white !important;
+  }
 
   mat-card-content {
     padding: 0 !important;
@@ -81,20 +85,25 @@ mat-spinner {
   width: 48px;
   height: 48px;
   margin: 0 auto 12px;
-  opacity: 0.9;
+  color: white !important;
 }
 
 .error-message {
   font-size: 14px;
+  color: white !important;
 }
 
 /* Avatar Card */
 .avatar-card {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  color: white !important;
   box-shadow: 0 4px 16px rgba(102, 126, 234, 0.25);
   margin: 0;
   margin-bottom: 16px;
+
+  * {
+    color: white !important;
+  }
 
   mat-card-content {
     padding: 24px !important;
@@ -126,7 +135,7 @@ mat-spinner {
   height: 120px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.2);
-  color: white;
+  color: white !important;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -144,6 +153,10 @@ mat-spinner {
   height: 40px;
   min-width: 40px;
   border: 2px solid white;
+
+  mat-icon {
+    color: white !important;
+  }
 }
 
 .avatar-info {
@@ -157,14 +170,14 @@ mat-spinner {
   font-size: 24px;
   font-weight: 700;
   margin: 0;
-  color: white;
+  color: white !important;
 }
 
 .usuario-email {
   font-size: 14px;
   margin: 0;
-  opacity: 0.9;
-  color: rgba(255, 255, 255, 0.9);
+  color: white !important;
+  opacity: 0.95;
 }
 
 .usuario-tipo {
@@ -173,12 +186,14 @@ mat-spinner {
   display: flex;
   align-items: center;
   gap: 6px;
-  opacity: 0.8;
+  color: white !important;
+  opacity: 0.9;
 
   mat-icon {
     font-size: 14px;
     width: 14px;
     height: 14px;
+    color: white !important;
   }
 }
 

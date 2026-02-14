@@ -39,7 +39,7 @@ import { Gasto } from '../../../core/services/gasto.service';
                 <div class="gasto-fecha">{{ gasto.fechaCreacion | date: 'dd/MM/yyyy HH:mm' }}</div>
               </div>
               <div class="gasto-monto">
-                ${{ gasto.monto | number: '1.2-2' }}
+                {{ gasto.monto | currency: 'USD' : 'symbol' : '1.2-2' }}
               </div>
             </div>
           </div>

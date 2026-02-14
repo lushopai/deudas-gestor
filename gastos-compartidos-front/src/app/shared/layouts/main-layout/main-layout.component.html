@@ -64,8 +64,8 @@
         <mat-icon>more_vert</mat-icon>
       </button>
       
-      <!-- Profile Icon (Mobile) -->
-      <button mat-icon-button (click)="abrirPerfil()" *ngIf="isMobile$ | async">
+      <!-- Profile Icon (Mobile) - Now opens menu -->
+      <button mat-icon-button [matMenuTriggerFor]="headerMenu" *ngIf="isMobile$ | async">
          <mat-icon>account_circle</mat-icon>
       </button>
 

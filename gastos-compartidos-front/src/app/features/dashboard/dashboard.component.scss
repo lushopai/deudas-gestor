@@ -63,11 +63,15 @@
 
 /* Banner Gastos Recurrentes Ejecutados */
 .ejecutados-banner {
-  background: linear-gradient(135deg, #43a047 0%, #2e7d32 100%);
-  color: white;
+  background: linear-gradient(135deg, #43a047 0%, #2e7d32 100%) !important;
+  color: white !important;
   border-radius: 12px;
   padding: 16px;
   animation: slideDown 0.3s ease-out;
+
+  * {
+    color: white !important;
+  }
 
   .ejecutados-header {
     display: flex;
@@ -144,9 +148,13 @@
 
 /* Error Card */
 .error-card {
-  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
-  color: white;
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%) !important;
+  color: white !important;
   margin: 0;
+
+  * {
+    color: white !important;
+  }
 
   mat-card-content {
     padding: 24px !important;
@@ -183,11 +191,15 @@
 
 /* Deudas Externas Card */
 .deudas-externas-card {
-  background: linear-gradient(135deg, #ef5350 0%, #e53935 100%);
-  color: white;
+  background: linear-gradient(135deg, #ef5350 0%, #e53935 100%) !important;
+  color: white !important;
   border-radius: 12px;
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
+
+  * {
+    color: white !important;
+  }
 
   &:hover {
     transform: translateY(-2px);
@@ -308,11 +320,15 @@
 
 /* Gastos Recurrentes Card */
 .recurrentes-card {
-  background: linear-gradient(135deg, #ab47bc 0%, #8e24aa 100%);
-  color: white;
+  background: linear-gradient(135deg, #ab47bc 0%, #8e24aa 100%) !important;
+  color: white !important;
   border-radius: 12px;
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
+
+  * {
+    color: white !important;
+  }
 
   &:hover {
     transform: translateY(-2px);

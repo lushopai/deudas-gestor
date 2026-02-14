@@ -5,15 +5,18 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatDividerModule } from '@angular/material/divider';
 import { MatMenuModule } from '@angular/material/menu';
 import { Router } from '@angular/router';
-import { BaseChartDirective } from 'ng2-charts';
-import { ChartConfiguration, ChartData } from 'chart.js';
 import { ApiService } from '../../core/services/api.service';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { NotificationService } from '../../core/services/notification.service';
+import { ReporteMonthSelectorComponent } from './components/reporte-month-selector';
+import { ReporteSummaryCardComponent } from './components/reporte-summary-card';
+import { ReporteBalanceBarComponent } from './components/reporte-balance-bar';
+import { ReportePieChartComponent } from './components/reporte-pie-chart';
+import { ReporteBarChartComponent } from './components/reporte-bar-chart';
+import { ReporteCategoriaDetailComponent } from './components/reporte-categoria-detail';
 
 @Component({
   selector: 'app-reportes',
@@ -25,9 +28,13 @@ import { NotificationService } from '../../core/services/notification.service';
     MatButtonModule,
     MatToolbarModule,
     MatProgressSpinnerModule,
-    MatDividerModule,
     MatMenuModule,
-    BaseChartDirective
+    ReporteMonthSelectorComponent,
+    ReporteSummaryCardComponent,
+    ReporteBalanceBarComponent,
+    ReportePieChartComponent,
+    ReporteBarChartComponent,
+    ReporteCategoriaDetailComponent
   ],
   template: `
     <mat-toolbar color="primary">
@@ -75,15 +82,12 @@ import { NotificationService } from '../../core/services/notification.service';
 
       <!-- Selector de mes (siempre visible cuando no hay error ni loading) -->
       @if (!cargando && !error) {
-        <div class="mes-selector">
-          <button mat-icon-button (click)="mesAnterior()">
-            <mat-icon>chevron_left</mat-icon>
-          </button>
-          <span class="mes-label">{{ nombreMes(mesActual) }} {{ anioActual }}</span>
-          <button mat-icon-button (click)="mesSiguiente()" [disabled]="esMesActual()">
-            <mat-icon>chevron_right</mat-icon>
-          </button>
-        </div>
+        <app-reporte-month-selector
+          [mesLabel]="nombreMes(mesActual) + ' ' + anioActual"
+          [isCurrentMonth]="esMesActual()"
+          (anterior)="mesAnterior()"
+          (siguiente)="mesSiguiente()">
+        </app-reporte-month-selector>
       }
 
       <!-- Sin datos -->
@@ -100,138 +104,52 @@ import { NotificationService } from '../../core/services/notification.service';
       @if (!cargando && !error && reporte && reporte.cantidadGastos > 0) {
         <!-- Resumen principal -->
         <div class="summary-grid">
-          <mat-card class="summary-card total">
-            <mat-card-content>
-              <mat-icon>account_balance_wallet</mat-icon>
-              <div class="summary-info">
-                <span class="summary-label">Total del Mes</span>
-                <span class="summary-value">\${{ reporte.gastoTotalMes | number:'1.0-0' }}</span>
-              </div>
-              <span class="summary-count">{{ reporte.cantidadGastos }} gastos</span>
-            </mat-card-content>
-          </mat-card>
+          <app-reporte-summary-card
+            type="total"
+            icon="account_balance_wallet"
+            label="Total del Mes"
+            [value]="reporte.gastoTotalMes"
+            [count]="reporte.cantidadGastos + ' gastos'">
+          </app-reporte-summary-card>
 
-          <mat-card class="summary-card user1">
-            <mat-card-content>
-              <mat-icon>person</mat-icon>
-              <div class="summary-info">
-                <span class="summary-label">{{ reporte.nombreUsuario1 }}</span>
-                <span class="summary-value">\${{ reporte.gastoUsuario1 | number:'1.0-0' }}</span>
-              </div>
-            </mat-card-content>
-          </mat-card>
+          <app-reporte-summary-card
+            type="user1"
+            icon="person"
+            [label]="reporte.nombreUsuario1"
+            [value]="reporte.gastoUsuario1">
+          </app-reporte-summary-card>
 
-          <mat-card class="summary-card user2">
-            <mat-card-content>
-              <mat-icon>person</mat-icon>
-              <div class="summary-info">
-                <span class="summary-label">{{ reporte.nombreUsuario2 }}</span>
-                <span class="summary-value">\${{ reporte.gastoUsuario2 | number:'1.0-0' }}</span>
-              </div>
-            </mat-card-content>
-          </mat-card>
+          <app-reporte-summary-card
+            type="user2"
+            icon="person"
+            [label]="reporte.nombreUsuario2"
+            [value]="reporte.gastoUsuario2">
+          </app-reporte-summary-card>
         </div>
 
         <!-- Balance / Deuda -->
-        <mat-card class="balance-card">
-          <mat-card-content>
-            <div class="balance-header">
-              <mat-icon [class]="reporte.saldoQuienDebe == 0 ? 'balance-ok' : 'balance-pending'">
-                {{ reporte.saldoQuienDebe == 0 ? 'check_circle' : 'swap_horiz' }}
-              </mat-icon>
-              <span class="balance-text">{{ reporte.detalleDeuda }}</span>
-            </div>
-
-            <!-- Barra comparativa -->
-            <div class="compare-bar">
-              <div class="compare-segment user1-seg"
-                [style.width.%]="getPorcentajeUsuario(1)">
-                <span class="seg-label">{{ reporte.nombreUsuario1 }}</span>
-              </div>
-              <div class="compare-segment user2-seg"
-                [style.width.%]="getPorcentajeUsuario(2)">
-                <span class="seg-label">{{ reporte.nombreUsuario2 }}</span>
-              </div>
-            </div>
-          </mat-card-content>
-        </mat-card>
+        <app-reporte-balance-bar
+          [balanceText]="reporte.detalleDeuda"
+          [isBalanced]="reporte.saldoQuienDebe === 0"
+          [nombreUsuario1]="reporte.nombreUsuario1"
+          [nombreUsuario2]="reporte.nombreUsuario2"
+          [porcentajeUsuario1]="getPorcentajeUsuario(1)"
+          [porcentajeUsuario2]="getPorcentajeUsuario(2)">
+        </app-reporte-balance-bar>
 
         <!-- Pie Chart: Gastos por Categoría -->
-        @if (pieChartData.labels && pieChartData.labels.length > 0) {
-          <mat-card class="chart-card">
-            <mat-card-header>
-              <mat-card-title>
-                <mat-icon>pie_chart</mat-icon>
-                Distribución por Categoría
-              </mat-card-title>
-            </mat-card-header>
-            <mat-divider></mat-divider>
-            <mat-card-content>
-              <div class="chart-wrapper">
-                <canvas baseChart
-                  [data]="pieChartData"
-                  [options]="pieChartOptions"
-                  type="doughnut">
-                </canvas>
-              </div>
-            </mat-card-content>
-          </mat-card>
+        @if (reporte.gastosPorCategoria && reporte.gastosPorCategoria.length > 0) {
+          <app-reporte-pie-chart [categorias]="reporte.gastosPorCategoria"></app-reporte-pie-chart>
         }
 
         <!-- Bar Chart: Comparativo por Categoría -->
-        @if (barChartData.labels && barChartData.labels.length > 0) {
-          <mat-card class="chart-card">
-            <mat-card-header>
-              <mat-card-title>
-                <mat-icon>bar_chart</mat-icon>
-                Comparativo por Categoría
-              </mat-card-title>
-            </mat-card-header>
-            <mat-divider></mat-divider>
-            <mat-card-content>
-              <div class="chart-wrapper chart-bar">
-                <canvas baseChart
-                  [data]="barChartData"
-                  [options]="barChartOptions"
-                  type="bar">
-                </canvas>
-              </div>
-            </mat-card-content>
-          </mat-card>
+        @if (reporte.gastosPorCategoria && reporte.gastosPorCategoria.length > 0) {
+          <app-reporte-bar-chart [categorias]="reporte.gastosPorCategoria"></app-reporte-bar-chart>
         }
 
         <!-- Gastos por Categoría (lista detallada) -->
         @if (reporte.gastosPorCategoria && reporte.gastosPorCategoria.length > 0) {
-          <mat-card class="categorias-card">
-            <mat-card-header>
-              <mat-card-title>
-                <mat-icon>format_list_bulleted</mat-icon>
-                Detalle por Categoría
-              </mat-card-title>
-            </mat-card-header>
-            <mat-divider></mat-divider>
-            <mat-card-content>
-              @for (cat of reporte.gastosPorCategoria; track cat.nombre) {
-                <div class="categoria-item">
-                  <div class="categoria-header">
-                    <div class="categoria-info">
-                      <span class="cat-icono">{{ cat.icono }}</span>
-                      <span class="cat-nombre">{{ cat.nombre }}</span>
-                      <span class="cat-count">({{ cat.cantidad }})</span>
-                    </div>
-                    <div class="categoria-monto">
-                      <span class="cat-valor">\${{ cat.monto | number:'1.0-0' }}</span>
-                      <span class="cat-pct">{{ cat.porcentaje }}%</span>
-                    </div>
-                  </div>
-                  <div class="categoria-bar">
-                    <div class="categoria-bar-fill" [style.width.%]="cat.porcentaje"
-                      [style.background-color]="cat.color || '#1976d2'"></div>
-                  </div>
-                </div>
-              }
-            </mat-card-content>
-          </mat-card>
+          <app-reporte-categoria-detail [categorias]="reporte.gastosPorCategoria"></app-reporte-categoria-detail>
         }
       }
     </div>
@@ -284,23 +202,7 @@ import { NotificationService } from '../../core/services/notification.service';
       p { color: rgba(0,0,0,0.5); margin: 0; }
     }
 
-    /* Selector de mes */
-    .mes-selector {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      margin-bottom: 16px;
-      .mes-label {
-        font-size: 18px;
-        font-weight: 500;
-        min-width: 180px;
-        text-align: center;
-        color: var(--text-primary, rgba(0,0,0,0.87));
-      }
-    }
-
-    /* Summary cards */
+    /* Summary grid */
     .summary-grid {
       display: grid;
       grid-template-columns: 1fr;
@@ -308,183 +210,7 @@ import { NotificationService } from '../../core/services/notification.service';
       margin-bottom: 16px;
     }
 
-    .summary-card {
-      mat-card-content {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 16px !important;
-      }
-      mat-icon {
-        font-size: 32px;
-        width: 32px;
-        height: 32px;
-        opacity: 0.8;
-      }
-      .summary-info {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-      }
-      .summary-label {
-        font-size: 13px;
-        color: rgba(0,0,0,0.6);
-      }
-      .summary-value {
-        font-size: 22px;
-        font-weight: 600;
-        color: rgba(0,0,0,0.87);
-      }
-      .summary-count {
-        font-size: 12px;
-        color: rgba(0,0,0,0.5);
-        background: rgba(0,0,0,0.06);
-        padding: 4px 8px;
-        border-radius: 12px;
-      }
-      &.total {
-        background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
-        color: white;
-        mat-icon, .summary-label, .summary-value, .summary-count { color: white; }
-        .summary-count { background: rgba(255,255,255,0.2); }
-      }
-      &.user1 { border-left: 4px solid #42a5f5; }
-      &.user2 { border-left: 4px solid #ef5350; }
-    }
-
-    /* Balance */
-    .balance-card {
-      margin-bottom: 16px;
-      mat-card-content { padding: 16px !important; }
-      .balance-header {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin-bottom: 14px;
-      }
-      .balance-ok { color: #4caf50; }
-      .balance-pending { color: #ff9800; }
-      .balance-text {
-        font-size: 15px;
-        font-weight: 500;
-        color: var(--text-primary, rgba(0,0,0,0.8));
-      }
-    }
-
-    .compare-bar {
-      display: flex;
-      height: 28px;
-      border-radius: 14px;
-      overflow: hidden;
-      background: #e0e0e0;
-    }
-
-    .compare-segment {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 20%;
-      transition: width 0.5s ease;
-      .seg-label {
-        font-size: 11px;
-        font-weight: 500;
-        color: white;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        padding: 0 8px;
-      }
-      &.user1-seg { background: #42a5f5; }
-      &.user2-seg { background: #ef5350; }
-    }
-
-    /* Charts */
-    .chart-card {
-      margin-bottom: 16px;
-      mat-card-header { padding: 16px 16px 12px; }
-      mat-card-title {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-size: 16px;
-        mat-icon { color: var(--primary-color, #1976d2); font-size: 22px; width: 22px; height: 22px; }
-      }
-      mat-card-content { padding: 12px 16px 16px !important; }
-    }
-
-    .chart-wrapper {
-      position: relative;
-      max-width: 280px;
-      margin: 0 auto;
-      padding: 8px 0;
-    }
-
-    .chart-bar {
-      max-width: 100%;
-    }
-
-    /* Categorías detalle */
-    .categorias-card {
-      margin-bottom: 16px;
-      mat-card-header { padding: 16px 16px 12px; }
-      mat-card-title {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-size: 16px;
-        mat-icon { color: var(--primary-color, #1976d2); font-size: 22px; width: 22px; height: 22px; }
-      }
-      mat-card-content { padding: 12px 16px 16px !important; }
-    }
-
-    .categoria-item {
-      margin-bottom: 14px;
-      &:last-child { margin-bottom: 0; }
-    }
-
-    .categoria-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 6px;
-    }
-
-    .categoria-info {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      .cat-icono { font-size: 18px; }
-      .cat-nombre { font-size: 14px; font-weight: 500; color: var(--text-primary, rgba(0,0,0,0.8)); }
-      .cat-count { font-size: 12px; color: rgba(0,0,0,0.4); }
-    }
-
-    .categoria-monto {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      .cat-valor { font-size: 14px; font-weight: 600; color: var(--text-primary, rgba(0,0,0,0.87)); }
-      .cat-pct {
-        font-size: 11px;
-        color: rgba(0,0,0,0.5);
-        background: rgba(0,0,0,0.06);
-        padding: 2px 6px;
-        border-radius: 8px;
-      }
-    }
-
-    .categoria-bar {
-      height: 8px;
-      background: #e8e8e8;
-      border-radius: 4px;
-      overflow: hidden;
-    }
-
-    .categoria-bar-fill {
-      height: 100%;
-      border-radius: 4px;
-      transition: width 0.5s ease;
-      min-width: 2%;
-    }
+    /* Styles for sub-components moved to their respective component files */
   `],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -496,71 +222,6 @@ export class ReportesComponent implements OnInit, OnDestroy {
   error: string | null = null;
   mesActual: number;
   anioActual: number;
-
-  // Pie/Doughnut chart
-  pieChartData: ChartData<'doughnut'> = { labels: [], datasets: [] };
-  pieChartOptions: ChartConfiguration<'doughnut'>['options'] = {
-    responsive: true,
-    maintainAspectRatio: true,
-    plugins: {
-      legend: {
-        position: 'bottom',
-        labels: {
-          padding: 16,
-          usePointStyle: true,
-          pointStyle: 'circle',
-          font: { size: 12, family: 'Roboto' }
-        }
-      },
-      tooltip: {
-        callbacks: {
-          label: (ctx) => {
-            const value = ctx.parsed;
-            const total = (ctx.dataset.data as number[]).reduce((a, b) => a + b, 0);
-            const pct = total > 0 ? ((value / total) * 100).toFixed(1) : '0';
-            return ` ${ctx.label}: $${value.toLocaleString('es-CL')} (${pct}%)`;
-          }
-        }
-      }
-    },
-    cutout: '55%'
-  };
-
-  // Bar chart
-  barChartData: ChartData<'bar'> = { labels: [], datasets: [] };
-  barChartOptions: ChartConfiguration<'bar'>['options'] = {
-    responsive: true,
-    maintainAspectRatio: true,
-    plugins: {
-      legend: {
-        position: 'bottom',
-        labels: {
-          padding: 16,
-          usePointStyle: true,
-          pointStyle: 'circle',
-          font: { size: 12, family: 'Roboto' }
-        }
-      },
-      tooltip: {
-        callbacks: {
-          label: (ctx) => ` ${ctx.dataset.label}: $${(ctx.parsed.y ?? 0).toLocaleString('es-CL')}`
-        }
-      }
-    },
-    scales: {
-      x: {
-        grid: { display: false },
-        ticks: { font: { size: 11 } }
-      },
-      y: {
-        beginAtZero: true,
-        ticks: {
-          font: { size: 11 },
-          callback: (value) => '$' + Number(value).toLocaleString('es-CL')
-        }
-      }
-    }
-  };
 
   private meses = [
     '', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -588,7 +249,6 @@ export class ReportesComponent implements OnInit, OnDestroy {
     this.apiService.getReporteMensual(this.mesActual, this.anioActual).pipe(takeUntil(this.destroy$)).subscribe({
       next: (data) => {
         this.reporte = data;
-        this.buildCharts();
         this.cargando = false;
         this.cdr.detectChanges();
       },
@@ -603,41 +263,6 @@ export class ReportesComponent implements OnInit, OnDestroy {
         this.cdr.detectChanges();
       }
     });
-  }
-
-  private buildCharts(): void {
-    if (!this.reporte?.gastosPorCategoria?.length) return;
-
-    const categorias = this.reporte.gastosPorCategoria;
-    const labels = categorias.map((c: any) => `${c.icono} ${c.nombre}`);
-    const montos = categorias.map((c: any) => c.monto);
-    const colores = categorias.map((c: any) => c.color || '#9e9e9e');
-
-    // Pie chart
-    this.pieChartData = {
-      labels,
-      datasets: [{
-        data: montos,
-        backgroundColor: colores,
-        borderWidth: 2,
-        borderColor: '#ffffff',
-        hoverBorderWidth: 3
-      }]
-    };
-
-    // Bar chart - solo si hay 2 usuarios (datos comparativos)
-    // Usamos los datos de categoría general ya que no tenemos desglose por usuario-categoría
-    this.barChartData = {
-      labels: categorias.map((c: any) => c.nombre),
-      datasets: [{
-        label: 'Monto por categoría',
-        data: montos,
-        backgroundColor: colores.map((c: string) => c + 'CC'),
-        borderColor: colores,
-        borderWidth: 1,
-        borderRadius: 4
-      }]
-    };
   }
 
   nombreMes(mes: number): string {

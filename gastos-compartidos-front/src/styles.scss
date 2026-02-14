@@ -376,6 +376,22 @@ p {
 }
 
 /* ============================================
+   MAT MENU (LIGHT MODE)
+   ============================================ */
+.mat-mdc-menu-panel {
+  background: var(--bg-primary) !important;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2) !important;
+}
+
+.mat-mdc-menu-item {
+  color: var(--text-primary) !important;
+
+  mat-icon {
+    color: var(--text-secondary) !important;
+  }
+}
+
+/* ============================================
    SWEETALERT2 CUSTOMIZATION
    ============================================ */
 .swal2-popup {

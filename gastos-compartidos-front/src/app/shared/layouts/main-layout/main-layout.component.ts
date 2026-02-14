@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ChildrenOutletContexts, RouterOutlet, Router, NavigationEnd, RouterLink, RouterLinkActive } from '@angular/router';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
@@ -45,6 +45,7 @@ interface NavItem {
 })
 export class MainLayoutComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
+  private authService = inject(AuthService);
   sidenavAberto = false;
 
   // Signals del AuthService
@@ -110,7 +111,6 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
   private fabRoutes = ['/dashboard', '/gastos'];
 
   constructor(
-    private authService: AuthService,
     private router: Router,
     private breakpointObserver: BreakpointObserver,
     private contexts: ChildrenOutletContexts,

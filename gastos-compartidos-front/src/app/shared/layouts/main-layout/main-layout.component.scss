@@ -21,14 +21,30 @@ mat-sidenav-content {
   display: flex;
   align-items: center;
   height: 56px;
+
+  button {
+    color: white !important;
+
+    mat-icon {
+      color: white !important;
+    }
+  }
 }
 
 .theme-toggle {
-  color: white;
+  color: white !important;
+
+  mat-icon {
+    color: white !important;
+  }
 }
 
 .menu-button {
-  color: white;
+  color: white !important;
+
+  mat-icon {
+    color: white !important;
+  }
 }
 
 .logo {

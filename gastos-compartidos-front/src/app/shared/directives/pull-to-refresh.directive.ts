@@ -10,7 +10,8 @@ export class PullToRefreshDirective implements OnInit, OnDestroy {
   private startY = 0;
   private pulling = false;
   private indicator: HTMLElement | null = null;
-  private threshold = 80;
+  private threshold = 120;  // Aumentado de 80 a 120 para ser menos sensible
+  private minPullDistance = 20;  // Distancia mínima antes de activar el pull-to-refresh
 
   private touchStartHandler = (e: TouchEvent) => this.onTouchStart(e);
   private touchMoveHandler = (e: TouchEvent) => this.onTouchMove(e);
@@ -59,7 +60,8 @@ export class PullToRefreshDirective implements OnInit, OnDestroy {
     const currentY = e.touches[0].clientY;
     const diff = currentY - this.startY;
 
-    if (diff > 0 && this.el.nativeElement.scrollTop <= 0) {
+    // Solo activar si el usuario está jalando hacia abajo con suficiente distancia
+    if (diff > this.minPullDistance && this.el.nativeElement.scrollTop <= 0) {
       e.preventDefault();
       const progress = Math.min(diff / this.threshold, 1);
       const translateY = Math.min(diff * 0.4, 60);
@@ -71,6 +73,12 @@ export class PullToRefreshDirective implements OnInit, OnDestroy {
       } else {
         this.indicator.classList.remove('ptr-ready');
       }
+    } else if (diff <= 0) {
+      // Si el usuario hace scroll hacia arriba, cancelar el pull
+      this.pulling = false;
+      this.indicator.style.transform = 'translateY(0)';
+      this.indicator.style.opacity = '0';
+      this.indicator.classList.remove('ptr-ready');
     }
   }
 
