@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { tap, map } from 'rxjs/operators';
+import { tap, map, switchMap } from 'rxjs/operators';
 import { PageResponse } from '../models/page-response';
 
 export interface Usuario {
@@ -77,7 +77,11 @@ export class PagoService {
   // Registrar un nuevo pago
   registrarPago(pago: PagoCreate): Observable<Pago> {
     return this.http.post<Pago>(this.apiUrl, pago).pipe(
-      tap(() => this.refrescarResumenDeuda())
+      switchMap(nuevoPago =>
+        this.obtenerResumenDeuda().pipe(
+          map(() => nuevoPago)
+        )
+      )
     );
   }
 
@@ -106,7 +110,11 @@ export class PagoService {
   // Cancelar un pago
   cancelarPago(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
-      tap(() => this.refrescarResumenDeuda())
+      switchMap(() =>
+        this.obtenerResumenDeuda().pipe(
+          map(() => undefined)
+        )
+      )
     );
   }
 
@@ -115,11 +123,6 @@ export class PagoService {
     return this.http.get<ResumenDeuda>(`${this.apiUrl}/resumen`).pipe(
       tap(resumen => this.resumenDeudaSubject.next(resumen))
     );
-  }
-
-  // Refrescar resumen de deuda
-  private refrescarResumenDeuda(): void {
-    this.obtenerResumenDeuda().subscribe();
   }
 
   // Limpiar estado

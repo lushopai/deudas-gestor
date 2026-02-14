@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -27,7 +27,8 @@ import { NotificationService } from '../../core/services/notification.service';
     RouterLink
   ],
   templateUrl: './registro.component.html',
-  styleUrls: ['./registro.component.scss']
+  styleUrls: ['./registro.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class RegistroComponent implements OnInit {
   formulario: FormGroup;

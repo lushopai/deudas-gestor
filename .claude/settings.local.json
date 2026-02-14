@@ -9,7 +9,8 @@
       "Bash(./mvnw compile:*)",
       "Bash(cmd /c:*)",
       "Bash(powershell -Command \"Set-Location ''d:\\\\Proyectos\\\\deudas\\\\deudas-gestor\\\\gastos-compartidos''; mvn compile 2>&1\")",
-      "Bash(powershell -Command:*)"
+      "Bash(powershell -Command:*)",
+      "Bash(find:*)"
     ]
   }
 }

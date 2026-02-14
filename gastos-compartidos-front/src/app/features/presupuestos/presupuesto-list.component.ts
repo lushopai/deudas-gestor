@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
@@ -246,7 +246,8 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/c
       .presupuestos-container { padding: 16px; }
       .header h1 { font-size: 20px; }
     }
-  `]
+  `],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PresupuestoListComponent implements OnInit {
     presupuestos: Presupuesto[] = [];

@@ -80,21 +80,37 @@ export class GastoService {
   // Crear nuevo gasto
   crearGasto(gasto: Partial<Gasto>): Observable<Gasto> {
     return this.http.post<Gasto>(`${this.apiUrl}`, gasto).pipe(
-      tap(() => this.obtenerGastos().subscribe())
+      tap(nuevoGasto => {
+        // Optimistic update: agregar el nuevo gasto al estado actual
+        const gastosActuales = this.gastosSubject.value;
+        this.gastosSubject.next([...gastosActuales, nuevoGasto]);
+      })
     );
   }
 
   // Actualizar gasto
   actualizarGasto(id: number, gasto: Partial<Gasto>): Observable<Gasto> {
     return this.http.put<Gasto>(`${this.apiUrl}/${id}`, gasto).pipe(
-      tap(() => this.obtenerGastos().subscribe())
+      tap(gastoActualizado => {
+        // Optimistic update: reemplazar el gasto en el estado actual
+        const gastosActuales = this.gastosSubject.value;
+        const gastosActualizados = gastosActuales.map(g =>
+          g.id === id ? gastoActualizado : g
+        );
+        this.gastosSubject.next(gastosActualizados);
+      })
     );
   }
 
   // Eliminar gasto
   eliminarGasto(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
-      tap(() => this.obtenerGastos().subscribe())
+      tap(() => {
+        // Optimistic update: eliminar el gasto del estado actual
+        const gastosActuales = this.gastosSubject.value;
+        const gastosFiltrados = gastosActuales.filter(g => g.id !== id);
+        this.gastosSubject.next(gastosFiltrados);
+      })
     );
   }
 
