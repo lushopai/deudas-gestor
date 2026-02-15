@@ -165,9 +165,13 @@ mat-toolbar {
   align-items: center;
   gap: var(--spacing-md);
   padding: var(--spacing-lg);
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
   border-radius: var(--radius);
-  color: white;
+  color: white !important;
+
+  * {
+    color: white !important;
+  }
 
   mat-icon {
     font-size: 32px;

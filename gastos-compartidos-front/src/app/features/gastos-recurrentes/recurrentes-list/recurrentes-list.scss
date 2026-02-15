@@ -69,18 +69,30 @@
     }
 
     &.activos {
-      background: linear-gradient(135deg, #42a5f5 0%, #1e88e5 100%);
-      color: white;
+      background: linear-gradient(135deg, #42a5f5 0%, #1e88e5 100%) !important;
+      color: white !important;
+
+      * {
+        color: white !important;
+      }
     }
 
     &.mensual {
-      background: linear-gradient(135deg, #ab47bc 0%, #8e24aa 100%);
-      color: white;
+      background: linear-gradient(135deg, #ab47bc 0%, #8e24aa 100%) !important;
+      color: white !important;
+
+      * {
+        color: white !important;
+      }
     }
 
     &.total {
-      background: linear-gradient(135deg, #66bb6a 0%, #43a047 100%);
-      color: white;
+      background: linear-gradient(135deg, #66bb6a 0%, #43a047 100%) !important;
+      color: white !important;
+
+      * {
+        color: white !important;
+      }
     }
   }
 }
