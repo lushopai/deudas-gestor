@@ -18,7 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/api/ocr")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "*") // Permitir CORS desde cualquier origen (ajustar en prod)
 public class OcrController {
 
     private final ClaudeOcrService ocrService;

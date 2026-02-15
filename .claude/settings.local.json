@@ -12,7 +12,16 @@
       "Bash(powershell -Command:*)",
       "Bash(find:*)",
       "Bash(wc:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(\"c:/proyectos/deudas-gestor/gastos-compartidos/.env.example\":*)",
+      "Bash(\"c:/proyectos/deudas-gestor/gastos-compartidos/src/main/resources/application-prod.properties\":*)",
+      "Bash(openssl rand:*)",
+      "Bash(\"c:/proyectos/deudas-gestor/setup-ubuntu.sh\":*)",
+      "Bash(chmod:*)",
+      "Bash(\"c:/proyectos/deudas-gestor/DEPLOYMENT-UBUNTU.md\":*)",
+      "Bash(\"c:/proyectos/deudas-gestor/update-ngrok-cors.sh\":*)",
+      "Bash(\"c:/proyectos/deudas-gestor/CORS-SETUP.md\":*)",
+      "Bash(\"c:/proyectos/deudas-gestor/DOCKER-COMPOSE-FIX.md\":*)"
     ]
   }
 }

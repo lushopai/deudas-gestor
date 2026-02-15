@@ -88,16 +88,20 @@ public class SecurityConfig {
         return http.build();
     }
 
-    @org.springframework.beans.factory.annotation.Value("${CORS_ALLOWED_ORIGINS:http://localhost:4200}")
+    @org.springframework.beans.factory.annotation.Value("${ALLOWED_ORIGINS:http://localhost:4200,http://localhost:8080}")
     private String allowedOrigins;
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // Dividir por comas y limpiar espacios
-        String[] origins = allowedOrigins.split(",");
 
-        // Usar patterns permite comodines como '*' y funciona con credenciales
+        // Dividir por comas, limpiar espacios y filtrar vacíos
+        String[] origins = Arrays.stream(allowedOrigins.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .toArray(String[]::new);
+
+        // Usar patterns permite comodines y funciona con credenciales
         configuration.setAllowedOriginPatterns(Arrays.asList(origins));
 
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
