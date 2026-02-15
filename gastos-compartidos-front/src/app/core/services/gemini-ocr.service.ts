@@ -43,8 +43,6 @@ export class GeminiOcrService {
      */
     async procesarRecibo(imagenFile: File): Promise<OcrResult> {
         try {
-            console.log('🤖 [OCR Backend] Enviando imagen al backend (Claude Vision)...');
-
             const formData = new FormData();
             formData.append('file', imagenFile);
 
@@ -54,7 +52,6 @@ export class GeminiOcrService {
             return new Promise((resolve, reject) => {
                 this.http.post<BackendOcrResponse>(url, formData).subscribe({
                     next: (response) => {
-                        console.log('✅ [OCR Backend] Respuesta recibida:', response);
                         resolve({
                             texto: response.texto,
                             confianza: response.confianza,
@@ -64,14 +61,14 @@ export class GeminiOcrService {
                         });
                     },
                     error: (error) => {
-                        console.error('❌ [OCR Backend] Error:', error);
+                        console.error('OCR Backend Error:', error);
                         reject(error);
                     }
                 });
             });
 
         } catch (error) {
-            console.error('❌ [OCR Backend] Error inesperado:', error);
+            console.error('OCR Error inesperado:', error);
             throw error;
         }
     }

@@ -1,0 +1,65 @@
+<mat-toolbar color="primary">
+  <button mat-icon-button (click)="volver()">
+    <mat-icon>arrow_back</mat-icon>
+  </button>
+  <span>Configuración</span>
+</mat-toolbar>
+
+<div class="settings-container">
+  <!-- Language -->
+  <app-settings-language
+    [currentLang]="currentLang"
+    (languageChanged)="onLanguageChanged($event)">
+  </app-settings-language>
+
+  <!-- Appearance -->
+  <app-settings-appearance
+    [darkMode]="settings.darkMode"
+    (darkModeToggled)="onDarkModeToggled()">
+  </app-settings-appearance>
+
+  <!-- Notifications -->
+  <app-settings-notifications
+    [recordatoriosActivos]="settings.recordatoriosActivos"
+    [recordatorioRecurrentes]="settings.recordatorioRecurrentes"
+    [recordatorioDeudas]="settings.recordatorioDeudas"
+    (settingChanged)="onNotificationSettingChanged($event)">
+  </app-settings-notifications>
+
+  <!-- Push -->
+  <app-settings-push
+    [pushSupported]="pushSupported"
+    [pushSubscribed]="pushSubscribed"
+    [pushLoading]="pushLoading"
+    [pushPermission]="pushPermission"
+    (pushToggled)="onPushToggled()"
+    (pushTested)="onPushTested()">
+  </app-settings-push>
+
+  <!-- Data -->
+  <app-settings-data
+    (exportData)="onExportData()"
+    (openProfile)="onOpenProfile()"
+    (configurePartner)="onConfigurePartner()">
+  </app-settings-data>
+
+  <!-- Categories -->
+  <app-settings-categories
+    [categorias]="categorias">
+  </app-settings-categories>
+
+  <!-- App Info -->
+  <mat-card class="settings-section app-info">
+    <div class="app-info-content">
+      <mat-icon class="app-logo">account_balance_wallet</mat-icon>
+      <span class="app-name">Gastos Compartidos</span>
+      <span class="app-version">v1.0.0</span>
+    </div>
+  </mat-card>
+
+  <!-- Logout -->
+  <button class="logout-btn" (click)="cerrarSesion()">
+    <mat-icon>logout</mat-icon>
+    <span>Cerrar Sesión</span>
+  </button>
+</div>

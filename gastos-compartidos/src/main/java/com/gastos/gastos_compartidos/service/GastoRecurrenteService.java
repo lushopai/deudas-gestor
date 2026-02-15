@@ -198,7 +198,7 @@ public class GastoRecurrenteService {
         }
 
         if (ejecutados > 0) {
-            log.info("✅ Ejecutados {} gastos recurrentes por un total de ${}", ejecutados, totalMonto);
+            log.info("Ejecutados {} gastos recurrentes por un total de ${}", ejecutados, totalMonto);
 
             // Enviar push notification a cada usuario afectado
             for (var entry : ejecutadosPorUsuario.entrySet()) {

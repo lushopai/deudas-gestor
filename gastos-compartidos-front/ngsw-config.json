@@ -42,10 +42,10 @@
         "/api/dashboard/**"
       ],
       "cacheConfig": {
-        "maxSize": 50,
-        "maxAge": "1h",
+        "maxSize": 100,
+        "maxAge": "1d",
         "strategy": "freshness",
-        "timeout": "5s"
+        "timeout": "3s"
       }
     },
     {

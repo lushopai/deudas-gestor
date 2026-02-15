@@ -61,8 +61,6 @@ public class ClaudeOcrService {
             // VALIDAR ARCHIVO ANTES DE PROCESAR
             validarArchivo(file);
 
-            log.info("Procesando recibo con Claude Vision...");
-
             // 1. Convertir imagen a base64
             String imageBase64 = convertFileToBase64(file);
             String mediaType = getMediaType(file.getOriginalFilename());
@@ -79,7 +77,6 @@ public class ClaudeOcrService {
             HttpEntity<String> entity = new HttpEntity<>(requestBody.toString(), headers);
 
             // 4. Llamar a Claude API
-            log.info("Llamando a Claude Vision API...");
             ResponseEntity<String> response = restTemplate.postForEntity(CLAUDE_API_URL, entity, String.class);
 
             if (!response.getStatusCode().is2xxSuccessful()) {
@@ -191,7 +188,6 @@ public class ClaudeOcrService {
             }
 
             textoGenerado = content.get(0).path("text").asText();
-            log.info("Respuesta de Claude: {}", textoGenerado);
 
             // Intentar extraer JSON del texto
             String jsonLimpio = extraerJsonDelTexto(textoGenerado);
@@ -345,9 +341,6 @@ public class ClaudeOcrService {
             throw new BadRequestException(
                     "Extensión de archivo no válida. Solo se aceptan: " + String.join(", ", ALLOWED_EXTENSIONS));
         }
-
-        log.info("Archivo validado correctamente: {} ({} bytes, tipo: {})",
-                filename, fileSize, contentType);
     }
 
     /**

@@ -26,8 +26,6 @@ export class OcrService {
    * Procesa un recibo usando Claude Vision API (backend)
    */
   async procesarRecibo(imagenFile: File): Promise<OcrResult> {
-    console.log('🔍 [OCR] Iniciando procesamiento de recibo con Claude Vision...');
-
     try {
       const resultado = await this.claudeOcrService.procesarRecibo(imagenFile);
 
@@ -38,7 +36,7 @@ export class OcrService {
         motor: resultado.motor
       };
     } catch (error) {
-      console.error('❌ [OCR] Error procesando con Claude Vision:', error);
+      console.error('OCR Error:', error);
       throw error;
     }
   }

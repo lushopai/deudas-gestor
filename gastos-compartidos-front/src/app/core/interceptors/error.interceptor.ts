@@ -36,7 +36,9 @@ export class ErrorInterceptor implements HttpInterceptor {
           // Error del servidor
           switch (error.status) {
             case 0:
-              errorMessage = 'No se pudo conectar con el servidor. Verifica tu conexión a internet.';
+              errorMessage = navigator.onLine
+                ? 'No se pudo conectar con el servidor. Intenta nuevamente.'
+                : 'Sin conexión a internet. Verifica tu conexión.';
               break;
 
             case 400:

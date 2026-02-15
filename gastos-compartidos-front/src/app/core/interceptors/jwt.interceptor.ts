@@ -18,18 +18,12 @@ export class JwtInterceptor implements HttpInterceptor {
     // Agregar token si existe
     const token = this.authService.obtenerToken();
 
-    console.log('🔐 [JWT Interceptor] URL:', request.url);
-    console.log('🔐 [JWT Interceptor] Token existe:', !!token);
-
     if (token && !request.url.includes('/public/')) {
-      console.log('✅ [JWT Interceptor] Agregando token a la petición');
       request = request.clone({
         setHeaders: {
           Authorization: `Bearer ${token}`
         }
       });
-    } else {
-      console.warn('⚠️ [JWT Interceptor] No se agregó token. Token:', !!token, 'URL pública:', request.url.includes('/public/'));
     }
 
     return next.handle(request).pipe(

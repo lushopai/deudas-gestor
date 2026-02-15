@@ -23,7 +23,6 @@ export class GoogleLoginComponent implements OnInit, AfterViewInit {
 
   constructor(private authService: AuthService, private router: Router) {
     this.clientId = environment.google.clientId;
-    console.log('ClientId en constructor:', this.clientId);
   }
 
   ngOnInit(): void {
@@ -43,7 +42,6 @@ export class GoogleLoginComponent implements OnInit, AfterViewInit {
       attempts++;
       if (typeof google !== 'undefined' && google.accounts) {
         clearInterval(interval);
-        console.log('Google SDK cargado correctamente');
       } else if (attempts >= maxAttempts) {
         clearInterval(interval);
         console.error('Google SDK no se pudo cargar');
@@ -58,8 +56,7 @@ export class GoogleLoginComponent implements OnInit, AfterViewInit {
         if (!this.clientId) {
           throw new Error('Client ID no está configurado');
         }
-        
-        console.log('Inicializando Google Sign-In con clientId:', this.clientId);
+
         google.accounts.id.initialize({
           client_id: this.clientId,
           callback: (response: any) => this.manejarRespuestaGoogle(response),
@@ -76,7 +73,6 @@ export class GoogleLoginComponent implements OnInit, AfterViewInit {
         this.error = String(e);
       }
     } else {
-      console.warn('Google SDK no cargado aún');
       setTimeout(() => this.inicializarGoogleSignIn(), 500);
     }
   }

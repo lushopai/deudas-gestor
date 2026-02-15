@@ -1,4 +1,4 @@
-import { ApplicationConfig, isDevMode, importProvidersFrom } from '@angular/core';
+import { ApplicationConfig, isDevMode, importProvidersFrom, APP_INITIALIZER } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient, withInterceptors, HTTP_INTERCEPTORS, withInterceptorsFromDi, HttpClient } from '@angular/common/http';
 import { provideAnimations } from '@angular/platform-browser/animations';
@@ -9,6 +9,7 @@ import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { routes } from './app.routes';
 import { JwtInterceptor } from './core/interceptors/jwt.interceptor';
 import { ErrorInterceptor } from './core/interceptors/error.interceptor';
+import { ConnectivityService } from './core/services/connectivity.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -38,6 +39,14 @@ export const appConfig: ApplicationConfig = {
     provideServiceWorker('ngsw-worker.js', {
       enabled: !isDevMode(),
       registrationStrategy: 'registerWhenStable:30000'
-    })
+    }),
+    {
+      provide: APP_INITIALIZER,
+      useFactory: (connectivityService: ConnectivityService) => () => {
+        // Inicializar el servicio de conectividad al arrancar la app
+      },
+      deps: [ConnectivityService],
+      multi: true
+    }
   ]
 };

@@ -37,6 +37,8 @@ public class GastoService {
         private final GastoSplitRepository gastoSplitRepository;
         private final UsuarioRepository usuarioRepository;
         private final CategoriaRepository categoriaRepository;
+        private final WebPushService webPushService;
+        private final PresupuestoService presupuestoService;
 
         public GastoResponseDTO crearGasto(Long usuarioId, GastoCreateDTO request) {
                 // Validar usuario
@@ -118,6 +120,14 @@ public class GastoService {
                                 gastoSplitRepository.save(split);
                                 gasto.getSplits().add(split);
                         }
+                }
+
+                // Verificar presupuestos y enviar notificaciones si aplica
+                verificarPresupuestosYNotificar(usuarioId, categoria.getId(), request.getMonto());
+
+                // Si es gasto compartido grande, notificar a la pareja
+                if (!esGastoIndividual && request.getMonto().compareTo(new BigDecimal("50000")) > 0) {
+                        notificarGastoGrandeAPareja(gasto, usuario, pareja);
                 }
 
                 return GastoResponseDTO.fromEntity(gasto);
@@ -315,5 +325,75 @@ public class GastoService {
                                 "cantidadGastos", gastos.size(),
                                 "promedioPorGasto", promedio,
                                 "gastosPorCategoria", gastosPorCategoria);
+        }
+
+        /**
+         * Verifica presupuestos del usuario y envía notificación si alcanzó 80% o 100%
+         */
+        private void verificarPresupuestosYNotificar(Long usuarioId, Long categoriaId, BigDecimal montoGasto) {
+                try {
+                        // Obtener presupuestos activos del usuario
+                        List<com.gastos.gastos_compartidos.dto.PresupuestoResponseDTO> presupuestos =
+                                presupuestoService.obtenerActivosPorUsuario(usuarioId);
+
+                        for (var presupuesto : presupuestos) {
+                                // Verificar solo presupuestos relevantes (global o de la categoría del gasto)
+                                if (presupuesto.getCategoriaId() == null || presupuesto.getCategoriaId().equals(categoriaId)) {
+                                        double porcentaje = presupuesto.getPorcentajeUsado();
+                                        String estado = presupuesto.getEstado();
+
+                                        // Notificar si alcanzó 100% (EXCEDIDO)
+                                        if ("EXCEDIDO".equals(estado) && porcentaje >= 100 && porcentaje < 105) {
+                                                String titulo = "💸 Presupuesto excedido";
+                                                String mensaje = String.format("Has excedido el presupuesto de %s (%.0f%%)",
+                                                        presupuesto.getCategoriaNombre(), porcentaje);
+                                                webPushService.notifyUser(usuarioId, titulo, mensaje, "/presupuestos");
+                                        }
+                                        // Notificar si alcanzó 80% (ALERTA)
+                                        else if ("ALERTA".equals(estado) && porcentaje >= 80 && porcentaje < 85) {
+                                                String titulo = "⚠️ Alerta de presupuesto";
+                                                String mensaje = String.format("Has usado el %.0f%% del presupuesto de %s",
+                                                        porcentaje, presupuesto.getCategoriaNombre());
+                                                webPushService.notifyUser(usuarioId, titulo, mensaje, "/presupuestos");
+                                        }
+                                }
+                        }
+                } catch (Exception e) {
+                        // No interrumpir el flujo si falla la notificación
+                        e.printStackTrace();
+                }
+        }
+
+        /**
+         * Notifica a la pareja cuando se registra un gasto grande (>$50,000)
+         */
+        private void notificarGastoGrandeAPareja(Gasto gasto, Usuario usuario, Pareja pareja) {
+                try {
+                        // Verificar que la pareja tenga 2 miembros
+                        if (pareja.getUsuarios().size() < 2) {
+                                return;
+                        }
+
+                        // Obtener el otro miembro de la pareja
+                        Usuario otroUsuario = pareja.getUsuarios().stream()
+                                .filter(u -> !u.getId().equals(usuario.getId()))
+                                .findFirst()
+                                .orElse(null);
+
+                        if (otroUsuario == null) {
+                                return;
+                        }
+
+                        String titulo = "💰 Gasto grande registrado";
+                        String mensaje = String.format("%s registró un gasto de $%,d: %s",
+                                usuario.getNombre(),
+                                gasto.getMonto().intValue(),
+                                gasto.getDescripcion());
+
+                        webPushService.notifyUser(otroUsuario.getId(), titulo, mensaje, "/gastos");
+                } catch (Exception e) {
+                        // No interrumpir el flujo si falla la notificación
+                        e.printStackTrace();
+                }
         }
 }

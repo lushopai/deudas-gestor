@@ -25,6 +25,7 @@ public class DeudaService {
     private final DeudaRepository deudaRepository;
     private final AbonoDeudaRepository abonoDeudaRepository;
     private final UsuarioRepository usuarioRepository;
+    private final WebPushService webPushService;
 
     // ==================== DEUDAS ====================
 
@@ -226,5 +227,43 @@ public class DeudaService {
         }
 
         return deuda;
+    }
+
+    // ==================== NOTIFICACIONES ====================
+
+    /**
+     * Tarea programada: Envía recordatorios de deudas próximas a vencer (3 días antes)
+     * Se ejecuta diariamente a las 9:00 AM
+     */
+    @org.springframework.scheduling.annotation.Scheduled(cron = "0 0 9 * * *")
+    public void recordarDeudasProximasAVencer() {
+        try {
+            LocalDate hoy = LocalDate.now();
+            LocalDate fechaLimite = hoy.plusDays(3);
+
+            // Buscar deudas activas que vencen exactamente en 3 días
+            List<Deuda> deudasProximas = deudaRepository.findAll().stream()
+                    .filter(d -> d.getEstado() == EstadoDeuda.ACTIVA)
+                    .filter(d -> d.getFechaVencimiento() != null)
+                    .filter(d -> d.getFechaVencimiento().equals(fechaLimite))
+                    .collect(Collectors.toList());
+
+            int notificacionesEnviadas = 0;
+            for (Deuda deuda : deudasProximas) {
+                String titulo = "⏰ Deuda próxima a vencer";
+                String mensaje = String.format("Tu deuda \"%s\" vence en 3 días. Saldo: $%,d",
+                        deuda.getDescripcion(),
+                        deuda.getSaldoPendiente().intValue());
+
+                webPushService.notifyUser(deuda.getUsuario().getId(), titulo, mensaje, "/deudas-externas");
+                notificacionesEnviadas++;
+            }
+
+            if (notificacionesEnviadas > 0) {
+                System.out.println("Enviados " + notificacionesEnviadas + " recordatorios de deudas próximas a vencer");
+            }
+        } catch (Exception e) {
+            System.err.println("Error en recordatorio de deudas: " + e.getMessage());
+        }
     }
 }

@@ -102,39 +102,10 @@
   }
 
   <!-- Gastos Recurrentes Próximos -->
-  @if (proximosRecurrentes.length > 0) {
-    <mat-card class="recurrentes-card" (click)="abrirRecurrentes()">
-      <mat-card-content>
-        <div class="recurrentes-header">
-          <div class="recurrentes-icon">
-            <mat-icon>autorenew</mat-icon>
-          </div>
-          <div class="recurrentes-info">
-            <span class="recurrentes-label">{{ 'DASHBOARD.RECURRING_EXPENSES' | translate }}</span>
-            <span class="recurrentes-count">{{ proximosRecurrentes.length }}</span>
-          </div>
-          <mat-icon class="arrow-icon">chevron_right</mat-icon>
-        </div>
-        <div class="recurrentes-lista">
-          @for (gr of proximosRecurrentes; track gr.id) {
-            <div class="recurrente-item">
-              <span class="recurrente-desc">{{ gr.descripcion }}</span>
-              <span class="recurrente-monto">{{ formatMonto(gr.monto) }}</span>
-              <span class="recurrente-dias">
-                @if (gr.diasHastaProxima <= 0) {
-                  Hoy
-                } @else if (gr.diasHastaProxima === 1) {
-                  Mañana
-                } @else {
-                  En {{ gr.diasHastaProxima }}d
-                }
-              </span>
-            </div>
-          }
-        </div>
-      </mat-card-content>
-    </mat-card>
-  }
+  <app-dashboard-recurrentes
+    [proximosRecurrentes]="proximosRecurrentes"
+    (cardClick)="abrirRecurrentes()">
+  </app-dashboard-recurrentes>
 
   <!-- Stats -->
   @if (!cargando && resumenGastos) {
@@ -163,48 +134,10 @@
   }
 
   <!-- Presupuestos activos -->
-  @if (!cargando && presupuestos.length > 0) {
-    <mat-card class="presupuestos-card">
-      <mat-card-header>
-        <mat-card-title>{{ 'DASHBOARD.BUDGETS_MONTH' | translate }}</mat-card-title>
-        <button mat-icon-button routerLink="/presupuestos" class="view-all-btn">
-          <mat-icon>arrow_forward</mat-icon>
-        </button>
-      </mat-card-header>
-      <mat-divider></mat-divider>
-      <mat-card-content>
-        @for (p of presupuestos; track p.id) {
-          <div class="presupuesto-item" [class.alerta]="p.estado === 'ALERTA'" [class.excedido]="p.estado === 'EXCEDIDO'">
-            <div class="presupuesto-header">
-              <div class="presupuesto-info">
-                <mat-icon>{{ p.categoriaIcono }}</mat-icon>
-                <span class="presupuesto-nombre">{{ p.categoriaNombre }}</span>
-              </div>
-              <div class="presupuesto-montos">
-                <span class="presupuesto-gastado">${{ p.gastado | number: '1.0-0' }}</span>
-                <span class="presupuesto-separador">/</span>
-                <span class="presupuesto-limite">${{ p.limite | number: '1.0-0' }}</span>
-              </div>
-            </div>
-            <mat-progress-bar
-              mode="determinate"
-              [value]="p.porcentajeUsado > 100 ? 100 : p.porcentajeUsado"
-              [color]="p.estado === 'EXCEDIDO' ? 'warn' : (p.estado === 'ALERTA' ? 'accent' : 'primary')"
-              class="presupuesto-progress">
-            </mat-progress-bar>
-            <div class="presupuesto-footer">
-              <span class="presupuesto-porcentaje">{{ p.porcentajeUsado | number: '1.0-0' }}%</span>
-              @if (p.estado === 'EXCEDIDO') {
-                <span class="presupuesto-estado excedido">Excedido por ${{ -p.disponible | number: '1.0-0' }}</span>
-              } @else {
-                <span class="presupuesto-estado">Disponible: ${{ p.disponible | number: '1.0-0' }}</span>
-              }
-            </div>
-          </div>
-        }
-      </mat-card-content>
-    </mat-card>
-  }
+  <app-dashboard-presupuestos
+    [presupuestos]="presupuestos"
+    [cargando]="cargando">
+  </app-dashboard-presupuestos>
   <!-- Gastos Recientes -->
   @if (!cargando && gastosRecientes.length > 0) {
     <app-dashboard-recent-gastos [gastos]="gastosRecientes"></app-dashboard-recent-gastos>

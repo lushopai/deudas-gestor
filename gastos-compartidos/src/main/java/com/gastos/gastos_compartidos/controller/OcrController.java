@@ -25,8 +25,6 @@ public class OcrController {
 
     @PostMapping("/scan")
     public ResponseEntity<OcrResponseDTO> escanearRecibo(@RequestParam("file") MultipartFile file) {
-        log.info("Recibida solicitud de escaneo OCR: {}", file.getOriginalFilename());
-
         if (file.isEmpty()) {
             return ResponseEntity.badRequest().build();
         }

@@ -27,6 +27,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { DashboardSummaryCardComponent } from './components/dashboard-summary-card';
 import { DashboardChartComponent } from './components/dashboard-chart';
 import { DashboardRecentGastosComponent } from './components/dashboard-recent-gastos';
+import { DashboardRecurrentesComponent } from './components/dashboard-recurrentes';
+import { DashboardPresupuestosComponent } from './components/dashboard-presupuestos';
 
 @Component({
   selector: 'app-dashboard',
@@ -51,7 +53,9 @@ import { DashboardRecentGastosComponent } from './components/dashboard-recent-ga
     PullToRefreshDirective,
     DashboardSummaryCardComponent,
     DashboardChartComponent,
-    DashboardRecentGastosComponent
+    DashboardRecentGastosComponent,
+    DashboardRecurrentesComponent,
+    DashboardPresupuestosComponent
   ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
