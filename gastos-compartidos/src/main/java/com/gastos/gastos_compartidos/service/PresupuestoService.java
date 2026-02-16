@@ -39,13 +39,12 @@ public class PresupuestoService {
             categoria = categoriaRepository.findById(dto.getCategoriaId())
                     .orElseThrow(() -> new RuntimeException("Categoría no encontrada"));
 
-            // Verificar que no exista ya un presupuesto para esta categoría/período
             presupuestoRepository.findByUsuarioIdAndCategoriaIdAndPeriodo(
                     usuarioId, dto.getCategoriaId(), dto.getPeriodo()).ifPresent(p -> {
                         throw new RuntimeException("Ya existe un presupuesto para esta categoría y período");
                     });
         } else {
-            // Verificar presupuesto global
+
             presupuestoRepository.findByUsuarioIdAndCategoriaIsNullAndPeriodo(
                     usuarioId, dto.getPeriodo()).ifPresent(p -> {
                         throw new RuntimeException("Ya existe un presupuesto global para este período");
@@ -118,10 +117,8 @@ public class PresupuestoService {
     }
 
     private PresupuestoResponseDTO mapToDTO(Presupuesto p, Long usuarioId) {
-        // Calcular rango de fechas según el período
         LocalDateTime[] rango = calcularRango(p.getPeriodo());
 
-        // Calcular gasto actual
         BigDecimal gastado;
         if (p.getCategoria() != null) {
             gastado = gastoRepository.sumarGastosPorCategoriaYRango(
@@ -161,9 +158,6 @@ public class PresupuestoService {
                 .build();
     }
 
-    /**
-     * Calcula el rango de fechas [desde, hasta) para el período actual.
-     */
     private LocalDateTime[] calcularRango(PeriodoPresupuesto periodo) {
         LocalDate hoy = LocalDate.now();
         LocalDateTime desde;

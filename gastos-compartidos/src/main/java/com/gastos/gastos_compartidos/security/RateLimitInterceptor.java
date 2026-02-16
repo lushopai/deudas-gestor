@@ -26,25 +26,20 @@ public class RateLimitInterceptor implements HandlerInterceptor {
         String userKey = resolveKey(request);
         String path = request.getRequestURI();
 
-        // Determinar límite según endpoint
         int capacity;
         Duration duration;
 
         if (path.startsWith("/api/auth/login") || path.startsWith("/api/auth/registro")) {
-            // Auth endpoints: 5 peticiones cada 15 minutos por IP
             capacity = 5;
             duration = Duration.ofMinutes(15);
         } else if (path.startsWith("/api/ocr/")) {
-            // OCR: costoso, 10 peticiones por minuto
             capacity = 10;
             duration = Duration.ofMinutes(1);
         } else {
-            // Default: 50 peticiones por minuto
             capacity = 50;
             duration = Duration.ofMinutes(1);
         }
 
-        // Clave incluye el grupo de endpoint para límites independientes
         String rateLimitKey = userKey + ":" + resolveEndpointGroup(path);
         RateLimitConfig.RateLimitResult result = rateLimitConfig.tryConsume(rateLimitKey, capacity, duration);
 
@@ -67,9 +62,6 @@ public class RateLimitInterceptor implements HandlerInterceptor {
         return "ip:" + request.getRemoteAddr();
     }
 
-    /**
-     * Agrupa endpoints para aplicar rate limits por grupo en vez de por URL exacta.
-     */
     private String resolveEndpointGroup(String path) {
         if (path.startsWith("/api/auth/"))
             return "auth";

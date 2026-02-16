@@ -6,24 +6,11 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.stereotype.Component;
 
-/**
- * Configuración de Rate Limiting
- * Implementa un patrón Token Bucket simplificado para limitar requests por usuario/IP
- */
 @Component
 public class RateLimitConfig {
 
-    // Cache de buckets por clave (usuario o IP)
     private final Map<String, TokenBucket> cache = new ConcurrentHashMap<>();
 
-    /**
-     * Intenta consumir un token del bucket asociado a la clave
-     * 
-     * @param key            Identificador único (usuario:endpoint o ip:endpoint)
-     * @param capacity       Número máximo de tokens (requests)
-     * @param refillDuration Tiempo para rellenar los tokens
-     * @return Resultado del intento de consumo
-     */
     public RateLimitResult tryConsume(String key, int capacity, Duration refillDuration) {
         TokenBucket bucket = cache.computeIfAbsent(key, k -> new TokenBucket(capacity, refillDuration));
         return bucket.tryConsume();
@@ -40,9 +27,17 @@ public class RateLimitConfig {
             this.retryAfterSeconds = retryAfterSeconds;
         }
 
-        public boolean isConsumed() { return consumed; }
-        public long getRemainingTokens() { return remainingTokens; }
-        public long getRetryAfterSeconds() { return retryAfterSeconds; }
+        public boolean isConsumed() {
+            return consumed;
+        }
+
+        public long getRemainingTokens() {
+            return remainingTokens;
+        }
+
+        public long getRetryAfterSeconds() {
+            return retryAfterSeconds;
+        }
     }
 
     private static class TokenBucket {
@@ -80,16 +75,10 @@ public class RateLimitConfig {
         }
     }
 
-    /**
-     * Limpia el cache (útil para testing o mantenimiento)
-     */
     public void clearCache() {
         cache.clear();
     }
 
-    /**
-     * Obtiene el tamaño actual del cache
-     */
     public int getCacheSize() {
         return cache.size();
     }

@@ -41,27 +41,22 @@ public class GastoService {
         private final PresupuestoService presupuestoService;
 
         public GastoResponseDTO crearGasto(Long usuarioId, GastoCreateDTO request) {
-                // Validar usuario
                 Usuario usuario = usuarioRepository.findById(usuarioId)
                                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
 
                 Pareja pareja = usuario.getPareja();
 
-                // Validar categoría
                 Categoria categoria = categoriaRepository.findById(request.getCategoriaId())
                                 .orElseThrow(() -> new ResourceNotFoundException("Categoría no encontrada"));
 
-                // Determinar si es gasto individual o compartido
                 boolean esGastoIndividual = (request.getSplit() == null || request.getSplit().isEmpty());
 
                 if (!esGastoIndividual) {
-                        // GASTO COMPARTIDO - Requiere pareja y validación de split
                         if (pareja == null) {
                                 throw new BadRequestException(
                                                 "Necesitas estar en una pareja para crear gastos compartidos");
                         }
 
-                        // Calcular total del split
                         BigDecimal totalSplit = request.getSplit().values()
                                         .stream()
                                         .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -73,7 +68,6 @@ public class GastoService {
                         }
                 }
 
-                // Crear gasto (pareja puede ser null para gastos individuales)
                 Gasto gasto = Gasto.builder()
                                 .descripcion(request.getDescripcion())
                                 .monto(request.getMonto())
@@ -81,31 +75,27 @@ public class GastoService {
                                 .notas(request.getNotas())
                                 .rutaFoto(request.getRutaFoto())
                                 .usuario(usuario)
-                                .pareja(pareja) // Null para gastos individuales
+                                .pareja(pareja)
                                 .categoria(categoria)
                                 .fechaGasto(request.getFechaGasto())
                                 .build();
 
                 gasto = gastoRepository.save(gasto);
 
-                // Crear splits solo si es gasto compartido
                 if (!esGastoIndividual) {
                         for (Map.Entry<Long, BigDecimal> entry : request.getSplit().entrySet()) {
                                 Long usuarioSplitId = entry.getKey();
                                 BigDecimal monto = entry.getValue();
 
-                                // Validar que el usuario del split exista
                                 Usuario usuarioSplit = usuarioRepository.findById(usuarioSplitId)
                                                 .orElseThrow(() -> new ResourceNotFoundException(
                                                                 "Usuario no encontrado en split"));
 
-                                // Validar que el usuario del split pertenezca a la misma pareja
                                 if (usuarioSplit.getPareja() == null
                                                 || !usuarioSplit.getPareja().getId().equals(pareja.getId())) {
                                         throw new BadRequestException("El usuario del split no pertenece a la pareja");
                                 }
 
-                                // Determinar el tipo de split
                                 GastoSplit.TipoSplit tipo = usuarioSplitId.equals(usuarioId)
                                                 ? GastoSplit.TipoSplit.PAGO
                                                 : GastoSplit.TipoSplit.DEBE;
@@ -122,10 +112,8 @@ public class GastoService {
                         }
                 }
 
-                // Verificar presupuestos y enviar notificaciones si aplica
                 verificarPresupuestosYNotificar(usuarioId, categoria.getId(), request.getMonto());
 
-                // Si es gasto compartido grande, notificar a la pareja
                 if (!esGastoIndividual && request.getMonto().compareTo(new BigDecimal("50000")) > 0) {
                         notificarGastoGrandeAPareja(gasto, usuario, pareja);
                 }
@@ -134,20 +122,16 @@ public class GastoService {
         }
 
         public GastoResponseDTO actualizarGasto(Long gastoId, Long usuarioId, GastoCreateDTO request) {
-                // Buscar el gasto existente
                 Gasto gasto = gastoRepository.findById(gastoId)
                                 .orElseThrow(() -> new ResourceNotFoundException("Gasto no encontrado"));
 
-                // Validar que el usuario que actualiza sea el que creó el gasto
                 if (!gasto.getUsuario().getId().equals(usuarioId)) {
                         throw new BadRequestException("Solo el usuario que registró el gasto puede actualizarlo");
                 }
 
-                // Validar categoría
                 Categoria categoria = categoriaRepository.findById(request.getCategoriaId())
                                 .orElseThrow(() -> new ResourceNotFoundException("Categoría no encontrada"));
 
-                // Actualizar campos básicos
                 gasto.setDescripcion(request.getDescripcion());
                 gasto.setMonto(request.getMonto());
                 gasto.setCategoria(categoria);
@@ -155,13 +139,10 @@ public class GastoService {
                 gasto.setRutaFoto(request.getRutaFoto());
                 gasto.setFechaGasto(request.getFechaGasto());
 
-                // Si hay splits, actualizarlos
                 if (request.getSplit() != null && !request.getSplit().isEmpty()) {
-                        // Eliminar splits antiguos
                         gastoSplitRepository.deleteAll(gasto.getSplits());
                         gasto.getSplits().clear();
 
-                        // Validar total del split
                         BigDecimal totalSplit = request.getSplit().values()
                                         .stream()
                                         .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -172,7 +153,6 @@ public class GastoService {
                                                                 totalSplit, request.getMonto()));
                         }
 
-                        // Crear nuevos splits
                         for (Map.Entry<Long, BigDecimal> entry : request.getSplit().entrySet()) {
                                 Long usuarioSplitId = entry.getKey();
                                 BigDecimal monto = entry.getValue();
@@ -229,7 +209,6 @@ public class GastoService {
                 Gasto gasto = gastoRepository.findById(gastoId)
                                 .orElseThrow(() -> new ResourceNotFoundException("Gasto no encontrado"));
 
-                // Solo el usuario que registró el gasto puede eliminarlo
                 if (!gasto.getUsuario().getId().equals(usuarioId)) {
                         throw new BadRequestException("Solo el usuario que registró el gasto puede eliminarlo");
                 }
@@ -243,10 +222,8 @@ public class GastoService {
 
                 List<Gasto> gastos = new java.util.ArrayList<>();
 
-                // Obtener gastos individuales del usuario (sin pareja)
                 gastos.addAll(gastoRepository.findByUsuarioIdAndParejaIsNullOrderByFechaGastoDesc(usuarioId));
 
-                // Si tiene pareja, también obtener gastos compartidos
                 if (usuario.getPareja() != null) {
                         gastos.addAll(gastoRepository.findByParejaidOrderByFechaGastoDesc(usuario.getPareja().getId()));
                 }
@@ -276,10 +253,8 @@ public class GastoService {
 
                 List<Gasto> gastos = new java.util.ArrayList<>();
 
-                // Obtener gastos individuales
                 gastos.addAll(gastoRepository.findByUsuarioIdAndParejaIsNullOrderByFechaGastoDesc(usuarioId));
 
-                // Si tiene pareja, también obtener gastos compartidos
                 if (usuario.getPareja() != null) {
                         gastos.addAll(gastoRepository.findByParejaidOrderByFechaGastoDesc(usuario.getPareja().getId()));
                 }
@@ -296,10 +271,8 @@ public class GastoService {
 
                 List<Gasto> gastos = new java.util.ArrayList<>();
 
-                // Obtener gastos individuales
                 gastos.addAll(gastoRepository.findByUsuarioIdAndParejaIsNullOrderByFechaGastoDesc(usuarioId));
 
-                // Si tiene pareja, también obtener gastos compartidos
                 if (usuario.getPareja() != null) {
                         gastos.addAll(gastoRepository.findByParejaidOrderByFechaGastoDesc(usuario.getPareja().getId()));
                 }
@@ -327,58 +300,50 @@ public class GastoService {
                                 "gastosPorCategoria", gastosPorCategoria);
         }
 
-        /**
-         * Verifica presupuestos del usuario y envía notificación si alcanzó 80% o 100%
-         */
         private void verificarPresupuestosYNotificar(Long usuarioId, Long categoriaId, BigDecimal montoGasto) {
                 try {
-                        // Obtener presupuestos activos del usuario
-                        List<com.gastos.gastos_compartidos.dto.PresupuestoResponseDTO> presupuestos =
-                                presupuestoService.obtenerActivosPorUsuario(usuarioId);
+                        List<com.gastos.gastos_compartidos.dto.PresupuestoResponseDTO> presupuestos = presupuestoService
+                                        .obtenerActivosPorUsuario(usuarioId);
 
                         for (var presupuesto : presupuestos) {
-                                // Verificar solo presupuestos relevantes (global o de la categoría del gasto)
-                                if (presupuesto.getCategoriaId() == null || presupuesto.getCategoriaId().equals(categoriaId)) {
+
+                                if (presupuesto.getCategoriaId() == null
+                                                || presupuesto.getCategoriaId().equals(categoriaId)) {
                                         double porcentaje = presupuesto.getPorcentajeUsado();
                                         String estado = presupuesto.getEstado();
 
-                                        // Notificar si alcanzó 100% (EXCEDIDO)
                                         if ("EXCEDIDO".equals(estado) && porcentaje >= 100 && porcentaje < 105) {
                                                 String titulo = "💸 Presupuesto excedido";
-                                                String mensaje = String.format("Has excedido el presupuesto de %s (%.0f%%)",
-                                                        presupuesto.getCategoriaNombre(), porcentaje);
+                                                String mensaje = String.format(
+                                                                "Has excedido el presupuesto de %s (%.0f%%)",
+                                                                presupuesto.getCategoriaNombre(), porcentaje);
                                                 webPushService.notifyUser(usuarioId, titulo, mensaje, "/presupuestos");
                                         }
-                                        // Notificar si alcanzó 80% (ALERTA)
+
                                         else if ("ALERTA".equals(estado) && porcentaje >= 80 && porcentaje < 85) {
                                                 String titulo = "⚠️ Alerta de presupuesto";
-                                                String mensaje = String.format("Has usado el %.0f%% del presupuesto de %s",
-                                                        porcentaje, presupuesto.getCategoriaNombre());
+                                                String mensaje = String.format(
+                                                                "Has usado el %.0f%% del presupuesto de %s",
+                                                                porcentaje, presupuesto.getCategoriaNombre());
                                                 webPushService.notifyUser(usuarioId, titulo, mensaje, "/presupuestos");
                                         }
                                 }
                         }
                 } catch (Exception e) {
-                        // No interrumpir el flujo si falla la notificación
                         e.printStackTrace();
                 }
         }
 
-        /**
-         * Notifica a la pareja cuando se registra un gasto grande (>$50,000)
-         */
         private void notificarGastoGrandeAPareja(Gasto gasto, Usuario usuario, Pareja pareja) {
                 try {
-                        // Verificar que la pareja tenga 2 miembros
                         if (pareja.getUsuarios().size() < 2) {
                                 return;
                         }
 
-                        // Obtener el otro miembro de la pareja
                         Usuario otroUsuario = pareja.getUsuarios().stream()
-                                .filter(u -> !u.getId().equals(usuario.getId()))
-                                .findFirst()
-                                .orElse(null);
+                                        .filter(u -> !u.getId().equals(usuario.getId()))
+                                        .findFirst()
+                                        .orElse(null);
 
                         if (otroUsuario == null) {
                                 return;
@@ -386,13 +351,12 @@ public class GastoService {
 
                         String titulo = "💰 Gasto grande registrado";
                         String mensaje = String.format("%s registró un gasto de $%,d: %s",
-                                usuario.getNombre(),
-                                gasto.getMonto().intValue(),
-                                gasto.getDescripcion());
+                                        usuario.getNombre(),
+                                        gasto.getMonto().intValue(),
+                                        gasto.getDescripcion());
 
                         webPushService.notifyUser(otroUsuario.getId(), titulo, mensaje, "/gastos");
                 } catch (Exception e) {
-                        // No interrumpir el flujo si falla la notificación
                         e.printStackTrace();
                 }
         }

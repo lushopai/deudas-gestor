@@ -25,7 +25,7 @@ public class GastoRecurrente {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "pareja_id")
-    private Pareja pareja; // Null si es gasto individual
+    private Pareja pareja;
 
     @Column(nullable = false, length = 255)
     private String descripcion;
@@ -42,19 +42,19 @@ public class GastoRecurrente {
     private Frecuencia frecuencia;
 
     @Column(nullable = false)
-    private Integer diaEjecucion; // Día del mes (1-31) o día de la semana (1-7)
+    private Integer diaEjecucion;
 
     @Column(nullable = false)
     private LocalDate fechaInicio;
 
     @Column
-    private LocalDate fechaFin; // Null = sin fecha fin
+    private LocalDate fechaFin;
 
     @Column
-    private LocalDate ultimaEjecucion; // Última vez que se generó un gasto
+    private LocalDate ultimaEjecucion;
 
     @Column
-    private LocalDate proximaEjecucion; // Próxima fecha programada
+    private LocalDate proximaEjecucion;
 
     @Column(nullable = false)
     @Builder.Default
@@ -62,7 +62,7 @@ public class GastoRecurrente {
 
     @Column(nullable = false)
     @Builder.Default
-    private Boolean esCompartido = false; // Si se divide con la pareja
+    private Boolean esCompartido = false;
 
     @Column(length = 500)
     private String notas;
@@ -91,11 +91,9 @@ public class GastoRecurrente {
         fechaActualizacion = LocalDateTime.now();
     }
 
-    /**
-     * Calcula la próxima fecha de ejecución basándose en la frecuencia
-     */
     public LocalDate calcularProximaEjecucion(LocalDate desde) {
-        if (desde == null) desde = LocalDate.now();
+        if (desde == null)
+            desde = LocalDate.now();
 
         LocalDate proxima;
         switch (frecuencia) {
@@ -127,7 +125,6 @@ public class GastoRecurrente {
                 proxima = desde.plusMonths(1);
         }
 
-        // Si hay fecha fin y la próxima está después, retornar null
         if (fechaFin != null && proxima.isAfter(fechaFin)) {
             return null;
         }
@@ -135,32 +132,24 @@ public class GastoRecurrente {
         return proxima;
     }
 
-    /**
-     * Ajusta el día del mes para manejar meses con menos días
-     */
     private LocalDate ajustarDiaMes(LocalDate fecha, int dia) {
         int ultimoDia = fecha.lengthOfMonth();
         int diaReal = Math.min(dia, ultimoDia);
         return fecha.withDayOfMonth(diaReal);
     }
 
-    /**
-     * Verifica si debe ejecutarse hoy
-     */
     public boolean debeEjecutarseHoy() {
-        if (!activo) return false;
-        if (proximaEjecucion == null) return false;
+        if (!activo)
+            return false;
+        if (proximaEjecucion == null)
+            return false;
         return !LocalDate.now().isBefore(proximaEjecucion);
     }
 
-    /**
-     * Marca como ejecutado y calcula próxima ejecución
-     */
     public void marcarEjecutado() {
         this.ultimaEjecucion = LocalDate.now();
         this.proximaEjecucion = calcularProximaEjecucion(LocalDate.now());
 
-        // Si no hay próxima ejecución, desactivar
         if (this.proximaEjecucion == null) {
             this.activo = false;
         }

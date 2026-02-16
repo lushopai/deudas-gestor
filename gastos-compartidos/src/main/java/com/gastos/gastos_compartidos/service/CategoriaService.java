@@ -41,7 +41,6 @@ public class CategoriaService {
     }
 
     public void inicializarCategoriasPredeterminadas() {
-        // Si no existen, crear categorías por defecto
         if (categoriaRepository.count() == 0) {
             categoriaRepository.save(new Categoria("Supermercado", "🛒"));
             categoriaRepository.save(new Categoria("Transporte", "🚗"));

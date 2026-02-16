@@ -24,10 +24,6 @@ import com.gastos.gastos_compartidos.exception.BadRequestException;
 
 import lombok.extern.slf4j.Slf4j;
 
-/**
- * Servicio OCR usando Claude Vision API de Anthropic
- * Para obtener la API key, visita: https://console.anthropic.com/keys
- */
 @Service
 @Slf4j
 public class ClaudeOcrService {
@@ -44,7 +40,6 @@ public class ClaudeOcrService {
     private static final String CLAUDE_API_URL = "https://api.anthropic.com/v1/messages";
     private static final String CLAUDE_API_VERSION = "2024-06-01";
 
-    // Constantes de validación de archivos
     private static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
     private static final List<String> ALLOWED_MIME_TYPES = List.of(
             "image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif");
@@ -58,17 +53,13 @@ public class ClaudeOcrService {
                         "Claude API key no configurada. Configura 'claude.api.key' en application.properties");
             }
 
-            // VALIDAR ARCHIVO ANTES DE PROCESAR
             validarArchivo(file);
 
-            // 1. Convertir imagen a base64
             String imageBase64 = convertFileToBase64(file);
             String mediaType = getMediaType(file.getOriginalFilename());
 
-            // 2. Crear request para Claude
             ObjectNode requestBody = createClaudeRequest(imageBase64, mediaType);
 
-            // 3. Headers
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.set("x-api-key", apiKey);
@@ -76,7 +67,6 @@ public class ClaudeOcrService {
 
             HttpEntity<String> entity = new HttpEntity<>(requestBody.toString(), headers);
 
-            // 4. Llamar a Claude API
             ResponseEntity<String> response = restTemplate.postForEntity(CLAUDE_API_URL, entity, String.class);
 
             if (!response.getStatusCode().is2xxSuccessful()) {
@@ -84,7 +74,6 @@ public class ClaudeOcrService {
                 throw new BadRequestException("Error al llamar a Claude API: " + response.getStatusCode());
             }
 
-            // 5. Parsear respuesta
             return parsearRespuesta(response.getBody());
 
         } catch (BadRequestException e) {
@@ -95,25 +84,18 @@ public class ClaudeOcrService {
         }
     }
 
-    /**
-     * Crea el JSON request para la API de Claude
-     */
     private ObjectNode createClaudeRequest(String imageBase64, String mediaType) {
         ObjectNode request = objectMapper.createObjectNode();
 
-        // Modelo y configuración
         request.put("model", model);
         request.put("max_tokens", 1024);
 
-        // Array de mensajes
         ArrayNode messages = request.putArray("messages");
         ObjectNode message = messages.addObject();
         message.put("role", "user");
 
-        // Contenido con imagen y prompt
         ArrayNode content = message.putArray("content");
 
-        // 1. Imagen
         ObjectNode imageContent = content.addObject();
         imageContent.put("type", "image");
         ObjectNode source = imageContent.putObject("source");
@@ -121,7 +103,6 @@ public class ClaudeOcrService {
         source.put("media_type", mediaType);
         source.put("data", imageBase64);
 
-        // 2. Prompt de texto
         ObjectNode textContent = content.addObject();
         textContent.put("type", "text");
         textContent.put("text",
@@ -136,9 +117,6 @@ public class ClaudeOcrService {
         return request;
     }
 
-    /**
-     * Convierte el archivo a base64
-     */
     private String convertFileToBase64(MultipartFile file) throws IOException {
         byte[] bytes = file.getBytes();
         if (bytes.length > 20 * 1024 * 1024) {
@@ -147,9 +125,6 @@ public class ClaudeOcrService {
         return Base64.getEncoder().encodeToString(bytes);
     }
 
-    /**
-     * Obtiene el MIME type basado en la extensión del archivo
-     */
     private String getMediaType(String filename) {
         if (filename == null) {
             return "image/jpeg";
@@ -166,22 +141,17 @@ public class ClaudeOcrService {
         return "image/jpeg";
     }
 
-    /**
-     * Parsea la respuesta de Claude
-     */
     private OcrResponseDTO parsearRespuesta(String responseBody) {
         String textoGenerado = "";
         try {
             JsonNode rootResponse = objectMapper.readTree(responseBody);
 
-            // Verificar si hay error
             if (rootResponse.has("error")) {
                 String errorMsg = rootResponse.path("error").path("message").asText("Error desconocido");
                 log.error("Claude API error: {}", errorMsg);
                 throw new BadRequestException("Claude API error: " + errorMsg);
             }
 
-            // Extraer el contenido de la respuesta
             JsonNode content = rootResponse.path("content");
             if (!content.isArray() || content.size() == 0) {
                 throw new BadRequestException("Respuesta vacía de Claude API");
@@ -189,16 +159,13 @@ public class ClaudeOcrService {
 
             textoGenerado = content.get(0).path("text").asText();
 
-            // Intentar extraer JSON del texto
             String jsonLimpio = extraerJsonDelTexto(textoGenerado);
             JsonNode datosIa = objectMapper.readTree(jsonLimpio);
 
-            // Extraer datos
             BigDecimal monto = parseMonto(datosIa.path("montoTotal").asText(null));
             String fecha = datosIa.path("fecha").asText(null);
             String comercio = datosIa.path("comercio").asText("Comercio Detectado");
 
-            // Parsear items
             List<OcrResponseDTO.Item> listaItems = new ArrayList<>();
             JsonNode itemsNode = datosIa.path("items");
             if (itemsNode.isArray()) {
@@ -216,7 +183,6 @@ public class ClaudeOcrService {
                 }
             }
 
-            // Confianza alta con Claude Vision
             int confianza = monto != null ? 95 : 70;
 
             return OcrResponseDTO.builder()
@@ -246,9 +212,6 @@ public class ClaudeOcrService {
         }
     }
 
-    /**
-     * Extrae JSON válido del texto
-     */
     private String extraerJsonDelTexto(String texto) {
         if (texto == null) {
             return "{}";
@@ -264,9 +227,6 @@ public class ClaudeOcrService {
         return texto;
     }
 
-    /**
-     * Parsea un monto (string) a BigDecimal
-     */
     private BigDecimal parseMonto(String montoStr) {
         if (montoStr == null || montoStr.equals("null") || montoStr.trim().isEmpty()) {
             return null;
@@ -308,18 +268,11 @@ public class ClaudeOcrService {
         }
     }
 
-    /**
-     * Valida que el archivo cumpla con los requisitos para OCR
-     * 
-     * @throws BadRequestException si el archivo no es válido
-     */
     private void validarArchivo(MultipartFile file) {
-        // 1. Validar que el archivo no esté vacío
         if (file == null || file.isEmpty()) {
             throw new BadRequestException("No se ha proporcionado ningún archivo");
         }
 
-        // 2. Validar tamaño
         long fileSize = file.getSize();
         if (fileSize > MAX_FILE_SIZE) {
             double sizeMB = fileSize / 1024.0 / 1024.0;
@@ -327,7 +280,6 @@ public class ClaudeOcrService {
                     String.format("Archivo muy grande. Tamaño máximo: 5MB. Tu archivo: %.2fMB", sizeMB));
         }
 
-        // 3. Validar tipo MIME
         String contentType = file.getContentType();
         if (contentType == null || !ALLOWED_MIME_TYPES.contains(contentType.toLowerCase())) {
             throw new BadRequestException(
@@ -335,7 +287,6 @@ public class ClaudeOcrService {
                             "Tipo recibido: " + (contentType != null ? contentType : "desconocido"));
         }
 
-        // 4. Validar extensión del archivo
         String filename = file.getOriginalFilename();
         if (filename == null || !tieneExtensionValida(filename)) {
             throw new BadRequestException(
@@ -343,9 +294,6 @@ public class ClaudeOcrService {
         }
     }
 
-    /**
-     * Verifica si el archivo tiene una extensión válida
-     */
     private boolean tieneExtensionValida(String filename) {
         if (filename == null || !filename.contains(".")) {
             return false;

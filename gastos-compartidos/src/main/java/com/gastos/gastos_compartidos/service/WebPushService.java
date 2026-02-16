@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.annotation.PostConstruct;
-import java.security.GeneralSecurityException;
 import java.security.Security;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -20,11 +19,6 @@ import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-/**
- * Servicio de Web Push Notifications con VAPID keys.
- * Las VAPID keys se configuran en application.properties.
- * Para generar un par de claves, usar: npx web-push generate-vapid-keys
- */
 @Service
 @Slf4j
 public class WebPushService {
@@ -52,8 +46,7 @@ public class WebPushService {
     @PostConstruct
     public void init() {
         if (vapidPublicKey.isEmpty() || vapidPrivateKey.isEmpty()) {
-            log.warn("Push notifications deshabilitadas: VAPID keys no configuradas. " +
-                    "Generar con: npx web-push generate-vapid-keys");
+            log.warn("Push notifications deshabilitadas: VAPID keys no configuradas");
             return;
         }
 
@@ -70,9 +63,6 @@ public class WebPushService {
         }
     }
 
-    /**
-     * Devuelve la clave pública VAPID para que el frontend la use al suscribirse.
-     */
     public String getVapidPublicKey() {
         return vapidPublicKey;
     }
@@ -81,15 +71,10 @@ public class WebPushService {
         return pushEnabled;
     }
 
-    /**
-     * Registra una suscripción push para un usuario.
-     */
     @Transactional
     public PushSubscription subscribe(Usuario usuario, String endpoint, String p256dhKey, String authKey) {
-        // Verificar si ya existe esta suscripción
         return subscriptionRepository.findByEndpoint(endpoint)
                 .map(existing -> {
-                    // Actualizar claves si cambiaron
                     existing.setP256dhKey(p256dhKey);
                     existing.setAuthKey(authKey);
                     existing.setUsuario(usuario);
@@ -106,17 +91,11 @@ public class WebPushService {
                 });
     }
 
-    /**
-     * Elimina una suscripción push.
-     */
     @Transactional
     public void unsubscribe(String endpoint) {
         subscriptionRepository.deleteByEndpoint(endpoint);
     }
 
-    /**
-     * Envía una notificación push a un usuario específico.
-     */
     public void notifyUser(Long usuarioId, String title, String body, String url) {
         if (!pushEnabled) {
             log.debug("Push deshabilitado, notificación omitida: {}", title);
@@ -129,10 +108,6 @@ public class WebPushService {
         }
     }
 
-    /**
-     * Envía una notificación push a todos los suscriptores de una lista de
-     * usuarios.
-     */
     public void notifyUsers(List<Long> usuarioIds, String title, String body, String url) {
         for (Long userId : usuarioIds) {
             notifyUser(userId, title, body, url);
@@ -160,7 +135,6 @@ public class WebPushService {
 
             pushService.send(notification);
 
-            // Actualizar última notificación
             sub.setUltimaNotificacion(LocalDateTime.now());
             subscriptionRepository.save(sub);
 
@@ -172,7 +146,6 @@ public class WebPushService {
             log.warn("Error al enviar push a endpoint {}: {}",
                     sub.getEndpoint().substring(0, Math.min(50, sub.getEndpoint().length())),
                     e.getMessage());
-            // Si el endpoint ya no es válido (410 Gone), eliminarlo
             if (e.getMessage() != null && e.getMessage().contains("410")) {
                 subscriptionRepository.delete(sub);
                 log.info("Suscripción eliminada por endpoint expirado");

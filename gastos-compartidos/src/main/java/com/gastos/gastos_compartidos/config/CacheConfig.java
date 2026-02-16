@@ -6,11 +6,6 @@ import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-/**
- * Configuración de caché en memoria.
- * Usa ConcurrentMapCacheManager (sin dependencias externas como Redis).
- * Los caches se reinician con el servidor.
- */
 @Configuration
 @EnableCaching
 public class CacheConfig {

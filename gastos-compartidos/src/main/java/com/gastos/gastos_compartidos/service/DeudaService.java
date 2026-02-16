@@ -27,8 +27,6 @@ public class DeudaService {
     private final UsuarioRepository usuarioRepository;
     private final WebPushService webPushService;
 
-    // ==================== DEUDAS ====================
-
     @Transactional
     public DeudaResponseDTO crearDeuda(Long usuarioId, DeudaCreateDTO dto) {
         Usuario usuario = usuarioRepository.findById(usuarioId)
@@ -69,7 +67,8 @@ public class DeudaService {
 
     public Page<DeudaResponseDTO> obtenerDeudasUsuarioPaginado(Long usuarioId, boolean soloActivas, Pageable pageable) {
         if (soloActivas) {
-            return deudaRepository.findByUsuarioIdAndEstadoOrderByFechaCreacionDesc(usuarioId, EstadoDeuda.ACTIVA, pageable)
+            return deudaRepository
+                    .findByUsuarioIdAndEstadoOrderByFechaCreacionDesc(usuarioId, EstadoDeuda.ACTIVA, pageable)
                     .map(DeudaResponseDTO::fromEntity);
         }
         return deudaRepository.findByUsuarioIdOrderByFechaCreacionDesc(usuarioId, pageable)
@@ -79,7 +78,6 @@ public class DeudaService {
     public DeudaResponseDTO obtenerDeuda(Long usuarioId, Long deudaId) {
         Deuda deuda = obtenerDeudaYValidar(usuarioId, deudaId);
 
-        // Obtener últimos 5 abonos
         List<AbonoDeudaResponseDTO> abonos = abonoDeudaRepository
                 .findByDeudaIdOrderByFechaPagoDesc(deudaId, PageRequest.of(0, 5))
                 .stream()
@@ -101,7 +99,6 @@ public class DeudaService {
         deuda.setDiaLimitePago(dto.getDiaLimitePago());
         deuda.setTasaInteres(dto.getTasaInteres());
 
-        // No permitir cambiar monto original si ya tiene abonos
         if (!deuda.getAbonos().isEmpty() && !deuda.getMontoOriginal().equals(dto.getMontoOriginal())) {
             throw new BadRequestException("No se puede modificar el monto original de una deuda que ya tiene abonos");
         }
@@ -129,8 +126,6 @@ public class DeudaService {
         return DeudaResponseDTO.fromEntity(deuda);
     }
 
-    // ==================== ABONOS ====================
-
     @Transactional
     public AbonoDeudaResponseDTO registrarAbono(Long usuarioId, Long deudaId, AbonoDeudaCreateDTO dto) {
         Deuda deuda = obtenerDeudaYValidar(usuarioId, deudaId);
@@ -140,7 +135,8 @@ public class DeudaService {
         }
 
         if (dto.getMonto().compareTo(deuda.getSaldoPendiente()) > 0) {
-            throw new BadRequestException("El monto del abono no puede ser mayor al saldo pendiente ($" + deuda.getSaldoPendiente() + ")");
+            throw new BadRequestException(
+                    "El monto del abono no puede ser mayor al saldo pendiente ($" + deuda.getSaldoPendiente() + ")");
         }
 
         AbonoDeuda abono = AbonoDeuda.builder()
@@ -154,7 +150,6 @@ public class DeudaService {
 
         abono = abonoDeudaRepository.save(abono);
 
-        // Actualizar saldo de la deuda
         deuda.registrarAbono(dto.getMonto());
         deudaRepository.save(deuda);
 
@@ -181,7 +176,6 @@ public class DeudaService {
             throw new BadRequestException("El abono no pertenece a esta deuda");
         }
 
-        // Restaurar saldo de la deuda
         deuda.setSaldoPendiente(deuda.getSaldoPendiente().add(abono.getMonto()));
         if (deuda.getEstado() == EstadoDeuda.PAGADA) {
             deuda.setEstado(EstadoDeuda.ACTIVA);
@@ -191,17 +185,14 @@ public class DeudaService {
         deudaRepository.save(deuda);
     }
 
-    // ==================== RESUMEN ====================
-
     public ResumenDeudasDTO obtenerResumen(Long usuarioId) {
         BigDecimal totalPendiente = deudaRepository.calcularTotalDeudaPendiente(usuarioId);
         long cantidadActivas = deudaRepository.countByUsuarioIdAndEstado(usuarioId, EstadoDeuda.ACTIVA);
 
-        // Total abonado este mes
         LocalDate now = LocalDate.now();
-        BigDecimal abonadoEsteMes = abonoDeudaRepository.calcularTotalAbonadoMes(usuarioId, now.getMonthValue(), now.getYear());
+        BigDecimal abonadoEsteMes = abonoDeudaRepository.calcularTotalAbonadoMes(usuarioId, now.getMonthValue(),
+                now.getYear());
 
-        // Últimos abonos
         List<AbonoDeudaResponseDTO> ultimosAbonos = abonoDeudaRepository
                 .findUltimosAbonosUsuario(usuarioId, PageRequest.of(0, 5))
                 .stream()
@@ -216,8 +207,6 @@ public class DeudaService {
                 .build();
     }
 
-    // ==================== HELPERS ====================
-
     private Deuda obtenerDeudaYValidar(Long usuarioId, Long deudaId) {
         Deuda deuda = deudaRepository.findById(deudaId)
                 .orElseThrow(() -> new ResourceNotFoundException("Deuda no encontrada"));
@@ -229,19 +218,12 @@ public class DeudaService {
         return deuda;
     }
 
-    // ==================== NOTIFICACIONES ====================
-
-    /**
-     * Tarea programada: Envía recordatorios de deudas próximas a vencer (3 días antes)
-     * Se ejecuta diariamente a las 9:00 AM
-     */
     @org.springframework.scheduling.annotation.Scheduled(cron = "0 0 9 * * *")
     public void recordarDeudasProximasAVencer() {
         try {
             LocalDate hoy = LocalDate.now();
             LocalDate fechaLimite = hoy.plusDays(3);
 
-            // Buscar deudas activas que vencen exactamente en 3 días
             List<Deuda> deudasProximas = deudaRepository.findAll().stream()
                     .filter(d -> d.getEstado() == EstadoDeuda.ACTIVA)
                     .filter(d -> d.getFechaVencimiento() != null)

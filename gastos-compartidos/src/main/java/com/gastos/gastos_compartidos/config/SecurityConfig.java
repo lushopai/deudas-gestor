@@ -60,7 +60,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                // Security headers
+
                 .headers(headers -> headers
                         .frameOptions(frame -> frame.deny())
                         .httpStrictTransportSecurity(hsts -> hsts
@@ -68,14 +68,13 @@ public class SecurityConfig {
                                 .maxAgeInSeconds(31536000) // 1 año
                         )
                         .contentTypeOptions(content -> {
-                        }) // X-Content-Type-Options: nosniff
-                )
+                        }))
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/public/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                         .requestMatchers("/actuator/**").permitAll()
-                        // Permitir acceso a archivos estáticos del frontend
+
                         .requestMatchers("/", "/index.html", "/favicon.ico", "/*.css", "/*.js", "/*.map",
                                 "/assets/**", "/styles/**", "/manifest.webmanifest", "/ngsw-worker.js",
                                 "/ngsw.json", "/safety-worker.js", "/worker-basic.min.js")
@@ -95,21 +94,19 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // Dividir por comas, limpiar espacios y filtrar vacíos
         String[] origins = Arrays.stream(allowedOrigins.split(","))
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
                 .toArray(String[]::new);
 
-        // Usar patterns permite comodines y funciona con credenciales
         configuration.setAllowedOriginPatterns(Arrays.asList(origins));
 
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD"));
-        // Permitir todos los headers que el cliente envíe
+
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setExposedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Total-Count"));
         configuration.setAllowCredentials(true);
-        // Permitir preflight por 24 horas
+
         configuration.setMaxAge(86400L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

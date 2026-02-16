@@ -1,4 +1,7 @@
 
+# Planes y documentación interna
+.plans/
+
 # Environment variables
 .env
 .env.local

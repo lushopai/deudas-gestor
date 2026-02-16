@@ -52,8 +52,6 @@ public class GastoRecurrenteService {
         gr.setNotas(dto.getNotas());
         gr.setTotalEjecutado(0);
 
-        // La próxima ejecución se calcula en @PrePersist de la entidad
-
         GastoRecurrente saved = gastoRecurrenteRepository.save(gr);
         return mapToDTO(saved);
     }
@@ -123,7 +121,6 @@ public class GastoRecurrenteService {
         if (dto.getNotas() != null)
             gr.setNotas(dto.getNotas());
 
-        // Recalcular próxima ejecución
         gr.setProximaEjecucion(gr.calcularProximaEjecucion(LocalDate.now()));
 
         GastoRecurrente saved = gastoRecurrenteRepository.save(gr);
@@ -172,10 +169,6 @@ public class GastoRecurrenteService {
         ejecutarGastoRecurrente(gr);
     }
 
-    /**
-     * Tarea programada: ejecutar gastos recurrentes pendientes cada día a las 6:00
-     * AM
-     */
     @Scheduled(cron = "0 0 6 * * *")
     @Transactional
     public void ejecutarGastosPendientes() {
