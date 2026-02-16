@@ -11,8 +11,10 @@ FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 COPY --from=builder /app/target/gastos-compartidos-*.jar app.jar
 
-# Crear usuario no-root
-RUN addgroup -S appuser && adduser -S appuser -G appuser
+# Crear usuario no-root y directorio de logs
+RUN addgroup -S appuser && adduser -S appuser -G appuser && \
+    mkdir -p /app/logs && \
+    chown -R appuser:appuser /app/logs
 USER appuser
 
 EXPOSE 8080

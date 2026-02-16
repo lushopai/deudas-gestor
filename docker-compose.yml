@@ -24,6 +24,9 @@ services:
     expose:
       - "8080"
     environment:
+      # Zona horaria Chile
+      TZ: America/Santiago
+      
       # Perfil de Spring Boot (prod = logs optimizados)
       SPRING_PROFILES_ACTIVE: prod
 
