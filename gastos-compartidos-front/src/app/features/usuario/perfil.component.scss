@@ -310,23 +310,70 @@ mat-spinner {
 }
 
 /* Action Buttons */
-.action-buttons {
+.action-buttons-container {
   display: flex;
   gap: 12px;
-  margin-top: 24px;
+  margin-top: 32px;
   margin-bottom: 24px;
+  padding: 0 4px;
 }
 
-.save-btn,
-.cancel-btn {
+.btn-primary,
+.btn-secondary {
   flex: 1;
   height: 48px;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+
+  &:hover:not(:disabled) {
+    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.45);
+    transform: translateY(-2px);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+}
+
+.btn-secondary {
+  background: #f0f0f0;
+  color: #333;
+  border: 1px solid #e0e0e0;
+
+  &:hover:not(:disabled) {
+    background: #e8e8e8;
+    border-color: #d0d0d0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  &:active:not(:disabled) {
+    background: #e0e0e0;
+  }
 }
 
 .spinner {

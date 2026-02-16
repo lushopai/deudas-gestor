@@ -216,26 +216,13 @@
             </div>
           }
 
-          <mat-divider></mat-divider>
-          <div class="security-item">
-            <div class="security-info">
-              <mat-icon>verified_user</mat-icon>
-              <div class="security-text">
-                <div class="security-label">Autenticación de dos factores</div>
-                <div class="security-detail">No configurada</div>
-              </div>
-            </div>
-            <button mat-stroked-button type="button" [disabled]="true">
-              Configurar
-            </button>
-          </div>
         </mat-card-content>
       </mat-card>
 
       <!-- Action Buttons -->
-      <div class="action-buttons">
+      <div class="action-buttons-container">
         <button mat-raised-button color="primary" (click)="guardarCambios()" [disabled]="guardando || perfilForm.invalid"
-          class="save-btn">
+          class="btn-primary">
           @if (!guardando) {
             <mat-icon>save</mat-icon>
           }
@@ -244,7 +231,8 @@
           }
           {{ guardando ? 'Guardando...' : 'Guardar Cambios' }}
         </button>
-        <button mat-stroked-button (click)="cancelar()" [disabled]="guardando" class="cancel-btn">
+        <button mat-raised-button (click)="cancelar()" [disabled]="guardando" class="btn-secondary">
+          <mat-icon>close</mat-icon>
           Cancelar
         </button>
       </div>
