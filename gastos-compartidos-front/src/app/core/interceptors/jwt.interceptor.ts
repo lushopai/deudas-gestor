@@ -3,11 +3,9 @@ import {
   HttpRequest,
   HttpHandler,
   HttpEvent,
-  HttpInterceptor,
-  HttpErrorResponse
+  HttpInterceptor
 } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
-import { catchError, switchMap } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 
 @Injectable()
@@ -15,12 +13,10 @@ export class JwtInterceptor implements HttpInterceptor {
   constructor(private authService: AuthService) { }
 
   intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
-    // No agregar token a rutas públicas o auth
     if (request.url.includes('/public/') || request.url.includes('/auth/')) {
       return next.handle(request);
     }
 
-    // Agregar token solo si existe
     const token = this.authService.obtenerToken();
     if (token) {
       request = request.clone({
@@ -30,16 +26,6 @@ export class JwtInterceptor implements HttpInterceptor {
       });
     }
 
-    return next.handle(request).pipe(
-      catchError((error: HttpErrorResponse) => {
-        // Si es 401, intentar refrescar token
-        if (error.status === 401) {
-          // Por ahora solo logout
-          this.authService.logout();
-          return throwError(() => error);
-        }
-        return throwError(() => error);
-      })
-    );
+    return next.handle(request);
   }
 }

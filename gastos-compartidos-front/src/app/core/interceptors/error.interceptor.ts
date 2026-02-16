@@ -9,12 +9,14 @@ import { AuthService } from '../services/auth.service';
 
 @Injectable()
 export class ErrorInterceptor implements HttpInterceptor {
+  private sessionExpiredHandled = false;
+
   constructor(
     private notificationService: NotificationService,
     private loadingService: LoadingService,
     private authService: AuthService,
     private router: Router
-  ) {}
+  ) { }
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     return next.handle(request).pipe(
@@ -57,13 +59,18 @@ export class ErrorInterceptor implements HttpInterceptor {
 
             case 401:
               if (isAuthRoute) {
-                // Error de credenciales en login
                 errorMessage = error.error?.mensaje || 'Credenciales incorrectas';
               } else {
-                // Sesión expirada en otras rutas
+                // Evitar múltiples alerts si hay varias peticiones simultáneas
+                if (this.sessionExpiredHandled) {
+                  return throwError(() => error);
+                }
+                this.sessionExpiredHandled = true;
                 errorMessage = 'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.';
                 this.authService.logout();
                 this.router.navigate(['/login']);
+                // Resetear flag después de un momento para futuras sesiones
+                setTimeout(() => this.sessionExpiredHandled = false, 3000);
               }
               break;
 
