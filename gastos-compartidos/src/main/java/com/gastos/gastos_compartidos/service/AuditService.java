@@ -22,7 +22,8 @@ public class AuditService {
     @Autowired
     private AuditLogRepository auditLogRepository;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Transactional
     public void registrar(Long usuarioId, AuditAction accion, String tablaNombre,
