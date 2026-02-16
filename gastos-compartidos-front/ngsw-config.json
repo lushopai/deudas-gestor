@@ -29,6 +29,18 @@
   ],
   "dataGroups": [
     {
+      "name": "api-auth",
+      "urls": [
+        "/api/auth/**"
+      ],
+      "cacheConfig": {
+        "maxSize": 1,
+        "maxAge": "0s",
+        "strategy": "freshness",
+        "timeout": "3s"
+      }
+    },
+    {
       "name": "api-freshness",
       "urls": [
         "/api/parejas/**",
