@@ -67,9 +67,9 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
       route: '/gastos'
     },
     {
-      label: 'Deudas',
+      label: 'Deudas Compartidas',
       icon: 'attach_money',
-      route: '/deudas/abonar'
+      route: '/deudas'
     },
     {
       label: 'Recurrentes',
@@ -77,19 +77,19 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
       route: '/gastos-recurrentes'
     },
     {
-      label: 'Reportes',
-      icon: 'assessment',
-      route: '/reportes'
-    },
-    {
-      label: 'Historial',
-      icon: 'history',
-      route: '/deudas/historial'
-    },
-    {
       label: 'Deudas Externas',
       icon: 'account_balance',
       route: '/deudas-externas'
+    },
+    {
+      label: 'Presupuestos',
+      icon: 'trending_up',
+      route: '/presupuestos'
+    },
+    {
+      label: 'Reportes',
+      icon: 'assessment',
+      route: '/reportes'
     },
     {
       label: 'Configuración',
@@ -102,7 +102,8 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
     { label: 'Inicio', icon: 'home', route: '/dashboard' },
     { label: 'Gastos', icon: 'receipt', route: '/gastos' },
     { label: 'Nuevo', icon: 'add_circle', route: '/gastos/nuevo' },
-    { label: 'Deudas', icon: 'attach_money', route: '/deudas/abonar' },
+    { label: 'Deudas', icon: 'attach_money', route: '/deudas' },
+    { label: 'Recurrentes', icon: 'autorenew', route: '/gastos-recurrentes' },
     { label: 'Perfil', icon: 'person', route: '/perfil' }
   ];
 

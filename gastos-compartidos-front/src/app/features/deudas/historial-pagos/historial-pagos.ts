@@ -8,6 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { PagoService, Pago } from '../../../core/services/pago.service';
 import { PageResponse } from '../../../core/models/page-response';
 import { AuthService } from '../../../core/services/auth.service';
@@ -30,6 +31,7 @@ import { SkeletonLoaderComponent } from '../../../shared/components/skeleton-loa
     MatProgressSpinnerModule,
     MatChipsModule,
     MatDividerModule,
+    MatTooltipModule,
     EmptyStateComponent,
     SkeletonLoaderComponent
   ],
@@ -147,7 +149,7 @@ export class HistorialPagos implements OnInit, OnDestroy {
   }
 
   volver(): void {
-    this.router.navigate(['/dashboard']);
+    this.router.navigate(['/deudas']);
   }
 
   configurarPareja(): void {

@@ -2,11 +2,14 @@ package com.gastos.gastos_compartidos.controller;
 
 import com.gastos.gastos_compartidos.dto.ParejaResponseDTO;
 import com.gastos.gastos_compartidos.dto.UnirParejaRequestDTO;
+import com.gastos.gastos_compartidos.entity.AuditAction;
 import com.gastos.gastos_compartidos.security.CustomUserDetails;
+import com.gastos.gastos_compartidos.service.AuditService;
 import com.gastos.gastos_compartidos.service.ParejaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -21,14 +24,14 @@ import org.springframework.web.bind.annotation.*;
 public class ParejaController {
 
     private final ParejaService parejaService;
+    private final AuditService auditService;
 
     @GetMapping("/mi-pareja")
     @Operation(summary = "Obtener información de mi pareja", description = "Obtiene los detalles de la pareja del usuario autenticado")
     public ResponseEntity<ParejaResponseDTO> obtenerMiPareja(
             @AuthenticationPrincipal CustomUserDetails currentUser) {
         ParejaResponseDTO pareja = parejaService.obtenerDetallePareja(
-            parejaService.obtenerParejaDelUsuario(currentUser.getId()).getId()
-        );
+                parejaService.obtenerParejaDelUsuario(currentUser.getId()).getId());
         return ResponseEntity.ok(pareja);
     }
 
@@ -44,12 +47,14 @@ public class ParejaController {
     @Operation(summary = "Unirse a una pareja", description = "Se une a una pareja usando un código de invitación")
     public ResponseEntity<ParejaResponseDTO> unirse(
             @AuthenticationPrincipal CustomUserDetails currentUser,
-            @Valid @RequestBody UnirParejaRequestDTO request) {
-        
+            @Valid @RequestBody UnirParejaRequestDTO request,
+            HttpServletRequest httpRequest) {
+
         parejaService.unirParejaConCodigo(currentUser.getId(), request.getCodigoInvitacion());
         ParejaResponseDTO pareja = parejaService.obtenerDetallePareja(
-            parejaService.obtenerParejaDelUsuario(currentUser.getId()).getId()
-        );
+                parejaService.obtenerParejaDelUsuario(currentUser.getId()).getId());
+        auditService.registrar(currentUser.getId(), AuditAction.CREATE, "parejas",
+                pareja.getId(), null, pareja, "Usuario unido a pareja", httpRequest);
         return ResponseEntity.ok(pareja);
     }
 

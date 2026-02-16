@@ -21,13 +21,16 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.gastos.gastos_compartidos.dto.GastoCreateDTO;
 import com.gastos.gastos_compartidos.dto.GastoResponseDTO;
+import com.gastos.gastos_compartidos.entity.AuditAction;
 import com.gastos.gastos_compartidos.security.CustomUserDetails;
+import com.gastos.gastos_compartidos.service.AuditService;
 import com.gastos.gastos_compartidos.service.GastoService;
 import com.gastos.gastos_compartidos.service.ParejaService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -40,14 +43,18 @@ public class GastoController {
 
     private final GastoService gastoService;
     private final ParejaService parejaService;
+    private final AuditService auditService;
 
     @PostMapping
     @Operation(summary = "Crear nuevo gasto", description = "Registra un nuevo gasto con su división entre usuarios")
     public ResponseEntity<GastoResponseDTO> crearGasto(
             @AuthenticationPrincipal CustomUserDetails currentUser,
-            @Valid @RequestBody GastoCreateDTO request) {
+            @Valid @RequestBody GastoCreateDTO request,
+            HttpServletRequest httpRequest) {
 
         GastoResponseDTO gasto = gastoService.crearGasto(currentUser.getId(), request);
+        auditService.registrar(currentUser.getId(), AuditAction.CREATE, "gastos",
+                gasto.getId(), null, gasto, "Gasto creado: " + request.getDescripcion(), httpRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(gasto);
     }
 
@@ -56,9 +63,13 @@ public class GastoController {
     public ResponseEntity<GastoResponseDTO> actualizarGasto(
             @PathVariable Long gastoId,
             @AuthenticationPrincipal CustomUserDetails currentUser,
-            @Valid @RequestBody GastoCreateDTO request) {
+            @Valid @RequestBody GastoCreateDTO request,
+            HttpServletRequest httpRequest) {
 
+        GastoResponseDTO gastoAntes = gastoService.obtenerGasto(gastoId);
         GastoResponseDTO gasto = gastoService.actualizarGasto(gastoId, currentUser.getId(), request);
+        auditService.registrar(currentUser.getId(), AuditAction.UPDATE, "gastos",
+                gastoId, gastoAntes, gasto, "Gasto actualizado: " + request.getDescripcion(), httpRequest);
         return ResponseEntity.ok(gasto);
     }
 
@@ -125,9 +136,13 @@ public class GastoController {
     @Operation(summary = "Eliminar un gasto", description = "Elimina un gasto (solo el usuario que lo registró puede hacerlo)")
     public ResponseEntity<?> eliminarGasto(
             @PathVariable Long gastoId,
-            @AuthenticationPrincipal CustomUserDetails currentUser) {
+            @AuthenticationPrincipal CustomUserDetails currentUser,
+            HttpServletRequest httpRequest) {
 
+        GastoResponseDTO gastoAntes = gastoService.obtenerGasto(gastoId);
         gastoService.eliminarGasto(gastoId, currentUser.getId());
+        auditService.registrar(currentUser.getId(), AuditAction.DELETE, "gastos",
+                gastoId, gastoAntes, null, "Gasto eliminado", httpRequest);
         return ResponseEntity.noContent().build();
     }
 }

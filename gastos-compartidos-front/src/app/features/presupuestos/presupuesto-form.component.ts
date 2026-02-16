@@ -32,53 +32,81 @@ export interface PresupuestoFormData {
         MatSlideToggleModule
     ],
     template: `
-    <h2 mat-dialog-title>{{ data.presupuesto ? 'Editar Presupuesto' : 'Nuevo Presupuesto' }}</h2>
+    <div class="dialog-header">
+      <h2 mat-dialog-title>{{ data.presupuesto ? 'Editar Presupuesto' : 'Nuevo Presupuesto' }}</h2>
+      <p class="dialog-subtitle">{{ data.presupuesto ? 'Actualiza tu límite de gasto' : 'Establece un límite para controlar tus gastos' }}</p>
+    </div>
     <mat-dialog-content>
       <form [formGroup]="form" class="presupuesto-form">
         
-        <!-- Categoría -->
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Categoría</mat-label>
-          <mat-select formControlName="categoriaId">
-            <mat-option [value]="null">
-              <mat-icon>account_balance_wallet</mat-icon>
-              Total General (Global)
-            </mat-option>
-            <mat-divider></mat-divider>
-            @for (cat of categorias; track cat.id) {
-              <mat-option [value]="cat.id">
-                <mat-icon>{{ cat.icono }}</mat-icon>
-                {{ cat.nombre }}
-              </mat-option>
-            }
-          </mat-select>
-          <mat-hint>Elige una categoría específica o crea un límite global</mat-hint>
-        </mat-form-field>
-
-        <!-- Límite y Período -->
-        <div class="row">
-          <mat-form-field appearance="outline" class="col">
-            <mat-label>Límite ($)</mat-label>
-            <input matInput type="number" formControlName="limite" min="0">
-            <mat-error *ngIf="form.get('limite')?.hasError('required')">Requerido</mat-error>
-            <mat-error *ngIf="form.get('limite')?.hasError('min')">Debe ser mayor a 0</mat-error>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="col">
-            <mat-label>Período</mat-label>
-            <mat-select formControlName="periodo">
-              <mat-option value="SEMANAL">Semanal</mat-option>
-              <mat-option value="MENSUAL">Mensual</mat-option>
-              <mat-option value="ANUAL">Anual</mat-option>
+        <!-- Categoría con descripción -->
+        <div class="form-section">
+          <label class="section-label">
+            <mat-icon>category</mat-icon>
+            Categoría
+          </label>
+          <p class="section-hint">Elige una categoría específica o crea un límite global</p>
+          
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Selecciona una opción</mat-label>
+            <mat-select formControlName="categoriaId">
+              <mat-optgroup label="GENERAL">
+                <mat-option [value]="null" class="global-option">
+                  <mat-icon>account_balance_wallet</mat-icon>
+                  <span>Global - Todas las categorías</span>
+                </mat-option>
+              </mat-optgroup>
+              <mat-optgroup label="POR CATEGORÍA" *ngIf="categorias.length > 0">
+                @for (cat of categorias; track cat.id) {
+                  <mat-option [value]="cat.id" class="category-option">
+                    <span class="cat-icon">{{ cat.icono }}</span>
+                    <span>{{ cat.nombre }}</span>
+                  </mat-option>
+                }
+              </mat-optgroup>
             </mat-select>
           </mat-form-field>
         </div>
 
+        <!-- Límite y Período -->
+        <div class="form-section">
+          <label class="section-label">
+            <mat-icon>trending_up</mat-icon>
+            Límite de Gasto
+          </label>
+          <p class="section-hint">Define cuánto quieres gastar en este período</p>
+          
+          <div class="row">
+            <mat-form-field appearance="outline" class="col">
+              <mat-label>$ Monto Máximo</mat-label>
+              <input matInput type="number" formControlName="limite" min="0" placeholder="0.00">
+              <mat-error *ngIf="form.get('limite')?.hasError('required')">Campo requerido</mat-error>
+              <mat-error *ngIf="form.get('limite')?.hasError('min')">Debe ser mayor a 0</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="col">
+              <mat-label>Período</mat-label>
+              <mat-select formControlName="periodo">
+                <mat-option value="SEMANAL">Semanal</mat-option>
+                <mat-option value="MENSUAL">Mensual</mat-option>
+                <mat-option value="ANUAL">Anual</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+
         <!-- Notas -->
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Notas (Opcional)</mat-label>
-          <textarea matInput formControlName="notas" rows="2"></textarea>
-        </mat-form-field>
+        <div class="form-section">
+          <label class="section-label">
+            <mat-icon>notes</mat-icon>
+            Notas (Opcional)
+          </label>
+          <p class="section-hint">Añade un recordatorio o descripción</p>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Escribe aquí...</mat-label>
+            <textarea matInput formControlName="notas" rows="2" placeholder="Ej: Presupuesto para entretenimiento"></textarea>
+          </mat-form-field>
+        </div>
 
       </form>
     </mat-dialog-content>
@@ -90,18 +118,71 @@ export interface PresupuestoFormData {
         {{ data.presupuesto ? 'Actualizar' : 'Crear' }}
       </button>
     </mat-dialog-actions>
-  `,
+  `, 
     styles: [`
+    .dialog-header {
+      margin-bottom: 16px;
+    }
+    .dialog-header h2 {
+      margin: 0 0 4px 0;
+      font-size: 20px;
+    }
+    .dialog-subtitle {
+      margin: 0;
+      font-size: 13px;
+      color: #666;
+    }
+
     .presupuesto-form {
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 24px;
       padding-top: 8px;
-      min-width: 300px;
+      min-width: 340px;
     }
+    
+    .form-section {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .section-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      color: #333;
+      margin: 0;
+    }
+    .section-label mat-icon {
+      color: #1976d2;
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+    
+    .section-hint {
+      margin: 0;
+      font-size: 12px;
+      color: #999;
+    }
+    
     .full-width {
       width: 100%;
     }
+    
+    .global-option, .category-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .cat-icon {
+      display: inline-block;
+      min-width: 20px;
+    }
+    
     .row {
       display: flex;
       gap: 16px;
@@ -109,12 +190,15 @@ export interface PresupuestoFormData {
     .col {
       flex: 1;
     }
-    mat-icon {
-      margin-right: 8px;
-      vertical-align: middle;
-    }
+    
     @media (max-width: 600px) {
-      .row { flex-direction: column; gap: 0; }
+      .presupuesto-form {
+        min-width: 280px;
+      }
+      .row { 
+        flex-direction: column; 
+        gap: 0; 
+      }
     }
   `],
     changeDetection: ChangeDetectionStrategy.OnPush

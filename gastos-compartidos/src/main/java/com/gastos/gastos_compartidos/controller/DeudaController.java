@@ -1,11 +1,14 @@
 package com.gastos.gastos_compartidos.controller;
 
 import com.gastos.gastos_compartidos.dto.*;
+import com.gastos.gastos_compartidos.entity.AuditAction;
 import com.gastos.gastos_compartidos.security.CustomUserDetails;
+import com.gastos.gastos_compartidos.service.AuditService;
 import com.gastos.gastos_compartidos.service.DeudaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -25,6 +28,7 @@ import java.util.List;
 public class DeudaController {
 
     private final DeudaService deudaService;
+    private final AuditService auditService;
 
     // ==================== DEUDAS ====================
 
@@ -32,9 +36,12 @@ public class DeudaController {
     @Operation(summary = "Crear nueva deuda", description = "Registra una nueva deuda externa")
     public ResponseEntity<DeudaResponseDTO> crearDeuda(
             @AuthenticationPrincipal CustomUserDetails currentUser,
-            @Valid @RequestBody DeudaCreateDTO dto) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(deudaService.crearDeuda(currentUser.getId(), dto));
+            @Valid @RequestBody DeudaCreateDTO dto,
+            HttpServletRequest httpRequest) {
+        DeudaResponseDTO deuda = deudaService.crearDeuda(currentUser.getId(), dto);
+        auditService.registrar(currentUser.getId(), AuditAction.CREATE, "deudas",
+                deuda.getId(), null, deuda, "Deuda creada: " + dto.getDescripcion(), httpRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).body(deuda);
     }
 
     @GetMapping
@@ -43,7 +50,8 @@ public class DeudaController {
             @AuthenticationPrincipal CustomUserDetails currentUser,
             @RequestParam(required = false, defaultValue = "false") boolean soloActivas,
             @PageableDefault(size = 20) Pageable pageable) {
-        Page<DeudaResponseDTO> deudas = deudaService.obtenerDeudasUsuarioPaginado(currentUser.getId(), soloActivas, pageable);
+        Page<DeudaResponseDTO> deudas = deudaService.obtenerDeudasUsuarioPaginado(currentUser.getId(), soloActivas,
+                pageable);
         return ResponseEntity.ok(deudas);
     }
 
@@ -60,16 +68,25 @@ public class DeudaController {
     public ResponseEntity<DeudaResponseDTO> actualizarDeuda(
             @AuthenticationPrincipal CustomUserDetails currentUser,
             @PathVariable Long id,
-            @Valid @RequestBody DeudaCreateDTO dto) {
-        return ResponseEntity.ok(deudaService.actualizarDeuda(currentUser.getId(), id, dto));
+            @Valid @RequestBody DeudaCreateDTO dto,
+            HttpServletRequest httpRequest) {
+        DeudaResponseDTO deudaAntes = deudaService.obtenerDeuda(currentUser.getId(), id);
+        DeudaResponseDTO deuda = deudaService.actualizarDeuda(currentUser.getId(), id, dto);
+        auditService.registrar(currentUser.getId(), AuditAction.UPDATE, "deudas",
+                id, deudaAntes, deuda, "Deuda actualizada: " + dto.getDescripcion(), httpRequest);
+        return ResponseEntity.ok(deuda);
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Eliminar deuda", description = "Elimina una deuda y todos sus abonos")
     public ResponseEntity<Void> eliminarDeuda(
             @AuthenticationPrincipal CustomUserDetails currentUser,
-            @PathVariable Long id) {
+            @PathVariable Long id,
+            HttpServletRequest httpRequest) {
+        DeudaResponseDTO deudaAntes = deudaService.obtenerDeuda(currentUser.getId(), id);
         deudaService.eliminarDeuda(currentUser.getId(), id);
+        auditService.registrar(currentUser.getId(), AuditAction.DELETE, "deudas",
+                id, deudaAntes, null, "Deuda eliminada", httpRequest);
         return ResponseEntity.noContent().build();
     }
 
@@ -77,8 +94,13 @@ public class DeudaController {
     @Operation(summary = "Cancelar deuda", description = "Marca una deuda como cancelada sin eliminarla")
     public ResponseEntity<DeudaResponseDTO> cancelarDeuda(
             @AuthenticationPrincipal CustomUserDetails currentUser,
-            @PathVariable Long id) {
-        return ResponseEntity.ok(deudaService.cancelarDeuda(currentUser.getId(), id));
+            @PathVariable Long id,
+            HttpServletRequest httpRequest) {
+        DeudaResponseDTO deudaAntes = deudaService.obtenerDeuda(currentUser.getId(), id);
+        DeudaResponseDTO deuda = deudaService.cancelarDeuda(currentUser.getId(), id);
+        auditService.registrar(currentUser.getId(), AuditAction.UPDATE, "deudas",
+                id, deudaAntes, deuda, "Deuda cancelada", httpRequest);
+        return ResponseEntity.ok(deuda);
     }
 
     // ==================== ABONOS ====================
@@ -88,9 +110,12 @@ public class DeudaController {
     public ResponseEntity<AbonoDeudaResponseDTO> registrarAbono(
             @AuthenticationPrincipal CustomUserDetails currentUser,
             @PathVariable Long deudaId,
-            @Valid @RequestBody AbonoDeudaCreateDTO dto) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(deudaService.registrarAbono(currentUser.getId(), deudaId, dto));
+            @Valid @RequestBody AbonoDeudaCreateDTO dto,
+            HttpServletRequest httpRequest) {
+        AbonoDeudaResponseDTO abono = deudaService.registrarAbono(currentUser.getId(), deudaId, dto);
+        auditService.registrar(currentUser.getId(), AuditAction.CREATE, "abonos_deuda",
+                abono.getId(), null, abono, "Abono registrado en deuda #" + deudaId, httpRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).body(abono);
     }
 
     @GetMapping("/{deudaId}/abonos")
@@ -106,8 +131,11 @@ public class DeudaController {
     public ResponseEntity<Void> eliminarAbono(
             @AuthenticationPrincipal CustomUserDetails currentUser,
             @PathVariable Long deudaId,
-            @PathVariable Long abonoId) {
+            @PathVariable Long abonoId,
+            HttpServletRequest httpRequest) {
         deudaService.eliminarAbono(currentUser.getId(), deudaId, abonoId);
+        auditService.registrar(currentUser.getId(), AuditAction.DELETE, "abonos_deuda",
+                abonoId, null, null, "Abono eliminado de deuda #" + deudaId, httpRequest);
         return ResponseEntity.noContent().build();
     }
 

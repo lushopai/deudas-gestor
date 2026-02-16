@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -24,6 +24,8 @@ import { takeUntil } from 'rxjs/operators';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BalanceCard implements OnInit, OnDestroy {
+  @Input() mostrarBotones = true; // Control si muestra botones (false en hub para evitar redundancia)
+  
   private destroy$ = new Subject<void>();
   resumen: ResumenDeuda | null = null;
   cargando = true;
@@ -74,6 +76,10 @@ export class BalanceCard implements OnInit, OnDestroy {
 
   verHistorial(): void {
     this.router.navigate(['/deudas/historial']);
+  }
+
+  abrirDeudas(): void {
+    this.router.navigate(['/deudas']);
   }
 
   configurarPareja(): void {

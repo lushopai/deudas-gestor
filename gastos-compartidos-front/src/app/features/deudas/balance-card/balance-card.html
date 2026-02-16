@@ -1,4 +1,4 @@
-<mat-card class="balance-card" [class]="getColorBalance()">
+<mat-card class="balance-card" [class]="getColorBalance()" (click)="abrirDeudas()" [class.clickeable]="resumen && !cargando">
   <!-- Loading State -->
   @if (cargando) {
     <div class="loading-state">
@@ -35,10 +35,13 @@
   <!-- Balance Content -->
   @if (resumen && !cargando) {
     <mat-card-content class="balance-content">
-      <!-- Header -->
+      <!-- Header with Arrow -->
       <div class="balance-header">
-        <mat-icon class="balance-icon">account_balance_wallet</mat-icon>
-        <div class="balance-title">Balance de Deudas</div>
+        <div class="header-left">
+          <mat-icon class="balance-icon">account_balance_wallet</mat-icon>
+          <div class="balance-title">Balance de Deudas</div>
+        </div>
+        <mat-icon class="arrow-icon">chevron_right</mat-icon>
       </div>
 
       <!-- Balance Info -->
@@ -51,19 +54,21 @@
         }
       </div>
 
-      <!-- Actions -->
-      <div class="balance-actions">
-        @if (resumen.saldoPendiente > 0) {
-          <button mat-raised-button color="primary" (click)="abonarPago()">
-            <mat-icon>payment</mat-icon>
-            Abonar Pago
+      <!-- Actions (Mostrar solo si mostrarBotones = true) -->
+      @if (mostrarBotones) {
+        <div class="balance-actions">
+          @if (resumen.saldoPendiente > 0) {
+            <button mat-raised-button color="primary" (click)="abonarPago(); $event.stopPropagation()">
+              <mat-icon>payment</mat-icon>
+              Abonar Pago
+            </button>
+          }
+          <button mat-stroked-button (click)="verHistorial(); $event.stopPropagation()">
+            <mat-icon>history</mat-icon>
+            Ver Historial
           </button>
-        }
-        <button mat-stroked-button (click)="verHistorial()">
-          <mat-icon>history</mat-icon>
-          Ver Historial
-        </button>
-      </div>
+        </div>
+      }
     </mat-card-content>
   }
 </mat-card>

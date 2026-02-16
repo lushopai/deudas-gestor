@@ -175,6 +175,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.router.navigate(['/gastos/ocr']);
   }
 
+  abrirNuevoPresupuesto() {
+    this.router.navigate(['/presupuestos']);
+  }
+
   cerrarSesion() {
     this.authService.logout();
     this.router.navigate(['/login']);
@@ -185,7 +189,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   abrirDeudas() {
-    this.router.navigate(['/deudas-externas']);
+    this.router.navigate(['/deudas']);
   }
 
   abrirRecurrentes() {

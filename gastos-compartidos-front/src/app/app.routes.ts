@@ -29,9 +29,15 @@ export const routes: Routes = [
       // Lazy: Reportes
       { path: 'reportes', loadComponent: () => import('./features/reportes/reportes.component').then(m => m.ReportesComponent) },
 
-      // Lazy: Deudas (pareja)
-      { path: 'deudas/abonar', loadComponent: () => import('./features/deudas/pago-form/pago-form').then(m => m.PagoForm) },
-      { path: 'deudas/historial', loadComponent: () => import('./features/deudas/historial-pagos/historial-pagos').then(m => m.HistorialPagos) },
+      // Lazy: Deudas (pareja) - Hub con child routes
+      {
+        path: 'deudas',
+        loadComponent: () => import('./features/deudas/deudas-hub.component').then(m => m.DeudasHubComponent),
+        children: [
+          { path: 'abonar', loadComponent: () => import('./features/deudas/pago-form/pago-form').then(m => m.PagoForm) },
+          { path: 'historial', loadComponent: () => import('./features/deudas/historial-pagos/historial-pagos').then(m => m.HistorialPagos) }
+        ]
+      },
 
       // Lazy: Pareja
       { path: 'pareja/configurar', loadComponent: () => import('./features/pareja/pareja-setup/pareja-setup').then(m => m.ParejaSetup) },

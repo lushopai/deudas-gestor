@@ -2,11 +2,14 @@ package com.gastos.gastos_compartidos.controller;
 
 import com.gastos.gastos_compartidos.dto.GastoRecurrenteCreateDTO;
 import com.gastos.gastos_compartidos.dto.GastoRecurrenteResponseDTO;
+import com.gastos.gastos_compartidos.entity.AuditAction;
 import com.gastos.gastos_compartidos.security.CustomUserDetails;
+import com.gastos.gastos_compartidos.service.AuditService;
 import com.gastos.gastos_compartidos.service.GastoRecurrenteService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -25,14 +28,18 @@ import java.util.Map;
 public class GastoRecurrenteController {
 
     private final GastoRecurrenteService gastoRecurrenteService;
+    private final AuditService auditService;
 
     @PostMapping
     @Operation(summary = "Crear gasto recurrente", description = "Crea un nuevo gasto recurrente programado")
     public ResponseEntity<GastoRecurrenteResponseDTO> crear(
             @AuthenticationPrincipal CustomUserDetails currentUser,
-            @Valid @RequestBody GastoRecurrenteCreateDTO dto) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(gastoRecurrenteService.crear(currentUser.getId(), dto));
+            @Valid @RequestBody GastoRecurrenteCreateDTO dto,
+            HttpServletRequest httpRequest) {
+        GastoRecurrenteResponseDTO recurrente = gastoRecurrenteService.crear(currentUser.getId(), dto);
+        auditService.registrar(currentUser.getId(), AuditAction.CREATE, "gastos_recurrentes",
+                recurrente.getId(), null, recurrente, "Gasto recurrente creado: " + dto.getDescripcion(), httpRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).body(recurrente);
     }
 
     @GetMapping
@@ -67,24 +74,36 @@ public class GastoRecurrenteController {
     public ResponseEntity<GastoRecurrenteResponseDTO> actualizar(
             @AuthenticationPrincipal CustomUserDetails currentUser,
             @PathVariable Long id,
-            @Valid @RequestBody GastoRecurrenteCreateDTO dto) {
-        return ResponseEntity.ok(gastoRecurrenteService.actualizar(id, currentUser.getId(), dto));
+            @Valid @RequestBody GastoRecurrenteCreateDTO dto,
+            HttpServletRequest httpRequest) {
+        GastoRecurrenteResponseDTO antes = gastoRecurrenteService.obtenerPorId(id, currentUser.getId());
+        GastoRecurrenteResponseDTO recurrente = gastoRecurrenteService.actualizar(id, currentUser.getId(), dto);
+        auditService.registrar(currentUser.getId(), AuditAction.UPDATE, "gastos_recurrentes",
+                id, antes, recurrente, "Gasto recurrente actualizado: " + dto.getDescripcion(), httpRequest);
+        return ResponseEntity.ok(recurrente);
     }
 
     @PatchMapping("/{id}/toggle")
     @Operation(summary = "Activar/desactivar", description = "Activa o desactiva un gasto recurrente")
     public ResponseEntity<GastoRecurrenteResponseDTO> toggleActivo(
             @AuthenticationPrincipal CustomUserDetails currentUser,
-            @PathVariable Long id) {
-        return ResponseEntity.ok(gastoRecurrenteService.toggleActivo(id, currentUser.getId()));
+            @PathVariable Long id,
+            HttpServletRequest httpRequest) {
+        GastoRecurrenteResponseDTO recurrente = gastoRecurrenteService.toggleActivo(id, currentUser.getId());
+        auditService.registrar(currentUser.getId(), AuditAction.UPDATE, "gastos_recurrentes",
+                id, null, recurrente, "Gasto recurrente toggle activo", httpRequest);
+        return ResponseEntity.ok(recurrente);
     }
 
     @PostMapping("/{id}/ejecutar")
     @Operation(summary = "Ejecutar manualmente", description = "Genera el gasto de forma manual sin esperar la fecha programada")
     public ResponseEntity<Map<String, String>> ejecutarManualmente(
             @AuthenticationPrincipal CustomUserDetails currentUser,
-            @PathVariable Long id) {
+            @PathVariable Long id,
+            HttpServletRequest httpRequest) {
         gastoRecurrenteService.ejecutarManualmente(id, currentUser.getId());
+        auditService.registrar(currentUser.getId(), AuditAction.CREATE, "gastos_recurrentes",
+                id, null, null, "Gasto recurrente ejecutado manualmente", httpRequest);
         return ResponseEntity.ok(Map.of("mensaje", "Gasto generado exitosamente"));
     }
 
@@ -92,8 +111,12 @@ public class GastoRecurrenteController {
     @Operation(summary = "Eliminar gasto recurrente", description = "Elimina un gasto recurrente")
     public ResponseEntity<Void> eliminar(
             @AuthenticationPrincipal CustomUserDetails currentUser,
-            @PathVariable Long id) {
+            @PathVariable Long id,
+            HttpServletRequest httpRequest) {
+        GastoRecurrenteResponseDTO antes = gastoRecurrenteService.obtenerPorId(id, currentUser.getId());
         gastoRecurrenteService.eliminar(id, currentUser.getId());
+        auditService.registrar(currentUser.getId(), AuditAction.DELETE, "gastos_recurrentes",
+                id, antes, null, "Gasto recurrente eliminado", httpRequest);
         return ResponseEntity.noContent().build();
     }
 

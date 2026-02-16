@@ -1,15 +1,9 @@
-<mat-toolbar color="primary">
-  <button mat-icon-button (click)="volver()">
-    <mat-icon>arrow_back</mat-icon>
-  </button>
-  <span>Historial de Pagos</span>
-  <span class="spacer"></span>
-  <button mat-icon-button (click)="abonarPago()">
+<div class="historial-container">
+  <!-- FAB Button (Floating Action Button) -->
+  <button mat-fab class="fab-button" (click)="abonarPago()" matTooltip="Registrar Pago">
     <mat-icon>add</mat-icon>
   </button>
-</mat-toolbar>
 
-<div class="historial-container">
   <!-- Loading Skeleton -->
   @if (cargando) {
     <app-skeleton-loader tipo="list-item" [cantidad]="4"></app-skeleton-loader>

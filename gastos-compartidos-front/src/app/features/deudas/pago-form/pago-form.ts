@@ -10,6 +10,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { PagoService, MetodoPago, ResumenDeuda } from '../../../core/services/pago.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
@@ -30,7 +31,8 @@ import { takeUntil } from 'rxjs/operators';
     MatSelectModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatSnackBarModule
   ],
   templateUrl: './pago-form.html',
   styleUrl: './pago-form.scss',
@@ -58,6 +60,7 @@ export class PagoForm implements OnInit, OnDestroy {
     private router: Router,
     private notificationService: NotificationService,
     private loadingService: LoadingService,
+    private snackBar: MatSnackBar,
     private cdr: ChangeDetectorRef
   ) { }
 
@@ -144,9 +147,22 @@ export class PagoForm implements OnInit, OnDestroy {
     }).pipe(takeUntil(this.destroy$)).subscribe({
       next: () => {
         this.loadingService.hide();
-        this.notificationService.success('Pago registrado exitosamente');
+        const mensaje = 'Pago registrado exitosamente';
+        this.notificationService.success(mensaje);
+        
+        // Toast visual adicional
+        this.snackBar.open(mensaje, '', {
+          duration: 2000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          panelClass: ['success-snackbar']
+        });
+        
         this.cargando = false;
-        this.router.navigate(['/dashboard']);
+        // Navegar con pequeño delay para que el usuario vea la confirmación
+        setTimeout(() => {
+          this.router.navigate(['/deudas']);
+        }, 500);
       },
       error: () => {
         this.loadingService.hide();
@@ -157,7 +173,7 @@ export class PagoForm implements OnInit, OnDestroy {
   }
 
   volver(): void {
-    this.router.navigate(['/dashboard']);
+    this.router.navigate(['/deudas']);
   }
 
   ngOnDestroy(): void {

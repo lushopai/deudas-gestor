@@ -248,7 +248,7 @@ export class GastoFormComponent implements OnInit, OnDestroy {
   }
 
   volver(): void {
-    this.router.navigate(['/dashboard']);
+    this.router.navigate(['/gastos']);
   }
 
   ngOnDestroy(): void {

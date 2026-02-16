@@ -3,11 +3,14 @@ package com.gastos.gastos_compartidos.controller;
 import com.gastos.gastos_compartidos.dto.PagoCreateDTO;
 import com.gastos.gastos_compartidos.dto.PagoResponseDTO;
 import com.gastos.gastos_compartidos.dto.ResumenDeudaDTO;
+import com.gastos.gastos_compartidos.entity.AuditAction;
 import com.gastos.gastos_compartidos.security.CustomUserDetails;
+import com.gastos.gastos_compartidos.service.AuditService;
 import com.gastos.gastos_compartidos.service.PagoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -26,14 +29,18 @@ import org.springframework.web.bind.annotation.*;
 public class PagoController {
 
     private final PagoService pagoService;
+    private final AuditService auditService;
 
     @PostMapping
     @Operation(summary = "Registrar un pago", description = "Registra un pago/abono de un usuario a otro de la misma pareja")
     public ResponseEntity<PagoResponseDTO> registrarPago(
             @AuthenticationPrincipal CustomUserDetails currentUser,
-            @Valid @RequestBody PagoCreateDTO request) {
+            @Valid @RequestBody PagoCreateDTO request,
+            HttpServletRequest httpRequest) {
 
         PagoResponseDTO pago = pagoService.registrarPago(currentUser.getId(), request);
+        auditService.registrar(currentUser.getId(), AuditAction.CREATE, "pagos",
+                pago.getId(), null, pago, "Pago registrado", httpRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(pago);
     }
 
@@ -61,9 +68,13 @@ public class PagoController {
     @Operation(summary = "Cancelar pago", description = "Cancela un pago (solo dentro de los 7 días posteriores)")
     public ResponseEntity<Void> cancelarPago(
             @PathVariable Long pagoId,
-            @AuthenticationPrincipal CustomUserDetails currentUser) {
+            @AuthenticationPrincipal CustomUserDetails currentUser,
+            HttpServletRequest httpRequest) {
 
+        PagoResponseDTO pagoAntes = pagoService.obtenerPagoPorId(pagoId, currentUser.getId());
         pagoService.cancelarPago(pagoId, currentUser.getId());
+        auditService.registrar(currentUser.getId(), AuditAction.DELETE, "pagos",
+                pagoId, pagoAntes, null, "Pago cancelado", httpRequest);
         return ResponseEntity.noContent().build();
     }
 

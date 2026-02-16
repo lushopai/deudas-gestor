@@ -9,6 +9,7 @@ import { NotificationService } from './notification.service';
 })
 export class ReminderService {
   private readonly STORAGE_KEY = 'gastos_reminders_shown';
+  private readonly SETTINGS_KEY = 'gastos_settings';
 
   constructor(
     private gastoRecurrenteService: GastoRecurrenteService,
@@ -17,10 +18,50 @@ export class ReminderService {
   ) {}
 
   /**
+   * Obtener configuración de recordatorios del usuario
+   */
+  private obtenerConfiguracionRecordatorios(): {
+    recordatoriosActivos: boolean;
+    recordatorioRecurrentes: boolean;
+    recordatorioDeudas: boolean;
+  } {
+    try {
+      const data = localStorage.getItem(this.SETTINGS_KEY);
+      if (!data) {
+        return {
+          recordatoriosActivos: true,
+          recordatorioRecurrentes: true,
+          recordatorioDeudas: true
+        };
+      }
+      const parsed = JSON.parse(data);
+      return {
+        recordatoriosActivos: parsed.recordatoriosActivos ?? true,
+        recordatorioRecurrentes: parsed.recordatorioRecurrentes ?? true,
+        recordatorioDeudas: parsed.recordatorioDeudas ?? true
+      };
+    } catch {
+      return {
+        recordatoriosActivos: true,
+        recordatorioRecurrentes: true,
+        recordatorioDeudas: true
+      };
+    }
+  }
+
+  /**
    * Verificar y mostrar recordatorios al usuario.
    * Solo muestra una vez al día por tipo de recordatorio.
+   * Respeta las configuraciones del usuario desde Settings.
    */
   verificarRecordatorios(): void {
+    const config = this.obtenerConfiguracionRecordatorios();
+    
+    // Si los recordatorios están desactivados, no mostrar nada
+    if (!config.recordatoriosActivos) {
+      return;
+    }
+
     const hoy = new Date().toISOString().split('T')[0];
     const shownToday = this.getShownToday(hoy);
 
@@ -30,30 +71,34 @@ export class ReminderService {
     }).subscribe({
       next: ({ recurrentes, deudas }) => {
         // Recordatorios de gastos recurrentes pendientes (hoy o atrasados)
-        const pendientesHoy = recurrentes.filter(g => g.diasHastaProxima <= 0);
-        if (pendientesHoy.length > 0 && !shownToday.includes('recurrentes_pendientes')) {
-          this.mostrarRecordatorioRecurrentes(pendientesHoy);
-          this.markShown(hoy, 'recurrentes_pendientes');
-        }
+        if (config.recordatorioRecurrentes) {
+          const pendientesHoy = recurrentes.filter(g => g.diasHastaProxima <= 0);
+          if (pendientesHoy.length > 0 && !shownToday.includes('recurrentes_pendientes')) {
+            this.mostrarRecordatorioRecurrentes(pendientesHoy);
+            this.markShown(hoy, 'recurrentes_pendientes');
+          }
 
-        // Recordatorios de gastos recurrentes próximos (1-3 días)
-        const proximosDias = recurrentes.filter(g => g.diasHastaProxima > 0 && g.diasHastaProxima <= 3);
-        if (proximosDias.length > 0 && !shownToday.includes('recurrentes_proximos')) {
-          this.mostrarRecordatorioProximos(proximosDias);
-          this.markShown(hoy, 'recurrentes_proximos');
+          // Recordatorios de gastos recurrentes próximos (1-3 días)
+          const proximosDias = recurrentes.filter(g => g.diasHastaProxima > 0 && g.diasHastaProxima <= 3);
+          if (proximosDias.length > 0 && !shownToday.includes('recurrentes_proximos')) {
+            this.mostrarRecordatorioProximos(proximosDias);
+            this.markShown(hoy, 'recurrentes_proximos');
+          }
         }
 
         // Recordatorios de deudas próximas a vencer
-        const deudasProximas = deudas.filter(d => {
-          if (!d.fechaVencimiento || d.estado !== 'ACTIVA') return false;
-          const vencimiento = new Date(d.fechaVencimiento);
-          const diasRestantes = Math.ceil((vencimiento.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-          return diasRestantes >= 0 && diasRestantes <= 7;
-        });
+        if (config.recordatorioDeudas) {
+          const deudasProximas = deudas.filter(d => {
+            if (!d.fechaVencimiento || d.estado !== 'ACTIVA') return false;
+            const vencimiento = new Date(d.fechaVencimiento);
+            const diasRestantes = Math.ceil((vencimiento.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+            return diasRestantes >= 0 && diasRestantes <= 7;
+          });
 
-        if (deudasProximas.length > 0 && !shownToday.includes('deudas_proximas')) {
-          this.mostrarRecordatorioDeudas(deudasProximas);
-          this.markShown(hoy, 'deudas_proximas');
+          if (deudasProximas.length > 0 && !shownToday.includes('deudas_proximas')) {
+            this.mostrarRecordatorioDeudas(deudasProximas);
+            this.markShown(hoy, 'deudas_proximas');
+          }
         }
       }
     });
