@@ -88,7 +88,7 @@ public class SecurityConfig {
         return http.build();
     }
 
-    @org.springframework.beans.factory.annotation.Value("${ALLOWED_ORIGINS:http://localhost:4200,http://localhost:8080}")
+    @org.springframework.beans.factory.annotation.Value("${ALLOWED_ORIGINS:http://localhost:4200,http://localhost:8080,https://*.ngrok.app,https://*.ngrok-free.app}")
     private String allowedOrigins;
 
     @Bean
