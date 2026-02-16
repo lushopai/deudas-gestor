@@ -28,7 +28,7 @@ services:
       SPRING_PROFILES_ACTIVE: prod
 
       # CONECTAR A BASE DE DATOS EXTERNA (desde .env)
-      SPRING_DATASOURCE_URL: ${DATABASE_URL:-jdbc:postgresql://192.168.1.18:5432/mi_basedatos}
+      SPRING_DATASOURCE_URL: ${DATABASE_URL}
       SPRING_DATASOURCE_USERNAME: ${DB_USERNAME:-admin}
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
 
@@ -41,10 +41,10 @@ services:
       # Notificaciones Push (VAPID)
       VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY}
       VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY}
-      VAPID_SUBJECT: ${VAPID_SUBJECT:-mailto:admin@gastoscompartidos.app}
+      VAPID_SUBJECT: ${VAPID_SUBJECT}
 
       # Configuración de CORS (IMPORTANTE: Usar ALLOWED_ORIGINS, no CORS_ALLOWED_ORIGINS)
-      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-https://0027-2803-c600-7115-c592-ddd0-8191-263f-46ea.ngrok-free.app,http://localhost:4200}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS}
 
       # Claude Vision OCR
       CLAUDE_API_KEY: ${CLAUDE_API_KEY}
@@ -66,19 +66,7 @@ services:
     networks:
       - app_network
     restart: unless-stopped
-  # pgAdmin (Opcional - COMENTADO PARA EVITAR CONFLICTOS SI YA TIENES UNO)
-  # pgadmin:
-  #   image: dpage/pgadmin4:latest
-  #   container_name: gastos_pgadmin
-  #   environment:
-  #     PGADMIN_DEFAULT_EMAIL: admin@example.com
-  #     PGADMIN_DEFAULT_PASSWORD: AdminPassword123
-  #   ports:
-  #     - "5050:80"
-  #   volumes:
-  #     - pgadmin_data_root:/var/lib/pgadmin
-  #   networks:
-  #     - app_network
+
 
 volumes:
   postgres_data_root:
