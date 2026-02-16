@@ -36,8 +36,8 @@ public class Usuario {
     @Column(unique = true)
     private String googleId; // Para OAuth Google
 
-    @Column
-    private String fotoPerfil;
+    @Column(columnDefinition = "TEXT")
+    private String fotoPerfil; // URL o Base64 de imagen, puede ser muy larga
 
     @Column
     private String telefono;
