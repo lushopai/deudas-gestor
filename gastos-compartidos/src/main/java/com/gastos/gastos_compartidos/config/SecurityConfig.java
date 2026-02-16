@@ -88,7 +88,7 @@ public class SecurityConfig {
         return http.build();
     }
 
-    @org.springframework.beans.factory.annotation.Value("${ALLOWED_ORIGINS:http://localhost:4200,http://localhost:8080,https://*.ngrok.app,https://*.ngrok-free.app}")
+    @org.springframework.beans.factory.annotation.Value("${ALLOWED_ORIGINS:http://localhost:4200,http://localhost:8080,https://*.ngrok.app,https://*.ngrok-free.app,http://*.ngrok-free.app}")
     private String allowedOrigins;
 
     @Bean
@@ -104,10 +104,13 @@ public class SecurityConfig {
         // Usar patterns permite comodines y funciona con credenciales
         configuration.setAllowedOriginPatterns(Arrays.asList(origins));
 
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD"));
+        // Permitir todos los headers que el cliente envíe
         configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setExposedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Total-Count"));
         configuration.setAllowCredentials(true);
-        configuration.setMaxAge(3600L);
+        // Permitir preflight por 24 horas
+        configuration.setMaxAge(86400L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

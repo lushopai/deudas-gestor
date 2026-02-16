@@ -15,10 +15,14 @@ export class JwtInterceptor implements HttpInterceptor {
   constructor(private authService: AuthService) { }
 
   intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
-    // Agregar token si existe
-    const token = this.authService.obtenerToken();
+    // No agregar token a rutas públicas o auth
+    if (request.url.includes('/public/') || request.url.includes('/auth/')) {
+      return next.handle(request);
+    }
 
-    if (token && !request.url.includes('/public/')) {
+    // Agregar token solo si existe
+    const token = this.authService.obtenerToken();
+    if (token) {
       request = request.clone({
         setHeaders: {
           Authorization: `Bearer ${token}`
