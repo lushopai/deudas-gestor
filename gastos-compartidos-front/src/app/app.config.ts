@@ -10,6 +10,7 @@ import { routes } from './app.routes';
 import { JwtInterceptor } from './core/interceptors/jwt.interceptor';
 import { ErrorInterceptor } from './core/interceptors/error.interceptor';
 import { ConnectivityService } from './core/services/connectivity.service';
+import { AppUpdateService } from './core/services/app-update.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -42,10 +43,10 @@ export const appConfig: ApplicationConfig = {
     }),
     {
       provide: APP_INITIALIZER,
-      useFactory: (connectivityService: ConnectivityService) => () => {
-        // Inicializar el servicio de conectividad al arrancar la app
+      useFactory: (connectivityService: ConnectivityService, appUpdateService: AppUpdateService) => () => {
+        appUpdateService.init();
       },
-      deps: [ConnectivityService],
+      deps: [ConnectivityService, AppUpdateService],
       multi: true
     }
   ]

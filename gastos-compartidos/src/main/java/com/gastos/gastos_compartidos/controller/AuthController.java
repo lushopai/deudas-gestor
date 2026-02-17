@@ -4,10 +4,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -43,7 +41,6 @@ public class AuthController {
     public ResponseEntity<?> login(@Valid @RequestBody AuthRequestDTO request) {
         String email = request.getEmail();
 
-        // Verificar si la cuenta está bloqueada
         if (loginAttemptService.isBlocked(email)) {
             long minutesLeft = loginAttemptService.getMinutesUntilUnlock(email);
             return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
@@ -53,20 +50,19 @@ public class AuthController {
         }
 
         try {
-            Authentication authentication = authenticationManager.authenticate(
+            authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             email,
                             request.getPassword()));
 
-            // Login exitoso: limpiar intentos fallidos
             loginAttemptService.loginSucceeded(email);
 
-            String token = tokenProvider.generarToken(authentication);
             Usuario usuario = usuarioService.obtenerPorEmail(email);
+            String accessToken = tokenProvider.generarAccessToken(usuario.getId());
+            String refreshToken = tokenProvider.generarRefreshToken(usuario.getId());
 
-            return ResponseEntity.ok(AuthResponseDTO.fromUsuario(token, usuario));
+            return ResponseEntity.ok(AuthResponseDTO.fromUsuario(accessToken, refreshToken, usuario));
         } catch (Exception e) {
-            // Login fallido: registrar intento
             loginAttemptService.loginFailed(email);
             int remaining = loginAttemptService.getRemainingAttempts(email);
 
@@ -90,26 +86,24 @@ public class AuthController {
     @Operation(summary = "Registrar nuevo usuario", description = "Crear una nueva cuenta con email y contraseña")
     public ResponseEntity<?> registro(@Valid @RequestBody RegistroRequestDTO request) {
         Usuario usuario = usuarioService.registrarUsuario(request);
-        String token = tokenProvider.generarTokenDesdeUsuarioId(usuario.getId());
+        String accessToken = tokenProvider.generarAccessToken(usuario.getId());
+        String refreshToken = tokenProvider.generarRefreshToken(usuario.getId());
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(AuthResponseDTO.fromUsuario(token, usuario));
+                .body(AuthResponseDTO.fromUsuario(accessToken, refreshToken, usuario));
     }
 
     @PostMapping("/google-login")
     @Operation(summary = "Iniciar sesión con Google", description = "Autenticarse con token de Google")
     public ResponseEntity<?> googleLogin(@Valid @RequestBody GoogleLoginRequestDTO request) {
         try {
-            // Verificar y extraer información del token de Google
             GoogleOAuthService.GoogleUserInfo userInfo = googleOAuthService.verificarYExtraerToken(request.getToken());
-
-            // Registrar o actualizar usuario
             Usuario usuario = googleOAuthService.registrarOActualizarUsuarioGoogle(userInfo);
 
-            // Generar token JWT local
-            String token = tokenProvider.generarTokenDesdeUsuarioId(usuario.getId());
+            String accessToken = tokenProvider.generarAccessToken(usuario.getId());
+            String refreshToken = tokenProvider.generarRefreshToken(usuario.getId());
 
-            return ResponseEntity.ok(AuthResponseDTO.fromUsuario(token, usuario));
+            return ResponseEntity.ok(AuthResponseDTO.fromUsuario(accessToken, refreshToken, usuario));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body("Error al autenticar con Google: " + e.getMessage());
@@ -117,13 +111,22 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    @Operation(summary = "Refrescar token", description = "Obtener un nuevo token")
-    public ResponseEntity<?> refreshToken(@RequestHeader("Authorization") String bearerToken) {
-        String token = bearerToken.substring(7);
-        Long usuarioId = tokenProvider.obtenerUsuarioIdDesdeToken(token);
-        String nuevoToken = tokenProvider.generarTokenDesdeUsuarioId(usuarioId);
+    @Operation(summary = "Refrescar token", description = "Obtener un nuevo access token usando el refresh token")
+    public ResponseEntity<?> refreshToken(@Valid @RequestBody java.util.Map<String, String> request) {
+        String refreshToken = request.get("refreshToken");
 
+        if (refreshToken == null || !tokenProvider.validarRefreshToken(refreshToken)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(java.util.Map.of("mensaje", "Refresh token inválido o expirado"));
+        }
+
+        Long usuarioId = tokenProvider.obtenerUsuarioIdDesdeToken(refreshToken);
         Usuario usuario = usuarioService.obtenerPorId(usuarioId);
-        return ResponseEntity.ok(AuthResponseDTO.fromUsuario(nuevoToken, usuario));
+
+        String nuevoAccessToken = tokenProvider.generarAccessToken(usuarioId);
+        // Generar nuevo refresh token (rotación de tokens)
+        String nuevoRefreshToken = tokenProvider.generarRefreshToken(usuarioId);
+
+        return ResponseEntity.ok(AuthResponseDTO.fromUsuario(nuevoAccessToken, nuevoRefreshToken, usuario));
     }
 }

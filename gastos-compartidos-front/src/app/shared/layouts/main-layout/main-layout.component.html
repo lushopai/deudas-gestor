@@ -70,6 +70,19 @@
       </button>
 
       <mat-menu #headerMenu="matMenu">
+        <button mat-menu-item (click)="navigateTo('/reportes')">
+          <mat-icon>assessment</mat-icon>
+          <span>Reportes</span>
+        </button>
+        <button mat-menu-item (click)="navigateTo('/presupuestos')">
+          <mat-icon>trending_up</mat-icon>
+          <span>Presupuestos</span>
+        </button>
+        <button mat-menu-item (click)="navigateTo('/deudas-externas')">
+          <mat-icon>account_balance</mat-icon>
+          <span>Deudas Externas</span>
+        </button>
+        <mat-divider></mat-divider>
         <button mat-menu-item (click)="abrirPerfil()">
           <mat-icon>person_outline</mat-icon>
           <span>Mi Perfil</span>

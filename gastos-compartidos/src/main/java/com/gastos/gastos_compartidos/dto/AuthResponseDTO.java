@@ -14,15 +14,17 @@ import lombok.NoArgsConstructor;
 public class AuthResponseDTO {
 
     private String token;
+    private String refreshToken;
 
     @Default
     private String tipo = "Bearer";
     private UsuarioResponseDTO usuario;
 
-    public static AuthResponseDTO fromUsuario(String token, Usuario usuario) {
+    public static AuthResponseDTO fromUsuario(String token, String refreshToken, Usuario usuario) {
         return AuthResponseDTO.builder()
-            .token(token)
-            .usuario(UsuarioResponseDTO.fromEntity(usuario))
-            .build();
+                .token(token)
+                .refreshToken(refreshToken)
+                .usuario(UsuarioResponseDTO.fromEntity(usuario))
+                .build();
     }
 }

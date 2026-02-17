@@ -179,7 +179,6 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
       return (nombreParts[0][0] + nombreParts[1][0]).toUpperCase();
     }
     return nombre.substring(0, 2).toUpperCase();
-    this.cerrarSidenav();
   }
 
   abrirPerfil() {

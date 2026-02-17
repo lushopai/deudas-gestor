@@ -9,18 +9,14 @@ import { toObservable } from '@angular/core/rxjs-interop';
 })
 export class AuthService {
   private tokenKey = 'gastos_token';
+  private refreshTokenKey = 'gastos_refresh_token';
   private usuarioKey = 'gastos_usuario';
 
-  // Signal privado para el estado del usuario
   private _usuario = signal<any>(this.getUsuarioDelLocalStorage());
 
-  // Signal público readonly
   usuario = this._usuario.asReadonly();
-
-  // Observable para compatibilidad con componentes que aún no migran
   usuario$ = toObservable(this._usuario);
 
-  // Computed signal para saber si está autenticado
   estaAutenticadoSignal = computed(() => {
     const token = this.obtenerToken();
     if (!token) return false;
@@ -28,12 +24,12 @@ export class AuthService {
     return this._usuario() !== null;
   });
 
-  constructor(private apiService: ApiService) {}
+  constructor(private apiService: ApiService) { }
 
   login(email: string, password: string): Observable<any> {
     return this.apiService.login(email, password).pipe(
       tap(response => {
-        this.guardarToken(response.token);
+        this.guardarTokens(response.token, response.refreshToken);
         this.guardarUsuario(response.usuario);
         this._usuario.set(response.usuario);
       })
@@ -43,7 +39,7 @@ export class AuthService {
   registro(data: any): Observable<any> {
     return this.apiService.registro(data).pipe(
       tap(response => {
-        this.guardarToken(response.token);
+        this.guardarTokens(response.token, response.refreshToken);
         this.guardarUsuario(response.usuario);
         this._usuario.set(response.usuario);
       })
@@ -53,9 +49,25 @@ export class AuthService {
   loginConGoogle(tokenGoogle: string): Observable<any> {
     return this.apiService.loginConGoogle(tokenGoogle).pipe(
       tap(response => {
-        this.guardarToken(response.token);
+        this.guardarTokens(response.token, response.refreshToken);
         this.guardarUsuario(response.usuario);
         this._usuario.set(response.usuario);
+      })
+    );
+  }
+
+  refreshToken(): Observable<any> {
+    const refreshToken = this.obtenerRefreshToken();
+    if (!refreshToken) {
+      throw new Error('No hay refresh token disponible');
+    }
+    return this.apiService.refreshToken(refreshToken).pipe(
+      tap(response => {
+        this.guardarTokens(response.token, response.refreshToken);
+        if (response.usuario) {
+          this.guardarUsuario(response.usuario);
+          this._usuario.set(response.usuario);
+        }
       })
     );
   }
@@ -64,15 +76,28 @@ export class AuthService {
     return localStorage.getItem(this.tokenKey);
   }
 
+  obtenerRefreshToken(): string | null {
+    return localStorage.getItem(this.refreshTokenKey);
+  }
+
   /**
-   * Verifica si el usuario está autenticado y si el token no ha expirado
+   * Verifica si el access token ha expirado pero el refresh token aún es válido
    */
+  puedeRefrescar(): boolean {
+    const refreshToken = this.obtenerRefreshToken();
+    if (!refreshToken) return false;
+    return !this.tokenExpirado(refreshToken);
+  }
+
   estaAutenticado(): boolean {
     const token = this.obtenerToken();
     if (!token) return false;
 
-    // Verificar si el token ha expirado
     if (this.tokenExpirado(token)) {
+      // Si el access token expiró pero el refresh sigue válido, no hacer logout
+      if (this.puedeRefrescar()) {
+        return true;
+      }
       this.logout();
       return false;
     }
@@ -82,6 +107,7 @@ export class AuthService {
 
   logout(): void {
     localStorage.removeItem(this.tokenKey);
+    localStorage.removeItem(this.refreshTokenKey);
     localStorage.removeItem(this.usuarioKey);
     this._usuario.set(null);
   }
@@ -90,15 +116,10 @@ export class AuthService {
     return this._usuario();
   }
 
-  /**
-   * Decodifica el payload del JWT y verifica si ha expirado
-   */
   private tokenExpirado(token: string): boolean {
     try {
       const payload = this.decodificarToken(token);
       if (!payload || !payload.exp) return true;
-
-      // exp está en segundos, Date.now() en milisegundos
       const expiracion = payload.exp * 1000;
       return Date.now() >= expiracion;
     } catch {
@@ -106,14 +127,10 @@ export class AuthService {
     }
   }
 
-  /**
-   * Decodifica el payload de un JWT sin verificar la firma
-   */
   private decodificarToken(token: string): any {
     try {
       const partes = token.split('.');
       if (partes.length !== 3) return null;
-
       const payload = partes[1];
       const decoded = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
       return JSON.parse(decoded);
@@ -122,8 +139,11 @@ export class AuthService {
     }
   }
 
-  private guardarToken(token: string): void {
+  private guardarTokens(token: string, refreshToken: string): void {
     localStorage.setItem(this.tokenKey, token);
+    if (refreshToken) {
+      localStorage.setItem(this.refreshTokenKey, refreshToken);
+    }
   }
 
   private guardarUsuario(usuario: any): void {

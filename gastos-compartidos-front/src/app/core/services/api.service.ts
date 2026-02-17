@@ -24,10 +24,8 @@ export class ApiService {
     return this.http.post(`${this.apiUrl}/auth/google-login`, { token: tokenGoogle });
   }
 
-  refreshToken(token: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/auth/refresh`, {}, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
+  refreshToken(refreshToken: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/auth/refresh`, { refreshToken });
   }
 
   // Categorías
