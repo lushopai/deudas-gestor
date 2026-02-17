@@ -3,6 +3,8 @@ package com.gastos.gastos_compartidos.service;
 import java.util.Optional;
 
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +28,8 @@ public class UsuarioService {
     private final ParejaRepository parejaRepository;
     private final ObjectProvider<PasswordEncoder> passwordEncoderProvider;
 
-    public UsuarioService(UsuarioRepository usuarioRepository, ParejaRepository parejaRepository, ObjectProvider<PasswordEncoder> passwordEncoderProvider) {
+    public UsuarioService(UsuarioRepository usuarioRepository, ParejaRepository parejaRepository,
+            ObjectProvider<PasswordEncoder> passwordEncoderProvider) {
         this.usuarioRepository = usuarioRepository;
         this.parejaRepository = parejaRepository;
         this.passwordEncoderProvider = passwordEncoderProvider;
@@ -46,34 +49,36 @@ public class UsuarioService {
 
         // Crear pareja (grupo)
         Pareja pareja = Pareja.builder()
-            .nombrePareja(request.getNombrePareja() != null ? request.getNombrePareja() : "Pareja de " + request.getNombre())
-            .build();
+                .nombrePareja(request.getNombrePareja() != null ? request.getNombrePareja()
+                        : "Pareja de " + request.getNombre())
+                .build();
         pareja = parejaRepository.save(pareja);
 
         // Crear usuario
         Usuario usuario = Usuario.builder()
-            .email(request.getEmail())
-            .nombre(request.getNombre())
-            .apellido(request.getApellido())
-            .password(getPasswordEncoder().encode(request.getPassword()))
-            .pareja(pareja)
-            .provider(Usuario.AuthProvider.LOCAL)
-            .build();
+                .email(request.getEmail())
+                .nombre(request.getNombre())
+                .apellido(request.getApellido())
+                .password(getPasswordEncoder().encode(request.getPassword()))
+                .pareja(pareja)
+                .provider(Usuario.AuthProvider.LOCAL)
+                .build();
 
         return usuarioRepository.save(usuario);
     }
 
     public Usuario obtenerPorEmail(String email) {
         return usuarioRepository.findByEmail(email)
-            .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado: " + email));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado: " + email));
     }
 
     public Usuario obtenerPorId(Long id) {
         return usuarioRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con ID: " + id));
     }
 
-    public Usuario obtenerOCrearPorGoogleId(String googleId, String email, String nombre, String apellido, String fotoPerfil) {
+    public Usuario obtenerOCrearPorGoogleId(String googleId, String email, String nombre, String apellido,
+            String fotoPerfil) {
         // Buscar por googleId
         Optional<Usuario> usuarioExistente = usuarioRepository.findByGoogleId(googleId);
         if (usuarioExistente.isPresent()) {
@@ -88,28 +93,31 @@ public class UsuarioService {
 
         // Crear nuevo usuario con Google
         Pareja pareja = Pareja.builder()
-            .nombrePareja("Pareja de " + nombre)
-            .build();
+                .nombrePareja("Pareja de " + nombre)
+                .build();
         pareja = parejaRepository.save(pareja);
 
         Usuario nuevoUsuario = Usuario.builder()
-            .email(email)
-            .nombre(nombre)
-            .apellido(apellido)
-            .googleId(googleId)
-            .fotoPerfil(fotoPerfil)
-            .provider(Usuario.AuthProvider.GOOGLE)
-            .pareja(pareja)
-            .build();
+                .email(email)
+                .nombre(nombre)
+                .apellido(apellido)
+                .googleId(googleId)
+                .fotoPerfil(fotoPerfil)
+                .provider(Usuario.AuthProvider.GOOGLE)
+                .pareja(pareja)
+                .build();
 
         return usuarioRepository.save(nuevoUsuario);
     }
 
+    @Cacheable(value = "usuario-perfil", key = "#usuarioId")
+    @Transactional(readOnly = true)
     public UsuarioResponseDTO obtenerPerfil(Long usuarioId) {
         Usuario usuario = obtenerPorId(usuarioId);
         return UsuarioResponseDTO.fromEntity(usuario);
     }
 
+    @CacheEvict(value = "usuario-perfil", key = "#usuarioId")
     public void cambiarPassword(Long usuarioId, CambiarPasswordDTO dto) {
         Usuario usuario = obtenerPorId(usuarioId);
 
@@ -125,6 +133,7 @@ public class UsuarioService {
         usuarioRepository.save(usuario);
     }
 
+    @CacheEvict(value = "usuario-perfil", key = "#usuarioId")
     public UsuarioResponseDTO actualizarPerfil(Long usuarioId, ActualizarPerfilDTO dto) {
         Usuario usuario = obtenerPorId(usuarioId);
 

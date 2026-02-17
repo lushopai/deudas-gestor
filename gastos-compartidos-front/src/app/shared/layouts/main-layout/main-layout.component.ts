@@ -210,6 +210,10 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
     this.router.navigate(['/gastos/nuevo']);
   }
 
+  buscarGastos() {
+    this.router.navigate(['/gastos'], { queryParams: { buscar: true } });
+  }
+
   cerrarSesion() {
     this.authService.logout();
     this.router.navigate(['/login']);

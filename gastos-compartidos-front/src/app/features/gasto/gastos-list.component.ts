@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatTableModule } from '@angular/material/table';
@@ -82,6 +82,7 @@ export class GastosListComponent implements OnInit, OnDestroy {
     private gastoService: GastoService,
     private notificationService: NotificationService,
     private router: Router,
+    private route: ActivatedRoute,
     private cdRef: ChangeDetectorRef
   ) { }
 
@@ -90,6 +91,16 @@ export class GastosListComponent implements OnInit, OnDestroy {
     this.gastoService.obtenerCategorias().pipe(takeUntil(this.destroy$)).subscribe({
       next: (cats) => this.categorias = cats.filter(c => c.activo),
       error: () => { }
+    });
+
+    // Abrir filtros si se navega con ?buscar=true
+    this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe(params => {
+      if (params['buscar'] === 'true') {
+        this.filtrosVisibles = true;
+        this.cdRef.detectChanges();
+        // Limpiar el query param
+        this.router.navigate([], { queryParams: {}, replaceUrl: true });
+      }
     });
   }
 
@@ -102,9 +113,9 @@ export class GastosListComponent implements OnInit, OnDestroy {
     this.gastoService.obtenerGastosPaginado(0, this.pageSize).pipe(takeUntil(this.destroy$)).subscribe({
       next: (page: PageResponse<Gasto>) => {
         this.gastos = page.content;
-        this.totalPaginas = page.totalPages;
-        this.totalElementos = page.totalElements;
-        this.esUltimaPagina = page.last;
+        this.totalPaginas = page.page.totalPages;
+        this.totalElementos = page.page.totalElements;
+        this.esUltimaPagina = page.page.number >= page.page.totalPages - 1;
         this.aplicarFiltros();
         this.cargando = false;
         this.cdRef.detectChanges();
@@ -131,7 +142,7 @@ export class GastosListComponent implements OnInit, OnDestroy {
     this.gastoService.obtenerGastosPaginado(this.paginaActual, this.pageSize).pipe(takeUntil(this.destroy$)).subscribe({
       next: (page: PageResponse<Gasto>) => {
         this.gastos = [...this.gastos, ...page.content];
-        this.esUltimaPagina = page.last;
+        this.esUltimaPagina = page.page.number >= page.page.totalPages - 1;
         this.aplicarFiltros();
         this.cargandoMas = false;
         this.cdRef.detectChanges();

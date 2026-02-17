@@ -30,7 +30,7 @@ public class ReporteService {
 
     public ReporteDTO generarReporteMensual(Long parejaId, int ano, int mes) {
         Pareja pareja = parejaRepository.findById(parejaId)
-            .orElseThrow(() -> new ResourceNotFoundException("Pareja no encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("Pareja no encontrada"));
 
         if (pareja.getUsuarios().size() < 2) {
             throw new BadRequestException("La pareja debe tener al menos 2 usuarios para generar reportes");
@@ -80,7 +80,8 @@ public class ReporteService {
             String catNombre = gasto.getCategoria() != null ? gasto.getCategoria().getNombre() : "Sin categoría";
             String catIcono = gasto.getCategoria() != null ? gasto.getCategoria().getIcono() : "help_outline";
             String catColor = gasto.getCategoria() != null && gasto.getCategoria().getColor() != null
-                ? gasto.getCategoria().getColor() : "#9e9e9e";
+                    ? gasto.getCategoria().getColor()
+                    : "#9e9e9e";
 
             montosPorCategoria.merge(catNombre, gasto.getMonto(), BigDecimal::add);
             cantidadPorCategoria.merge(catNombre, 1, Integer::sum);
@@ -99,7 +100,8 @@ public class ReporteService {
         if (saldoFinal.compareTo(BigDecimal.ZERO) > 0) {
             detalleDeuda = String.format("%s debe $%.2f a %s", usuario1.getNombre(), saldoFinal, usuario2.getNombre());
         } else if (saldoFinal.compareTo(BigDecimal.ZERO) < 0) {
-            detalleDeuda = String.format("%s debe $%.2f a %s", usuario2.getNombre(), saldoFinal.abs(), usuario1.getNombre());
+            detalleDeuda = String.format("%s debe $%.2f a %s", usuario2.getNombre(), saldoFinal.abs(),
+                    usuario1.getNombre());
         } else {
             detalleDeuda = "Están al día";
         }
@@ -107,36 +109,40 @@ public class ReporteService {
         // Construir lista de categorías ordenada por monto descendente
         final BigDecimal total = gastoTotal;
         List<ReporteDTO.CategoriaReporte> categorias = montosPorCategoria.entrySet().stream()
-            .sorted(Map.Entry.<String, BigDecimal>comparingByValue().reversed())
-            .map(entry -> {
-                double porcentaje = total.compareTo(BigDecimal.ZERO) > 0
-                    ? entry.getValue().divide(total, 4, RoundingMode.HALF_UP).doubleValue() * 100
-                    : 0;
-                return ReporteDTO.CategoriaReporte.builder()
-                    .nombre(entry.getKey())
-                    .icono(iconosPorCategoria.get(entry.getKey()))
-                    .color(coloresPorCategoria.get(entry.getKey()))
-                    .monto(entry.getValue())
-                    .cantidad(cantidadPorCategoria.get(entry.getKey()))
-                    .porcentaje(Math.round(porcentaje * 10.0) / 10.0)
-                    .build();
-            })
-            .collect(Collectors.toList());
+                .sorted(Map.Entry.<String, BigDecimal>comparingByValue().reversed())
+                .map(entry -> {
+                    double porcentaje = total.compareTo(BigDecimal.ZERO) > 0
+                            ? entry.getValue().divide(total, 4, RoundingMode.HALF_UP).doubleValue() * 100
+                            : 0;
+                    return ReporteDTO.CategoriaReporte.builder()
+                            .nombre(entry.getKey())
+                            .icono(iconosPorCategoria.get(entry.getKey()))
+                            .color(coloresPorCategoria.get(entry.getKey()))
+                            .monto(entry.getValue())
+                            .cantidad(cantidadPorCategoria.get(entry.getKey()))
+                            .porcentaje(Math.round(porcentaje * 10.0) / 10.0)
+                            .build();
+                })
+                .collect(Collectors.toList());
 
         return ReporteDTO.builder()
-            .parejaId(parejaId)
-            .nombrePareja(pareja.getNombrePareja())
-            .nombreUsuario1(usuario1.getNombre())
-            .nombreUsuario2(usuario2.getNombre())
-            .gastoTotalMes(gastoTotal)
-            .gastoUsuario1(gastosUsuario1)
-            .gastoUsuario2(gastosUsuario2)
-            .pagadoUsuario1(pagadoUsuario1)
-            .pagadoUsuario2(pagadoUsuario2)
-            .saldoQuienDebe(saldoFinal)
-            .detalleDeuda(detalleDeuda)
-            .cantidadGastos(gastos.size())
-            .gastosPorCategoria(categorias)
-            .build();
+                .parejaId(parejaId)
+                .nombrePareja(pareja.getNombrePareja())
+                .nombreUsuario1(usuario1.getNombre())
+                .nombreUsuario2(usuario2.getNombre())
+                .gastoTotalMes(gastoTotal)
+                .gastoUsuario1(gastosUsuario1)
+                .gastoUsuario2(gastosUsuario2)
+                .pagadoUsuario1(pagadoUsuario1)
+                .pagadoUsuario2(pagadoUsuario2)
+                .saldoQuienDebe(saldoFinal)
+                .detalleDeuda(detalleDeuda)
+                .cantidadGastos(gastos.size())
+                .gastosPorCategoria(categorias)
+                .build();
+    }
+
+    public List<Gasto> obtenerGastosPorRango(Long parejaId, LocalDateTime inicio, LocalDateTime fin) {
+        return gastoRepository.findByParejaidAndFechaRango(parejaId, inicio, fin);
     }
 }

@@ -3,7 +3,7 @@ import { LoginComponent } from './features/auth/login.component';
 import { RegistroComponent } from './features/auth/registro.component';
 import { DashboardComponent } from './features/dashboard/dashboard.component';
 import { MainLayoutComponent } from './shared/layouts/main-layout/main-layout.component';
-import { AuthGuard } from './core/guards/auth.guard';
+import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -12,7 +12,7 @@ export const routes: Routes = [
   {
     path: '',
     component: MainLayoutComponent,
-    canActivate: [AuthGuard],
+    canActivate: [authGuard],
     children: [
       // Eager: Dashboard (página principal)
       { path: 'dashboard', component: DashboardComponent },

@@ -79,8 +79,8 @@ export class HistorialPagos implements OnInit, OnDestroy {
     this.pagoService.obtenerHistorialPaginado(0, this.pageSize).pipe(takeUntil(this.destroy$)).subscribe({
       next: (page: PageResponse<Pago>) => {
         this.pagos = page.content;
-        this.totalElementos = page.totalElements;
-        this.esUltimaPagina = page.last;
+        this.totalElementos = page.page.totalElements;
+        this.esUltimaPagina = page.page.number >= page.page.totalPages - 1;
         this.cargando = false;
         this.cdr.detectChanges();
       },
@@ -106,7 +106,7 @@ export class HistorialPagos implements OnInit, OnDestroy {
     this.pagoService.obtenerHistorialPaginado(this.paginaActual, this.pageSize).pipe(takeUntil(this.destroy$)).subscribe({
       next: (page: PageResponse<Pago>) => {
         this.pagos = [...this.pagos, ...page.content];
-        this.esUltimaPagina = page.last;
+        this.esUltimaPagina = page.page.number >= page.page.totalPages - 1;
         this.cargandoMas = false;
         this.cdr.detectChanges();
       },

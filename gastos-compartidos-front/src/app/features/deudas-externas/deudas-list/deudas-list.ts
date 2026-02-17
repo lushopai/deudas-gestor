@@ -80,8 +80,8 @@ export class DeudasList implements OnInit, OnDestroy {
     this.deudaService.obtenerDeudasPaginado(0, this.pageSize).pipe(takeUntil(this.destroy$)).subscribe({
       next: (page: PageResponse<Deuda>) => {
         this.deudas = page.content;
-        this.totalElementos = page.totalElements;
-        this.esUltimaPagina = page.last;
+        this.totalElementos = page.page.totalElements;
+        this.esUltimaPagina = page.page.number >= page.page.totalPages - 1;
         this.cargando = false;
         this.cdr.detectChanges();
       },
@@ -107,7 +107,7 @@ export class DeudasList implements OnInit, OnDestroy {
     this.deudaService.obtenerDeudasPaginado(this.paginaActual, this.pageSize).pipe(takeUntil(this.destroy$)).subscribe({
       next: (page: PageResponse<Deuda>) => {
         this.deudas = [...this.deudas, ...page.content];
-        this.esUltimaPagina = page.last;
+        this.esUltimaPagina = page.page.number >= page.page.totalPages - 1;
         this.cargandoMas = false;
         this.cdr.detectChanges();
       },

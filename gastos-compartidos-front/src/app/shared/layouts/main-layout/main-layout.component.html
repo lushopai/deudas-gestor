@@ -54,6 +54,10 @@
       </div>
       
       <span class="spacer"></span>
+
+      <button mat-icon-button (click)="buscarGastos()" aria-label="Buscar gastos">
+        <mat-icon>search</mat-icon>
+      </button>
       
       <button mat-icon-button (click)="toggleDarkMode()" class="theme-toggle">
         <mat-icon>{{ darkMode ? 'light_mode' : 'dark_mode' }}</mat-icon>

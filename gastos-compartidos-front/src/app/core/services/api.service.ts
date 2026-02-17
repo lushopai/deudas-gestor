@@ -83,4 +83,10 @@ export class ApiService {
       responseType: 'blob'
     });
   }
+
+  getTendenciaMensual(meses: number = 6): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/reportes/tendencia`, {
+      params: { meses: meses.toString() }
+    });
+  }
 }

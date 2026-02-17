@@ -17,6 +17,7 @@ import { ReporteBalanceBarComponent } from './components/reporte-balance-bar';
 import { ReportePieChartComponent } from './components/reporte-pie-chart';
 import { ReporteBarChartComponent } from './components/reporte-bar-chart';
 import { ReporteCategoriaDetailComponent } from './components/reporte-categoria-detail';
+import { ReporteTendenciaComponent } from './components/reporte-tendencia';
 
 @Component({
   selector: 'app-reportes',
@@ -34,7 +35,8 @@ import { ReporteCategoriaDetailComponent } from './components/reporte-categoria-
     ReporteBalanceBarComponent,
     ReportePieChartComponent,
     ReporteBarChartComponent,
-    ReporteCategoriaDetailComponent
+    ReporteCategoriaDetailComponent,
+    ReporteTendenciaComponent
   ],
   template: `
     <mat-toolbar color="primary">
@@ -141,6 +143,9 @@ import { ReporteCategoriaDetailComponent } from './components/reporte-categoria-
         @if (reporte.gastosPorCategoria && reporte.gastosPorCategoria.length > 0) {
           <app-reporte-pie-chart [categorias]="reporte.gastosPorCategoria"></app-reporte-pie-chart>
         }
+
+        <!-- Tendencia Mensual (últimos 6 meses) -->
+        <app-reporte-tendencia></app-reporte-tendencia>
 
         <!-- Bar Chart: Comparativo por Categoría -->
         @if (reporte.gastosPorCategoria && reporte.gastosPorCategoria.length > 0) {
