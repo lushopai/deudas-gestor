@@ -220,66 +220,61 @@ mat-chip {
   }
 }
 
-/* Filtros */
+/* Search & Filters */
 .filtros-section {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
 }
 
-.filtros-top {
+.search-row {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.busqueda-field {
+.search-field {
   flex: 1;
-
-  .mat-mdc-form-field-subscript-wrapper {
-    display: none;
-  }
+  width: 100%;
 }
 
-::ng-deep .busqueda-field .mat-mdc-form-field-subscript-wrapper {
-  display: none !important;
+.filter-btn {
+  height: 56px;
+  width: 56px;
+  background-color: var(--bg-tertiary);
+  border-radius: 4px;
 }
 
-::ng-deep .busqueda-field .mat-mdc-text-field-wrapper {
-  height: 44px;
-}
-
-::ng-deep .busqueda-field .mat-mdc-form-field-infix {
-  padding-top: 8px !important;
-  padding-bottom: 8px !important;
-  min-height: 44px;
-}
-
-.filter-toggle {
-  color: var(--text-secondary, #666);
-
-  &.active {
-    color: var(--primary-color, #1976d2);
-    background: rgba(25, 118, 210, 0.08);
-  }
-}
-
-.filtros-expanded {
+.filters-panel {
   background: var(--bg-primary, white);
   border-radius: 12px;
   padding: 16px;
   display: flex;
   flex-direction: column;
   gap: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  animation: fadeIn 0.2s ease-out;
 }
 
-.filtro-group {
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.filter-group {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.filtro-label {
+.filter-label {
   font-size: 12px;
   font-weight: 500;
   color: var(--text-secondary, #666);
@@ -287,47 +282,54 @@ mat-chip {
   letter-spacing: 0.5px;
 }
 
-.categoria-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+.chip-icon {
+  font-size: 16px;
+  margin-right: 4px;
 }
 
-.cat-chip {
-  font-size: 13px !important;
-  height: 32px !important;
-  border-radius: 16px !important;
-  padding: 0 12px !important;
-  min-width: auto !important;
+/* Scrollable chip list on mobile */
+mat-chip-listbox {
+  overflow-x: auto;
+  padding-bottom: 4px;
+  /* Hide scrollbar */
+  scrollbar-width: none;
 
-  &.selected {
-    background: var(--primary-color, #1976d2) !important;
-    color: white !important;
-    border-color: var(--primary-color, #1976d2) !important;
+  &::-webkit-scrollbar {
+    display: none;
   }
 }
 
-.fecha-inputs {
+.date-row {
   display: flex;
   gap: 12px;
-}
+  flex-wrap: wrap;
 
-.fecha-field {
-  flex: 1;
-
-  ::ng-deep .mat-mdc-form-field-subscript-wrapper {
-    display: none !important;
+  mat-form-field {
+    flex: 1;
+    min-width: 140px;
   }
 }
 
-.limpiar-btn {
-  align-self: flex-start;
+.filter-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid var(--border-color);
+  padding-top: 12px;
 }
 
-.filtro-resultado {
+.results-count {
   font-size: 13px;
-  color: var(--text-secondary, #666);
-  padding: 0 4px;
+  color: var(--text-secondary);
+}
+
+/* FAB Mobile */
+.fab-mobile {
+  position: fixed !important;
+  bottom: 24px;
+  right: 24px;
+  z-index: 999;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
 }
 
 /* Load More */
@@ -355,56 +357,200 @@ mat-chip {
 }
 
 @keyframes spin {
-  100% { transform: rotate(360deg); }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
-/* Responsive */
+/* Desktop / Mobile toggles */
+.mobile-only {
+  display: none;
+}
+
+.desktop-only {
+  display: block;
+}
+
+/* =============================================
+   MOBILE CARD VIEW
+   ============================================= */
+.gastos-mobile-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  background: var(--border-color, #eee);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.gasto-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 12px;
+  background: var(--bg-primary, white);
+  cursor: pointer;
+  transition: background 0.15s ease;
+
+  &:active {
+    background: var(--bg-tertiary, #f5f5f5);
+  }
+}
+
+.gasto-card-icon {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  border-radius: 10px;
+  background: var(--bg-tertiary, #f0f0f0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.gasto-card-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.gasto-card-desc {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary, #333);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gasto-card-meta {
+  font-size: 12px;
+  color: var(--text-secondary, #999);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gasto-card-right {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.gasto-card-monto {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--primary-color, #1976d2);
+  white-space: nowrap;
+}
+
+.gasto-card-menu {
+  width: 32px !important;
+  height: 32px !important;
+  line-height: 32px !important;
+  color: var(--text-secondary, #999);
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+/* =============================================
+   RESPONSIVE
+   ============================================= */
 @media (max-width: 768px) {
+  .desktop-only {
+    display: none !important;
+  }
+
+  .mobile-only {
+    display: flex;
+  }
+
   .gastos-list-container {
     padding: 12px;
     gap: 12px;
   }
 
-  .header-row th {
-    font-size: 11px;
-    padding: 8px 12px;
-  }
+  /* Header más compacto */
+  .page-header {
+    h1 {
+      font-size: 20px;
+    }
 
-  .data-row td {
-    padding: 8px 12px;
-    font-size: 12px;
-  }
+    .subtitle {
+      display: none;
+    }
 
-  .displayedColumns {
-    display: none;
+    button[mat-raised-button] {
+      padding: 0 12px !important;
+      font-size: 13px;
+      height: 36px;
 
-    &.descripcion,
-    &.monto,
-    &.acciones {
-      display: table-cell;
+      mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
     }
   }
 
-  .descripcion-cell {
-    max-width: 150px;
+  /* Filtros más compactos */
+  .filtros-expanded {
+    padding: 12px;
+    gap: 12px;
   }
 
-  .monto {
-    font-size: 14px;
+  .categoria-chips {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  .cat-chip {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .fecha-inputs {
+    gap: 8px;
   }
 }
 
 @media (max-width: 480px) {
-  .gastos-table-card mat-card-header {
-    padding: 12px;
-  }
-
-  .gastos-table-card mat-card-title {
-    font-size: 16px;
-  }
-
-  .data-row td {
+  .gastos-list-container {
     padding: 8px;
-    font-size: 11px;
+    gap: 8px;
+  }
+
+  .gasto-card {
+    padding: 12px 10px;
+    gap: 10px;
+  }
+
+  .gasto-card-icon {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    font-size: 18px;
+  }
+
+  .gasto-card-desc {
+    font-size: 13px;
+  }
+
+  .gasto-card-monto {
+    font-size: 14px;
   }
 }

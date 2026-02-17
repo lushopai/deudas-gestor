@@ -25,6 +25,7 @@ import { NotificationService } from '../../core/services/notification.service';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state';
 import { SkeletonLoaderComponent } from '../../shared/components/skeleton-loader/skeleton-loader';
 import { PullToRefreshDirective } from '../../shared/directives/pull-to-refresh.directive';
+import { ClpPipe } from '../../shared/pipes/clp.pipe';
 
 @Component({
   selector: 'app-gastos-list',
@@ -50,7 +51,8 @@ import { PullToRefreshDirective } from '../../shared/directives/pull-to-refresh.
     MatNativeDateModule,
     EmptyStateComponent,
     SkeletonLoaderComponent,
-    PullToRefreshDirective
+    PullToRefreshDirective,
+    ClpPipe
   ],
   templateUrl: './gastos-list.component.html',
   styleUrls: ['./gastos-list.component.scss'],
@@ -190,7 +192,7 @@ export class GastosListComponent implements OnInit, OnDestroy {
   }
 
   filtrarPorCategoria(catId: number | null) {
-    this.categoriaSeleccionada = this.categoriaSeleccionada === catId ? null : catId;
+    this.categoriaSeleccionada = catId;
     this.aplicarFiltros();
   }
 
@@ -213,6 +215,18 @@ export class GastosListComponent implements OnInit, OnDestroy {
     if (!catId) return 'Sin categoría';
     const cat = this.categorias.find(c => c.id === catId);
     return cat ? `${cat.icono} ${cat.nombre}` : `Categoría ${catId}`;
+  }
+
+  getIconoCategoria(catId: number | undefined): string {
+    if (!catId) return '📦';
+    const cat = this.categorias.find(c => c.id === catId);
+    return cat?.icono || '📦';
+  }
+
+  getSoloNombreCategoria(catId: number | undefined): string {
+    if (!catId) return 'Sin categoría';
+    const cat = this.categorias.find(c => c.id === catId);
+    return cat?.nombre || `Categoría ${catId}`;
   }
 
   async eliminarGasto(id: number) {

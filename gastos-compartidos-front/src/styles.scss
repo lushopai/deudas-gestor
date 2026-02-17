@@ -272,45 +272,110 @@ p {
 }
 
 /* ============================================
-   ANGULAR MATERIAL OVERRIDES
+   ANGULAR MATERIAL OVERRIDES (FRIENDLY UI)
    ============================================ */
 
 /* Toolbar */
 .mat-toolbar {
   background: var(--primary-color) !important;
   color: white !important;
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-sm);
 }
 
 /* Cards */
 .mat-mdc-card {
-  box-shadow: var(--shadow-md) !important;
-  border-radius: var(--radius) !important;
+  box-shadow: var(--shadow-sm) !important;
+  border-radius: 16px !important;
+  /* Más redondeado */
   background: var(--bg-primary) !important;
   padding: 16px !important;
+  border: 1px solid rgba(0, 0, 0, 0.03);
+  /* Borde sutil */
 }
 
-/* Espaciado entre secciones */
-.section-spacing {
-  margin-bottom: var(--spacing-lg);
+/* Buttons - Pill Shape (Estilo Amigable) */
+.mat-mdc-button,
+.mat-mdc-raised-button,
+.mat-mdc-flat-button,
+.mat-mdc-stroked-button,
+.mat-mdc-unelevated-button {
+  border-radius: 999px !important;
+  /* Full pill */
+  padding: 0 24px !important;
+  /* Padding lateral generoso */
+  height: 44px !important;
+  /* Buena altura táctil */
+  letter-spacing: 0.5px !important;
+  font-weight: 500 !important;
+  text-transform: none !important;
+  /* No uppercase forzado */
 }
 
-/* Buttons */
-.mat-mdc-raised-button.mat-primary {
-  background-color: var(--primary-color) !important;
+/* Icon Button - asegurar redondez */
+.mat-mdc-icon-button {
+  border-radius: 50% !important;
 }
 
-.mat-mdc-raised-button.mat-primary:hover {
-  background-color: var(--primary-dark) !important;
+/* FAB */
+.mat-mdc-fab,
+.mat-mdc-mini-fab {
+  box-shadow: var(--shadow-lg) !important;
 }
 
-/* Form fields */
+/* INPUTS & FORM FIELDS (Friendly Outline) */
 .mat-mdc-form-field {
   width: 100%;
 }
 
+/* Remover fondo gris de inputs 'fill' si existen */
 .mat-mdc-text-field-wrapper {
-  background-color: var(--bg-tertiary) !important;
+  background-color: transparent !important;
+}
+
+/* Bordes redondeados y suaves para Outline */
+.mat-mdc-form-field-appearance-outline .mat-mdc-notched-outline__leading {
+  border-top-left-radius: 12px !important;
+  border-bottom-left-radius: 12px !important;
+  border-color: rgba(0, 0, 0, 0.12) !important;
+  border-width: 1px !important;
+}
+
+.mat-mdc-form-field-appearance-outline .mat-mdc-notched-outline__trailing {
+  border-top-right-radius: 12px !important;
+  border-bottom-right-radius: 12px !important;
+  border-color: rgba(0, 0, 0, 0.12) !important;
+  border-width: 1px !important;
+}
+
+.mat-mdc-form-field-appearance-outline .mat-mdc-notched-outline__notch {
+  border-color: rgba(0, 0, 0, 0.12) !important;
+  border-width: 1px !important;
+  border-top: none !important;
+  /* El label corta aquí */
+}
+
+/* Input Focus Color */
+.mat-mdc-form-field.mat-focused .mat-mdc-notched-outline__leading,
+.mat-mdc-form-field.mat-focused .mat-mdc-notched-outline__notch,
+.mat-mdc-form-field.mat-focused .mat-mdc-notched-outline__trailing {
+  border-color: var(--primary-color) !important;
+  border-width: 2px !important;
+}
+
+/* Input Text Style */
+.mat-mdc-input-element {
+  font-weight: 500 !important;
+  letter-spacing: 0.3px !important;
+}
+
+/* Dialogs */
+.mat-mdc-dialog-container {
+  border-radius: 20px !important;
+  /* Dialogs muy redondeados */
+}
+
+.mat-mdc-dialog-surface {
+  border-radius: 20px !important;
 }
 
 /* Tabs */
@@ -566,6 +631,7 @@ p {
     transform: translateX(400px);
     opacity: 0;
   }
+
   to {
     transform: translateX(0);
     opacity: 1;
@@ -577,6 +643,7 @@ p {
     transform: translateX(0);
     opacity: 1;
   }
+
   to {
     transform: translateX(400px);
     opacity: 0;
