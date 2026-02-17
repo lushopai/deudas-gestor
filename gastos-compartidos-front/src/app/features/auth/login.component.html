@@ -17,7 +17,10 @@
         <mat-form-field appearance="outline">
           <mat-label>Contraseña</mat-label>
           <mat-icon matIconPrefix>lock</mat-icon>
-          <input matInput type="password" formControlName="password">
+          <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password">
+          <button mat-icon-button matSuffix type="button" (click)="hidePassword = !hidePassword" tabindex="-1">
+            <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
         </mat-form-field>
 
         <button mat-raised-button color="primary" type="submit" class="submit-button"

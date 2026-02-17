@@ -22,7 +22,7 @@
           </div>
           <div class="saldo">
             <span class="label">Saldo Pendiente</span>
-            <span class="monto">{{ formatMonto(deuda.saldoPendiente) }}</span>
+            <span class="monto">{{ deuda.saldoPendiente | clp }}</span>
           </div>
         </div>
       </mat-card-content>
@@ -46,11 +46,11 @@
                 } @else if (formulario.get('monto')?.hasError('min')) {
                   Debe ser mayor a 0
                 } @else if (formulario.get('monto')?.hasError('max')) {
-                  No puede ser mayor al saldo ({{ formatMonto(deuda.saldoPendiente) }})
+                  No puede ser mayor al saldo ({{ deuda.saldoPendiente | clp }})
                 }
               </mat-error>
             }
-            <mat-hint>Máximo: {{ formatMonto(deuda.saldoPendiente) }}</mat-hint>
+            <mat-hint>Máximo: {{ deuda.saldoPendiente | clp }}</mat-hint>
           </mat-form-field>
 
           <mat-form-field appearance="outline">

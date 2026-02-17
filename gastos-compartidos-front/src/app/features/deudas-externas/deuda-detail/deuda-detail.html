@@ -34,15 +34,15 @@
         <div class="montos-grid">
           <div class="monto-box principal">
             <span class="label">Saldo Pendiente</span>
-            <span class="valor">{{ formatMonto(deuda.saldoPendiente) }}</span>
+            <span class="valor">{{ deuda.saldoPendiente | clp }}</span>
           </div>
           <div class="monto-box">
             <span class="label">Monto Original</span>
-            <span class="valor">{{ formatMonto(deuda.montoOriginal) }}</span>
+            <span class="valor">{{ deuda.montoOriginal | clp }}</span>
           </div>
           <div class="monto-box success">
             <span class="label">Total Pagado</span>
-            <span class="valor">{{ formatMonto(deuda.montoPagado) }}</span>
+            <span class="valor">{{ deuda.montoPagado | clp }}</span>
           </div>
         </div>
 
@@ -140,7 +140,7 @@
               <mat-list-item class="abono-item">
                 <mat-icon matListItemIcon>payment</mat-icon>
                 <div matListItemTitle class="abono-title">
-                  <span class="monto">{{ formatMonto(abono.monto) }}</span>
+                  <span class="monto">{{ abono.monto | clp }}</span>
                   <span class="fecha">{{ formatFecha(abono.fechaPago) }}</span>
                 </div>
                 <div matListItemLine class="abono-subtitle">

@@ -4,6 +4,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { GastoRecurrente } from '../../../core/services/gasto-recurrente.service';
 import { TranslateModule } from '@ngx-translate/core';
+import { ClpPipe } from '../../../shared/pipes/clp.pipe';
 
 @Component({
   selector: 'app-dashboard-recurrentes',
@@ -12,7 +13,8 @@ import { TranslateModule } from '@ngx-translate/core';
     CommonModule,
     MatCardModule,
     MatIconModule,
-    TranslateModule
+    TranslateModule,
+    ClpPipe
   ],
   template: `
     @if (proximosRecurrentes.length > 0) {
@@ -32,7 +34,7 @@ import { TranslateModule } from '@ngx-translate/core';
             @for (gr of proximosRecurrentes; track gr.id) {
               <div class="recurrente-item">
                 <span class="recurrente-desc">{{ gr.descripcion }}</span>
-                <span class="recurrente-monto">{{ formatMonto(gr.monto) }}</span>
+                <span class="recurrente-monto">{{ gr.monto | clp }}</span>
                 <span class="recurrente-dias">
                   @if (gr.diasHastaProxima <= 0) {
                     Hoy
@@ -146,12 +148,4 @@ import { TranslateModule } from '@ngx-translate/core';
 export class DashboardRecurrentesComponent {
   @Input({ required: true }) proximosRecurrentes!: GastoRecurrente[];
   @Output() cardClick = new EventEmitter<void>();
-
-  formatMonto(monto: number): string {
-    return new Intl.NumberFormat('es-CL', {
-      style: 'currency',
-      currency: 'CLP',
-      minimumFractionDigits: 0
-    }).format(monto);
-  }
 }

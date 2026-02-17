@@ -35,6 +35,7 @@ import { GoogleLoginComponent } from '../../core/components/google-login.compone
 export class LoginComponent {
   formulario: FormGroup;
   cargando = false;
+  hidePassword = true;
 
   constructor(
     private fb: FormBuilder,

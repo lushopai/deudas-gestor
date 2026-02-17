@@ -43,6 +43,14 @@
                 <mat-icon matIconPrefix>category</mat-icon>
               </mat-form-field>
 
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Fecha del gasto</mat-label>
+                <input matInput [matDatepicker]="pickerManual" formControlName="fechaGasto" required>
+                <mat-datepicker-toggle matSuffix [for]="pickerManual"></mat-datepicker-toggle>
+                <mat-datepicker #pickerManual></mat-datepicker>
+                <mat-icon matIconPrefix>calendar_today</mat-icon>
+              </mat-form-field>
+
               <button mat-raised-button color="primary" type="submit" class="full-width submit-btn" [disabled]="cargando">
                 <mat-icon *ngIf="!cargando">save</mat-icon>
                 <mat-progress-spinner *ngIf="cargando" diameter="24" mode="indeterminate"></mat-progress-spinner>
@@ -220,6 +228,14 @@
                       </mat-option>
                     </mat-select>
                     <mat-icon matIconPrefix>category</mat-icon>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Fecha del gasto</mat-label>
+                    <input matInput [matDatepicker]="pickerOcr" formControlName="fechaGasto" required>
+                    <mat-datepicker-toggle matSuffix [for]="pickerOcr"></mat-datepicker-toggle>
+                    <mat-datepicker #pickerOcr></mat-datepicker>
+                    <mat-icon matIconPrefix>calendar_today</mat-icon>
                   </mat-form-field>
 
                   <div class="button-group">

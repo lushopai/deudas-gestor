@@ -19,7 +19,7 @@
           <mat-icon>account_balance_wallet</mat-icon>
           <div class="resumen-info">
             <span class="label">Deuda Total</span>
-            <span class="monto">{{ formatMonto(resumen.totalDeudaPendiente) }}</span>
+            <span class="monto">{{ resumen.totalDeudaPendiente | clp }}</span>
           </div>
         </mat-card-content>
       </mat-card>
@@ -39,7 +39,7 @@
           <mat-icon>trending_down</mat-icon>
           <div class="resumen-info">
             <span class="label">Abonado Este Mes</span>
-            <span class="monto">{{ formatMonto(resumen.totalAbonadoEsteMes) }}</span>
+            <span class="monto">{{ resumen.totalAbonadoEsteMes | clp }}</span>
           </div>
         </mat-card-content>
       </mat-card>
@@ -109,11 +109,11 @@
               <div class="montos">
                 <div class="monto-item">
                   <span class="label">Saldo Pendiente</span>
-                  <span class="valor principal">{{ formatMonto(deuda.saldoPendiente) }}</span>
+                  <span class="valor principal">{{ deuda.saldoPendiente | clp }}</span>
                 </div>
                 <div class="monto-item">
                   <span class="label">Monto Original</span>
-                  <span class="valor">{{ formatMonto(deuda.montoOriginal) }}</span>
+                  <span class="valor">{{ deuda.montoOriginal | clp }}</span>
                 </div>
               </div>
 

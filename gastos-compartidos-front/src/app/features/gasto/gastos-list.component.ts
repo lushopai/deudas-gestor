@@ -24,6 +24,7 @@ import { takeUntil } from 'rxjs/operators';
 import { NotificationService } from '../../core/services/notification.service';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state';
 import { SkeletonLoaderComponent } from '../../shared/components/skeleton-loader/skeleton-loader';
+import { PullToRefreshDirective } from '../../shared/directives/pull-to-refresh.directive';
 
 @Component({
   selector: 'app-gastos-list',
@@ -48,7 +49,8 @@ import { SkeletonLoaderComponent } from '../../shared/components/skeleton-loader
     MatDatepickerModule,
     MatNativeDateModule,
     EmptyStateComponent,
-    SkeletonLoaderComponent
+    SkeletonLoaderComponent,
+    PullToRefreshDirective
   ],
   templateUrl: './gastos-list.component.html',
   styleUrls: ['./gastos-list.component.scss'],

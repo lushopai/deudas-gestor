@@ -20,6 +20,7 @@ import {
 import { NotificationService } from '../../../core/services/notification.service';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { ClpPipe } from '../../../shared/pipes/clp.pipe';
 
 @Component({
   selector: 'app-deuda-detail',
@@ -33,7 +34,8 @@ import { takeUntil } from 'rxjs/operators';
     MatProgressBarModule,
     MatChipsModule,
     MatDividerModule,
-    MatListModule
+    MatListModule,
+    ClpPipe
   ],
   templateUrl: './deuda-detail.html',
   styleUrl: './deuda-detail.scss',
@@ -105,7 +107,7 @@ export class DeudaDetail implements OnInit, OnDestroy {
 
   async eliminarAbono(abono: AbonoDeuda): Promise<void> {
     const confirmado = await this.notificationService.confirm(
-      `Se eliminará el abono de ${this.formatMonto(abono.monto)} y se restaurará el saldo de la deuda.`,
+      `Se eliminará el abono de ${new ClpPipe().transform(abono.monto)} y se restaurará el saldo de la deuda.`,
       '¿Eliminar abono?'
     );
 
@@ -143,14 +145,6 @@ export class DeudaDetail implements OnInit, OnDestroy {
       case 'SERVICIO': return 'receipt';
       default: return 'payments';
     }
-  }
-
-  formatMonto(monto: number): string {
-    return new Intl.NumberFormat('es-CL', {
-      style: 'currency',
-      currency: 'CLP',
-      minimumFractionDigits: 0
-    }).format(monto);
   }
 
   formatFecha(fecha: string): string {

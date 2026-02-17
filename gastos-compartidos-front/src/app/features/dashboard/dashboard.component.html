@@ -24,7 +24,7 @@
           <span class="ejecutados-titulo">
             {{ ejecutadosHoy.length === 1 ? 'Se registró 1 gasto recurrente hoy' : 'Se registraron ' + ejecutadosHoy.length + ' gastos recurrentes hoy' }}
           </span>
-          <span class="ejecutados-total">Total: {{ formatMonto(totalEjecutadoHoy) }}</span>
+          <span class="ejecutados-total">Total: {{ totalEjecutadoHoy | clp }}</span>
         </div>
         <button mat-icon-button (click)="descartarBannerEjecutados()" class="ejecutados-close">
           <mat-icon>close</mat-icon>
@@ -34,7 +34,7 @@
         @for (gr of ejecutadosHoy; track gr.id) {
           <div class="ejecutado-item">
             <span class="ejecutado-desc">{{ gr.descripcion }}</span>
-            <span class="ejecutado-monto">{{ formatMonto(gr.monto) }}</span>
+            <span class="ejecutado-monto">{{ gr.monto | clp }}</span>
           </div>
         }
       </div>
@@ -80,14 +80,14 @@
           </div>
           <div class="deudas-monto">
             <span class="monto-label">{{ 'BUDGETS.REMAINING' | translate }}</span>
-            <span class="monto-valor">{{ formatMonto(resumenDeudas.totalDeudaPendiente) }}</span>
+            <span class="monto-valor">{{ resumenDeudas.totalDeudaPendiente | clp }}</span>
           </div>
           <mat-icon class="arrow-icon">chevron_right</mat-icon>
         </div>
         @if (resumenDeudas.totalAbonadoEsteMes > 0) {
           <div class="deudas-abonado">
             <mat-icon>trending_down</mat-icon>
-            <span>Abonado este mes: {{ formatMonto(resumenDeudas.totalAbonadoEsteMes) }}</span>
+            <span>Abonado este mes: {{ resumenDeudas.totalAbonadoEsteMes | clp }}</span>
           </div>
         }
       </mat-card-content>

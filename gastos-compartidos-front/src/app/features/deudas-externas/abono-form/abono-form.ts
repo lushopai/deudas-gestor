@@ -21,6 +21,7 @@ import {
 import { NotificationService } from '../../../core/services/notification.service';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { ClpPipe } from '../../../shared/pipes/clp.pipe';
 
 @Component({
   selector: 'app-abono-form',
@@ -36,7 +37,8 @@ import { takeUntil } from 'rxjs/operators';
     MatIconModule,
     MatDatepickerModule,
     MatNativeDateModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    ClpPipe
   ],
   templateUrl: './abono-form.html',
   styleUrl: './abono-form.scss',
@@ -143,14 +145,6 @@ export class AbonoForm implements OnInit, OnDestroy {
   private formatDate(date: Date | null): string | undefined {
     if (!date) return undefined;
     return date.toISOString().split('T')[0];
-  }
-
-  formatMonto(monto: number): string {
-    return new Intl.NumberFormat('es-CL', {
-      style: 'currency',
-      currency: 'CLP',
-      minimumFractionDigits: 0
-    }).format(monto);
   }
 
   tieneError(campo: string): boolean {

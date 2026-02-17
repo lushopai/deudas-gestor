@@ -29,6 +29,7 @@ import { DashboardChartComponent } from './components/dashboard-chart';
 import { DashboardRecentGastosComponent } from './components/dashboard-recent-gastos';
 import { DashboardRecurrentesComponent } from './components/dashboard-recurrentes';
 import { DashboardPresupuestosComponent } from './components/dashboard-presupuestos';
+import { ClpPipe } from '../../shared/pipes/clp.pipe';
 
 @Component({
   selector: 'app-dashboard',
@@ -55,7 +56,8 @@ import { DashboardPresupuestosComponent } from './components/dashboard-presupues
     DashboardChartComponent,
     DashboardRecentGastosComponent,
     DashboardRecurrentesComponent,
-    DashboardPresupuestosComponent
+    DashboardPresupuestosComponent,
+    ClpPipe
   ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
@@ -202,13 +204,5 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   descartarBannerEjecutados() {
     this.ejecutadosHoy = [];
-  }
-
-  formatMonto(monto: number): string {
-    return new Intl.NumberFormat('es-CL', {
-      style: 'currency',
-      currency: 'CLP',
-      minimumFractionDigits: 0
-    }).format(monto);
   }
 }

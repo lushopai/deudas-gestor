@@ -11,6 +11,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { OcrService } from '../../core/services/ocr.service';
 import { Subject } from 'rxjs';
@@ -35,7 +37,9 @@ import { NotificationService } from '../../core/services/notification.service';
     MatIconModule,
     MatTabsModule,
     MatToolbarModule,
-    MatDividerModule
+    MatDividerModule,
+    MatDatepickerModule,
+    MatNativeDateModule
   ],
   templateUrl: './gasto-form.component.html',
   styleUrls: ['./gasto-form.component.scss'],
@@ -67,7 +71,8 @@ export class GastoFormComponent implements OnInit, OnDestroy {
     this.formulario = this.fb.group({
       descripcion: ['', Validators.required],
       monto: ['', [Validators.required, Validators.min(0)]],
-      categoriaId: ['', Validators.required]
+      categoriaId: ['', Validators.required],
+      fechaGasto: [new Date(), Validators.required]
     });
   }
 
@@ -148,9 +153,16 @@ export class GastoFormComponent implements OnInit, OnDestroy {
       return;
     }
 
+    const fechaSeleccionada = this.formulario.value.fechaGasto;
+    const fechaISO = fechaSeleccionada instanceof Date
+      ? fechaSeleccionada.toISOString()
+      : new Date(fechaSeleccionada).toISOString();
+
     const gastoPayload = {
-      ...this.formulario.value,
-      fechaGasto: new Date().toISOString(),
+      descripcion: this.formulario.value.descripcion,
+      monto: this.formulario.value.monto,
+      categoriaId: this.formulario.value.categoriaId,
+      fechaGasto: fechaISO,
       split: {
         [usuario.id]: this.formulario.value.monto
       }

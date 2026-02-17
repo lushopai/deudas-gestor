@@ -18,6 +18,7 @@ import { EmptyStateComponent } from '../../../shared/components/empty-state/empt
 import { SkeletonLoaderComponent } from '../../../shared/components/skeleton-loader/skeleton-loader';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { ClpPipe } from '../../../shared/pipes/clp.pipe';
 
 @Component({
   selector: 'app-recurrentes-list',
@@ -32,7 +33,8 @@ import { takeUntil } from 'rxjs/operators';
     MatMenuModule,
     MatSlideToggleModule,
     EmptyStateComponent,
-    SkeletonLoaderComponent
+    SkeletonLoaderComponent,
+    ClpPipe
   ],
   templateUrl: './recurrentes-list.html',
   styleUrl: './recurrentes-list.scss',
@@ -191,14 +193,6 @@ export class RecurrentesList implements OnInit, OnDestroy {
     if (gasto.diasHastaProxima <= 0) return 'pendiente';
     if (gasto.diasHastaProxima <= 3) return 'proximo';
     return 'normal';
-  }
-
-  formatMonto(monto: number): string {
-    return new Intl.NumberFormat('es-CL', {
-      style: 'currency',
-      currency: 'CLP',
-      minimumFractionDigits: 0
-    }).format(monto);
   }
 
   formatFecha(fecha: string): string {

@@ -29,7 +29,7 @@
           <mat-icon>calendar_month</mat-icon>
           <div class="resumen-info">
             <span class="label">Gasto Mensual Est.</span>
-            <span class="monto">{{ formatMonto(totalMensual) }}</span>
+            <span class="monto">{{ totalMensual | clp }}</span>
           </div>
         </mat-card-content>
       </mat-card>
@@ -115,7 +115,7 @@
             <mat-card-content>
               <div class="gasto-info">
                 <div class="monto-section">
-                  <span class="monto">{{ formatMonto(gasto.monto) }}</span>
+                  <span class="monto">{{ gasto.monto | clp }}</span>
                   <span class="categoria-nombre">{{ gasto.categoriaNombre }}</span>
                 </div>
 

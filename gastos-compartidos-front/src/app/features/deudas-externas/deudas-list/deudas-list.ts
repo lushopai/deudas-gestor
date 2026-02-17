@@ -22,6 +22,7 @@ import { takeUntil } from 'rxjs/operators';
 import { NotificationService } from '../../../core/services/notification.service';
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state';
 import { SkeletonLoaderComponent } from '../../../shared/components/skeleton-loader/skeleton-loader';
+import { ClpPipe } from '../../../shared/pipes/clp.pipe';
 
 @Component({
   selector: 'app-deudas-list',
@@ -37,7 +38,8 @@ import { SkeletonLoaderComponent } from '../../../shared/components/skeleton-loa
     MatMenuModule,
     MatTabsModule,
     EmptyStateComponent,
-    SkeletonLoaderComponent
+    SkeletonLoaderComponent,
+    ClpPipe
   ],
   templateUrl: './deudas-list.html',
   styleUrl: './deudas-list.scss',
@@ -189,14 +191,6 @@ export class DeudasList implements OnInit, OnDestroy {
       case 'SERVICIO': return 'receipt';
       default: return 'payments';
     }
-  }
-
-  formatMonto(monto: number): string {
-    return new Intl.NumberFormat('es-CL', {
-      style: 'currency',
-      currency: 'CLP',
-      minimumFractionDigits: 0
-    }).format(monto);
   }
 
   ngOnDestroy(): void {
