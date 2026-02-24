@@ -10,7 +10,7 @@
 
 mat-toolbar {
   flex-shrink: 0;
-  background: #1976d2;
+  background: var(--primary-color);
   color: white;
   box-shadow: var(--shadow-sm);
 
@@ -80,7 +80,7 @@ mat-card-content {
     }
 
     .mdc-tab-indicator__content--underline {
-      border-color: #1976d2;
+      border-color: var(--primary-color);
     }
   }
 }
@@ -111,8 +111,8 @@ mat-form-field {
 }
 
 .submit-btn {
-  height: 48px !important;
-  font-size: 15px !important;
+  height: 44px !important;
+  font-size: 14px !important;
   font-weight: 500 !important;
   margin-top: 24px;
 }
@@ -148,12 +148,12 @@ mat-form-field {
 }
 
 .camera-btn {
-  background: #1976d2 !important;
+  background: var(--primary-color) !important;
   color: white !important;
 }
 
 .gallery-btn {
-  color: #1976d2 !important;
+  color: var(--primary-color) !important;
 }
 
 .processing-indicator {
@@ -170,8 +170,8 @@ mat-form-field {
   margin-top: 16px;
   padding: 16px;
   background: #f5f5f5;
-  border-left: 4px solid #1976d2;
-  border-radius: 4px;
+  border-left: 4px solid var(--primary-color);
+  border-radius: var(--radius-sm);
 }
 
 .result-header {
@@ -187,16 +187,16 @@ mat-form-field {
   display: inline-flex;
   align-items: center;
   padding: 4px 10px;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 
   &.gemini {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    background: linear-gradient(135deg, #42a5f5 0%, #1e88e5 100%) !important;
     color: white !important;
-    box-shadow: 0 2px 4px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 2px 4px rgba(66, 165, 245, 0.4);
   }
 
   &.tesseract {
@@ -227,8 +227,8 @@ mat-form-field {
 .resultado-item {
   padding: 12px;
   background: white;
-  border-radius: 4px;
-  border-left: 3px solid #1976d2;
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--primary-color);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 
   strong {
@@ -278,14 +278,14 @@ mat-form-field {
 .items-section {
   margin: 20px 0;
   background: white;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .section-header {
   padding: 16px;
-  background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%) !important;
+  background: linear-gradient(135deg, var(--primary-color) 0%, #1565c0 100%) !important;
   color: white !important;
 
   * {
@@ -396,12 +396,12 @@ mat-form-field {
   tfoot {
     .total-row {
       background: #f8f9fa;
-      border-top: 2px solid #1976d2;
+      border-top: 2px solid var(--primary-color);
 
       td {
         padding: 16px;
         font-size: 16px;
-        color: #1976d2;
+        color: var(--primary-color);
       }
     }
   }
@@ -411,7 +411,7 @@ mat-form-field {
 .additional-data {
   margin: 20px 0;
   border: 1px solid #e0e0e0;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   overflow: hidden;
 
   summary {
@@ -428,7 +428,7 @@ mat-form-field {
     }
 
     &::marker {
-      color: #1976d2;
+      color: var(--primary-color);
     }
   }
 
@@ -446,10 +446,10 @@ mat-form-field {
     gap: 12px;
     padding: 12px;
     background: #f8f9fa;
-    border-radius: 6px;
+    border-radius: var(--radius-sm);
 
     mat-icon {
-      color: #1976d2;
+      color: var(--primary-color);
       font-size: 20px;
       width: 20px;
       height: 20px;
@@ -508,13 +508,13 @@ mat-form-field {
   margin-top: var(--spacing-md);
 
   .save-btn {
-    height: 48px;
+    height: 44px;
     font-weight: 600;
-    font-size: 15px;
+    font-size: 14px;
   }
 
   .clear-btn {
-    height: 48px;
+    height: 44px;
     font-weight: 500;
   }
 }
@@ -690,7 +690,7 @@ mat-form-field {
 
     tfoot .total-row {
       background: #333;
-      border-top-color: #1976d2;
+      border-top-color: var(--primary-color);
 
       td {
         color: #64b5f6;
@@ -737,7 +737,7 @@ mat-form-field {
 .tips-card {
   margin-bottom: 24px;
   background: #e3f2fd;
-  border-left: 4px solid #1976d2;
+  border-left: 4px solid var(--primary-color);
 
   mat-card-content {
     padding: 16px !important;
@@ -759,7 +759,7 @@ mat-form-field {
   .tips-title {
     font-weight: 500;
     font-size: 16px;
-    color: #1976d2;
+    color: var(--primary-color);
   }
 }
 
@@ -779,7 +779,7 @@ mat-form-field {
       display: inline-block;
       width: 4px;
       height: 4px;
-      background: #1976d2;
+      background: var(--primary-color);
       border-radius: 50%;
       margin-right: 8px;
       vertical-align: middle;

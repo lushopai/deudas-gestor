@@ -19,7 +19,7 @@
           <div class="section">
             <h3 class="section-title">Información Principal</h3>
 
-            <mat-form-field appearance="outline">
+            <mat-form-field appearance="fill">
               <mat-label>Acreedor</mat-label>
               <mat-icon matIconPrefix>business</mat-icon>
               <input matInput formControlName="acreedor" placeholder="Ej: Banco Santander, Tarjeta Visa">
@@ -28,7 +28,7 @@
               }
             </mat-form-field>
 
-            <mat-form-field appearance="outline">
+            <mat-form-field appearance="fill">
               <mat-label>Tipo de Deuda</mat-label>
               <mat-icon matIconPrefix>category</mat-icon>
               <mat-select formControlName="tipo">
@@ -38,7 +38,7 @@
               </mat-select>
             </mat-form-field>
 
-            <mat-form-field appearance="outline">
+            <mat-form-field appearance="fill">
               <mat-label>Descripción (opcional)</mat-label>
               <mat-icon matIconPrefix>description</mat-icon>
               <textarea matInput formControlName="descripcion" rows="2"
@@ -50,7 +50,7 @@
           <div class="section">
             <h3 class="section-title">Monto</h3>
 
-            <mat-form-field appearance="outline">
+            <mat-form-field appearance="fill">
               <mat-label>Monto Total de la Deuda</mat-label>
               <mat-icon matIconPrefix>attach_money</mat-icon>
               <input matInput type="number" formControlName="montoOriginal" placeholder="500000">
@@ -68,14 +68,14 @@
             <h3 class="section-title">Fechas</h3>
 
             <div class="row">
-              <mat-form-field appearance="outline">
+              <mat-form-field appearance="fill">
                 <mat-label>Fecha de Inicio</mat-label>
                 <input matInput [matDatepicker]="pickerInicio" formControlName="fechaInicio">
                 <mat-datepicker-toggle matIconSuffix [for]="pickerInicio"></mat-datepicker-toggle>
                 <mat-datepicker #pickerInicio></mat-datepicker>
               </mat-form-field>
 
-              <mat-form-field appearance="outline">
+              <mat-form-field appearance="fill">
                 <mat-label>Fecha de Vencimiento (opcional)</mat-label>
                 <input matInput [matDatepicker]="pickerVencimiento" formControlName="fechaVencimiento">
                 <mat-datepicker-toggle matIconSuffix [for]="pickerVencimiento"></mat-datepicker-toggle>
@@ -90,7 +90,7 @@
             <p class="section-hint">Útil para tarjetas de crédito</p>
 
             <div class="row">
-              <mat-form-field appearance="outline">
+              <mat-form-field appearance="fill">
                 <mat-label>Día de Corte</mat-label>
                 <mat-icon matIconPrefix>event</mat-icon>
                 <input matInput type="number" formControlName="diaCorte" min="1" max="31" placeholder="15">
@@ -99,7 +99,7 @@
                 }
               </mat-form-field>
 
-              <mat-form-field appearance="outline">
+              <mat-form-field appearance="fill">
                 <mat-label>Día Límite de Pago</mat-label>
                 <mat-icon matIconPrefix>event</mat-icon>
                 <input matInput type="number" formControlName="diaLimitePago" min="1" max="31" placeholder="5">
@@ -109,7 +109,7 @@
               </mat-form-field>
             </div>
 
-            <mat-form-field appearance="outline">
+            <mat-form-field appearance="fill">
               <mat-label>Tasa de Interés Anual (%)</mat-label>
               <mat-icon matIconPrefix>percent</mat-icon>
               <input matInput type="number" formControlName="tasaInteres" min="0" max="100" placeholder="24.5">

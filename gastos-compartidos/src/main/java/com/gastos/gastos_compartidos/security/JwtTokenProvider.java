@@ -79,8 +79,11 @@ public class JwtTokenProvider {
             String tipo = claims.get(TOKEN_TYPE_CLAIM, String.class);
             // Solo aceptar access tokens para autenticación de requests
             return tipo == null || ACCESS_TOKEN.equals(tipo);
+        } catch (ExpiredJwtException ex) {
+            // Token expirado es comportamiento normal (el frontend refresca con refresh token)
+            return false;
         } catch (JwtException ex) {
-            throw new JwtException("Token JWT inválido o expirado: " + ex.getMessage());
+            throw new JwtException("Token JWT inválido: " + ex.getMessage());
         } catch (IllegalArgumentException ex) {
             throw new IllegalArgumentException("Error procesando JWT: " + ex.getMessage());
         }

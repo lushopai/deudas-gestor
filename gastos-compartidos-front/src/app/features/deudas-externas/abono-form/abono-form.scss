@@ -28,9 +28,9 @@
 }
 
 .deuda-info-card {
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   margin-bottom: 16px;
-  background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+  background: var(--primary-color);
   color: white;
 
   mat-card-content {
@@ -81,7 +81,7 @@
 }
 
 .form-card {
-  border-radius: 12px;
+  border-radius: var(--radius-md);
 
   mat-card-content {
     padding: 24px !important;

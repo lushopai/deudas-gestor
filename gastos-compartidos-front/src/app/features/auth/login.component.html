@@ -8,13 +8,13 @@
   <mat-card class="login-card">
     <mat-card-content>
       <form [formGroup]="formulario" (ngSubmit)="iniciarSesion()">
-        <mat-form-field appearance="outline">
+        <mat-form-field appearance="fill">
           <mat-label>Email</mat-label>
           <mat-icon matIconPrefix>email</mat-icon>
           <input matInput type="email" formControlName="email">
         </mat-form-field>
 
-        <mat-form-field appearance="outline">
+        <mat-form-field appearance="fill">
           <mat-label>Contraseña</mat-label>
           <mat-icon matIconPrefix>lock</mat-icon>
           <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password">

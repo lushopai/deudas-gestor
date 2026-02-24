@@ -28,7 +28,7 @@
 }
 
 .deuda-card {
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   margin-bottom: 16px;
 
   mat-card-header {
@@ -37,8 +37,8 @@
 
     .tipo-icon {
       background: #e3f2fd;
-      color: #1976d2;
-      border-radius: 12px;
+      color: var(--primary-color);
+      border-radius: var(--radius-md);
       width: 48px;
       height: 48px;
       font-size: 28px;
@@ -85,7 +85,7 @@
 
   .monto-box {
     background: #f5f5f5;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     padding: 16px;
     text-align: center;
 
@@ -109,7 +109,7 @@
       background: #e3f2fd;
 
       .valor {
-        color: #1976d2;
+        color: var(--primary-color);
         font-size: 22px;
       }
     }
@@ -140,7 +140,7 @@
 
     .porcentaje {
       font-weight: 600;
-      color: #1976d2;
+      color: var(--primary-color);
     }
   }
 
@@ -161,7 +161,7 @@
     gap: 12px;
 
     mat-icon {
-      color: #1976d2;
+      color: var(--primary-color);
       margin-top: 2px;
     }
 
@@ -182,7 +182,7 @@
 }
 
 .abonos-card {
-  border-radius: 12px;
+  border-radius: var(--radius-md);
 
   mat-card-header {
     padding: 20px;
@@ -194,7 +194,7 @@
       font-size: 16px;
 
       mat-icon {
-        color: #1976d2;
+        color: var(--primary-color);
       }
     }
   }

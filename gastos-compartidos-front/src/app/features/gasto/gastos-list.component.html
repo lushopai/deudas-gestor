@@ -36,7 +36,7 @@
   @if (!cargando && !error && gastos.length > 0) {
     <div class="filtros-section">
       <div class="search-row">
-        <mat-form-field appearance="outline" class="search-field" subscriptSizing="dynamic">
+        <mat-form-field appearance="fill" class="search-field" subscriptSizing="dynamic">
           <mat-label>Buscar gastos</mat-label>
           <mat-icon matPrefix>search</mat-icon>
           <input matInput
@@ -85,14 +85,14 @@
           <div class="filter-group">
             <label class="filter-label">Rango de fechas</label>
             <div class="date-row">
-              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-form-field appearance="fill" subscriptSizing="dynamic">
                 <mat-label>Desde</mat-label>
                 <input matInput [matDatepicker]="pickerDesde" [(ngModel)]="fechaDesde" (dateChange)="aplicarFiltros()">
                 <mat-datepicker-toggle matSuffix [for]="pickerDesde"></mat-datepicker-toggle>
                 <mat-datepicker #pickerDesde></mat-datepicker>
               </mat-form-field>
 
-              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-form-field appearance="fill" subscriptSizing="dynamic">
                 <mat-label>Hasta</mat-label>
                 <input matInput [matDatepicker]="pickerHasta" [(ngModel)]="fechaHasta" (dateChange)="aplicarFiltros()">
                 <mat-datepicker-toggle matSuffix [for]="pickerHasta"></mat-datepicker-toggle>

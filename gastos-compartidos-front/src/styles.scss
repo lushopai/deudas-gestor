@@ -346,20 +346,57 @@ p {
   /* Borde sutil */
 }
 
-/* Buttons - Pill Shape (Estilo Amigable) - Estandarizado a 44px */
+/* Buttons - Estandarizado a 44px manteniendo estilos Material */
 .mat-mdc-button,
 .mat-mdc-raised-button,
 .mat-mdc-flat-button,
 .mat-mdc-stroked-button,
 .mat-mdc-unelevated-button {
-  height: 44px !important;
-  min-width: 88px !important;
-  border-radius: 999px !important;
-  padding: 0 24px !important;
+  // Altura por defecto - componentes pueden sobrescribir sin !important
+  height: 44px;
+  min-width: 88px;
+
+  // Border radius - permite personalización
+  border-radius: 22px;
+
+  // Padding y tipografía estándar
+  padding: 0 20px;
   font-size: 14px !important;
   font-weight: 500 !important;
   letter-spacing: 0.5px !important;
   text-transform: none !important;
+
+  // Layout horizontal por defecto (icono + texto en línea)
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  // Iconos dentro de botones - tamaño estándar
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+  }
+}
+
+// Botones raised mantienen su elevación
+.mat-mdc-raised-button {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+
+  &:hover:not(:disabled) {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3) !important;
+  }
+
+  &:active:not(:disabled) {
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+  }
+}
+
+// Botones stroked mantienen su borde
+.mat-mdc-stroked-button {
+  border: 1px solid currentColor !important;
 }
 
 /* Icon Button - tamaño consistente */
@@ -389,62 +426,12 @@ p {
   box-shadow: var(--shadow-md) !important;
 }
 
-/* INPUTS & FORM FIELDS (Friendly Outline) */
+/* INPUTS & FORM FIELDS */
 .mat-mdc-form-field {
   width: 100%;
-}
-
-/* Remover fondo gris de inputs 'fill' si existen */
-.mat-mdc-text-field-wrapper {
-  background-color: transparent !important;
-}
-
-/* Bordes redondeados y suaves para Outline */
-.mat-mdc-form-field-appearance-outline .mat-mdc-notched-outline__leading {
-  border-color: rgba(0, 0, 0, 0.12) !important;
-  border-width: 1px !important;
-}
-
-.mat-mdc-form-field-appearance-outline .mat-mdc-notched-outline__trailing {
-  border-color: rgba(0, 0, 0, 0.12) !important;
-  border-width: 1px !important;
-}
-
-.mat-mdc-form-field-appearance-outline .mat-mdc-notched-outline__notch {
-  border-color: rgba(0, 0, 0, 0.12) !important;
-  border-width: 1px !important;
-  border-top: none !important;
-  /* El label corta aquí */
-}
-
-/* Input Focus Color */
-.mat-mdc-form-field.mat-focused .mat-mdc-notched-outline__leading,
-.mat-mdc-form-field.mat-focused .mat-mdc-notched-outline__notch,
-.mat-mdc-form-field.mat-focused .mat-mdc-notched-outline__trailing {
-  border-color: var(--primary-color) !important;
-  border-width: 2px !important;
-}
-
-/* Input Text Style */
-.mat-mdc-input-element {
-  font-weight: 500 !important;
-  letter-spacing: 0.3px !important;
-}
-
-/* Form field icons - tamaños consistentes */
-.mat-mdc-form-field-icon-prefix,
-.mat-mdc-form-field-icon-suffix {
-  mat-icon {
-    font-size: 20px;
-    width: 20px;
-    height: 20px;
-    color: var(--text-secondary);
-  }
-}
-
-/* Label consistente */
-.mdc-floating-label {
-  color: var(--text-secondary) !important;
+  /* Color de focus con primary color */
+  --mdc-filled-text-field-focus-active-indicator-color: var(--primary-color);
+  --mdc-filled-text-field-focus-label-text-color: var(--primary-color);
 }
 
 /* Focus state - label y prefix icon */
@@ -458,14 +445,14 @@ p {
   }
 }
 
-/* Outline appearance - border radius con variables */
-.mat-mdc-form-field-appearance-outline {
-  .mdc-notched-outline__leading {
-    border-radius: var(--radius-lg) 0 0 var(--radius-lg) !important;
-  }
-
-  .mdc-notched-outline__trailing {
-    border-radius: 0 var(--radius-lg) var(--radius-lg) 0 !important;
+/* Form field icons - tamaños consistentes */
+.mat-mdc-form-field-icon-prefix,
+.mat-mdc-form-field-icon-suffix {
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    color: var(--text-secondary);
   }
 }
 

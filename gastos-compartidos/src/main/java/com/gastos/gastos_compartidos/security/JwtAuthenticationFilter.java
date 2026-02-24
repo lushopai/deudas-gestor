@@ -41,7 +41,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         } catch (JwtException ex) {
-            logger.error("No se pudo establecer autenticación del usuario: {}", ex);
+            logger.warn("Token JWT rechazado: " + ex.getMessage());
         }
 
         filterChain.doFilter(request, response);

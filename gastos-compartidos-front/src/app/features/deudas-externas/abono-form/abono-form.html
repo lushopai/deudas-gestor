@@ -32,7 +32,7 @@
     <mat-card class="form-card">
       <mat-card-content>
         <form [formGroup]="formulario" (ngSubmit)="guardar()">
-          <mat-form-field appearance="outline">
+          <mat-form-field appearance="fill">
             <mat-label>Monto del Abono</mat-label>
             <mat-icon matIconPrefix>attach_money</mat-icon>
             <input matInput type="number" formControlName="monto" placeholder="100000">
@@ -53,14 +53,14 @@
             <mat-hint>Máximo: {{ deuda.saldoPendiente | clp }}</mat-hint>
           </mat-form-field>
 
-          <mat-form-field appearance="outline">
+          <mat-form-field appearance="fill">
             <mat-label>Fecha de Pago</mat-label>
             <input matInput [matDatepicker]="picker" formControlName="fechaPago">
             <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
             <mat-datepicker #picker></mat-datepicker>
           </mat-form-field>
 
-          <mat-form-field appearance="outline">
+          <mat-form-field appearance="fill">
             <mat-label>Método de Pago</mat-label>
             <mat-icon matIconPrefix>payment</mat-icon>
             <mat-select formControlName="metodoPago">
@@ -70,13 +70,13 @@
             </mat-select>
           </mat-form-field>
 
-          <mat-form-field appearance="outline">
+          <mat-form-field appearance="fill">
             <mat-label>Número de Comprobante (opcional)</mat-label>
             <mat-icon matIconPrefix>receipt</mat-icon>
             <input matInput formControlName="comprobante" placeholder="Ej: TRF-123456">
           </mat-form-field>
 
-          <mat-form-field appearance="outline">
+          <mat-form-field appearance="fill">
             <mat-label>Notas (opcional)</mat-label>
             <mat-icon matIconPrefix>notes</mat-icon>
             <textarea matInput formControlName="notas" rows="2"
