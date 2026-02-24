@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { forkJoin, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -37,7 +37,6 @@ import { ClpPipe } from '../../shared/pipes/clp.pipe';
   imports: [
     CommonModule,
     TranslateModule,
-    RouterLink,
     MatToolbarModule,
     MatButtonModule,
     MatCardModule,
