@@ -15,10 +15,10 @@
       <mat-card-content>
         <form [formGroup]="formulario" (ngSubmit)="guardar()">
           <!-- Descripción -->
-          <mat-form-field appearance="outline" class="full-width">
+          <mat-form-field appearance="fill" class="full-width">
             <mat-label>Descripción</mat-label>
+            <mat-icon matPrefix>description</mat-icon>
             <input matInput formControlName="descripcion" placeholder="Ej: Arriendo, Netflix, Luz...">
-            <mat-icon matIconPrefix>description</mat-icon>
             @if (tieneError('descripcion')) {
               <mat-error>La descripción es requerida</mat-error>
             }
@@ -26,16 +26,16 @@
 
           <!-- Monto y Categoría -->
           <div class="form-row">
-            <mat-form-field appearance="outline">
+            <mat-form-field appearance="fill">
               <mat-label>Monto</mat-label>
+              <mat-icon matPrefix>attach_money</mat-icon>
               <input matInput type="number" formControlName="monto" placeholder="0">
-              <mat-icon matIconPrefix>attach_money</mat-icon>
               @if (tieneError('monto')) {
                 <mat-error>Ingresa un monto válido</mat-error>
               }
             </mat-form-field>
 
-            <mat-form-field appearance="outline">
+            <mat-form-field appearance="fill">
               <mat-label>Categoría</mat-label>
               <mat-select formControlName="categoriaId">
                 @for (cat of categorias; track cat.id) {
@@ -52,7 +52,7 @@
 
           <!-- Frecuencia y Día -->
           <div class="form-row">
-            <mat-form-field appearance="outline">
+            <mat-form-field appearance="fill">
               <mat-label>Frecuencia</mat-label>
               <mat-select formControlName="frecuencia">
                 @for (freq of frecuencias; track freq.value) {
@@ -62,10 +62,10 @@
             </mat-form-field>
 
             @if (necesitaDia) {
-              <mat-form-field appearance="outline">
+              <mat-form-field appearance="fill">
                 <mat-label>Día del mes</mat-label>
+                <mat-icon matPrefix>event</mat-icon>
                 <input matInput type="number" formControlName="diaEjecucion" min="1" max="31" placeholder="1-31">
-                <mat-icon matIconPrefix>event</mat-icon>
                 <mat-hint>Día en que se ejecuta (1-31)</mat-hint>
               </mat-form-field>
             }
@@ -73,14 +73,14 @@
 
           <!-- Fechas -->
           <div class="form-row">
-            <mat-form-field appearance="outline">
+            <mat-form-field appearance="fill">
               <mat-label>Fecha de inicio</mat-label>
               <input matInput [matDatepicker]="pickerInicio" formControlName="fechaInicio" placeholder="DD/MM/YYYY">
               <mat-datepicker-toggle matIconSuffix [for]="pickerInicio"></mat-datepicker-toggle>
               <mat-datepicker #pickerInicio></mat-datepicker>
             </mat-form-field>
 
-            <mat-form-field appearance="outline">
+            <mat-form-field appearance="fill">
               <mat-label>Fecha de fin (opcional)</mat-label>
               <input matInput [matDatepicker]="pickerFin" formControlName="fechaFin" placeholder="DD/MM/YYYY">
               <mat-datepicker-toggle matIconSuffix [for]="pickerFin"></mat-datepicker-toggle>
@@ -97,15 +97,16 @@
           </div>
 
           <!-- Notas -->
-          <mat-form-field appearance="outline" class="full-width">
+          <mat-form-field appearance="fill" class="full-width">
             <mat-label>Notas (opcional)</mat-label>
+            <mat-icon matPrefix>notes</mat-icon>
             <textarea matInput formControlName="notas" rows="3" placeholder="Detalles adicionales..."></textarea>
-            <mat-icon matIconPrefix>notes</mat-icon>
           </mat-form-field>
 
           <!-- Acciones -->
           <div class="form-actions">
-            <button mat-button type="button" (click)="cancelar()">
+            <button mat-stroked-button type="button" (click)="cancelar()">
+              <mat-icon>close</mat-icon>
               Cancelar
             </button>
             <button mat-raised-button color="primary" type="submit"

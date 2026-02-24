@@ -47,6 +47,42 @@ form {
 
   mat-form-field {
     width: 100%;
+
+    // Mejorar apariencia de iconos prefix
+    ::ng-deep {
+      .mat-mdc-form-field-icon-prefix {
+        padding-right: var(--spacing-sm);
+        color: var(--text-secondary);
+
+        mat-icon {
+          font-size: 20px;
+          width: 20px;
+          height: 20px;
+        }
+      }
+
+      // Label más claro y visible
+      .mdc-floating-label {
+        color: var(--text-secondary) !important;
+      }
+
+      // Cuando está focused, resaltar el icono y label
+      &.mat-focused {
+        .mdc-floating-label {
+          color: var(--primary-color) !important;
+        }
+
+        .mat-mdc-form-field-icon-prefix {
+          color: var(--primary-color);
+        }
+      }
+
+      // Hints más sutiles
+      .mat-mdc-form-field-hint {
+        font-size: 12px;
+        color: var(--text-tertiary);
+      }
+    }
   }
 
   mat-form-field.col {
@@ -85,10 +121,19 @@ form {
   border-top: 1px solid var(--border-color);
 
   button {
-    min-width: 120px;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
 
     mat-progress-spinner {
       display: inline-block;
+      margin-right: var(--spacing-xs);
     }
   }
 }

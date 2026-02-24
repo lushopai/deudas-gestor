@@ -63,7 +63,7 @@
   gap: var(--spacing-sm);
   padding: var(--spacing-xl);
   text-align: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #42a5f5 0%, #1e88e5 100%);
   color: white;
 
   mat-icon {
@@ -196,7 +196,7 @@
     flex: 1;
     height: 44px;
     font-weight: 600;
-    border-radius: 6px;
+    border-radius: 22px !important;
 
     mat-icon {
       margin-right: 4px;
@@ -205,10 +205,10 @@
 
   button[mat-raised-button] {
     background: white !important;
-    color: #1976d2 !important;
+    color: var(--primary-color) !important;
 
     mat-icon {
-      color: #1976d2 !important;
+      color: var(--primary-color) !important;
     }
 
     &:hover {
@@ -219,7 +219,7 @@
   }
 
   button[mat-stroked-button] {
-    border: 2px solid rgba(255, 255, 255, 0.7) !important;
+    border: 1px solid rgba(255, 255, 255, 0.5) !important;
     color: white !important;
     background: transparent !important;
 
@@ -229,7 +229,7 @@
 
     &:hover {
       background: rgba(255, 255, 255, 0.15) !important;
-      border-color: rgba(255, 255, 255, 0.9) !important;
+      border-color: rgba(255, 255, 255, 0.8) !important;
     }
   }
 }

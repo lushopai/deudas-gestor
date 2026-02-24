@@ -34,30 +34,35 @@
 }
 
 .action-btn {
-  height: 80px;
-  display: flex;
-  flex-direction: column;
+  height: 80px !important;  // Override global 44px
+  display: flex !important;
+  flex-direction: column !important;  // Override global inline-flex
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  border-radius: 8px;
+  gap: var(--spacing-sm) !important;
+  padding: var(--spacing-md) !important;
+  border-radius: var(--radius-md) !important;
   font-weight: 600;
   transition: all 0.3s ease;
+  flex: 1;  // Grow equally
+  min-width: 140px;
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+    box-shadow: var(--shadow-lg);
   }
 
   mat-icon {
-    font-size: 32px;
-    width: 32px;
-    height: 32px;
-    line-height: 32px;
+    font-size: 32px !important;  // Override global 20px
+    width: 32px !important;
+    height: 32px !important;
+    line-height: 32px !important;
   }
 
   span {
     font-size: 14px;
+    font-weight: 600;
+    text-align: center;
   }
 }
 
