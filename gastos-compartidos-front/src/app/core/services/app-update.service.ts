@@ -71,7 +71,6 @@ export class AppUpdateService {
             badge: '/favicon.ico',
             tag: 'app-update',         // Reemplaza notificaciones anteriores del mismo tipo
             requireInteraction: true,  // No desaparece sola en Android/desktop
-            renotify: true,
         });
 
         notification.onclick = () => {

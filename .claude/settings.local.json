@@ -21,7 +21,11 @@
       "Bash(\"c:/proyectos/deudas-gestor/DEPLOYMENT-UBUNTU.md\":*)",
       "Bash(\"c:/proyectos/deudas-gestor/update-ngrok-cors.sh\":*)",
       "Bash(\"c:/proyectos/deudas-gestor/CORS-SETUP.md\":*)",
-      "Bash(\"c:/proyectos/deudas-gestor/DOCKER-COMPOSE-FIX.md\":*)"
+      "Bash(\"c:/proyectos/deudas-gestor/DOCKER-COMPOSE-FIX.md\":*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(gh pr:*)"
     ]
   }
 }
