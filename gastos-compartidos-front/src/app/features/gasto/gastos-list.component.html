@@ -115,7 +115,13 @@
   }
 
   <!-- Floating Action Button (Mobile Only) -->
-  <button mat-fab color="primary" class="fab-mobile mobile-only" routerLink="/gastos/nuevo">
+  <button mat-fab
+    color="primary"
+    class="fab-mobile mobile-only"
+    routerLink="/gastos/nuevo"
+    aria-label="Crear nuevo gasto"
+    matTooltip="Nuevo Gasto"
+    matTooltipPosition="left">
     <mat-icon>add</mat-icon>
   </button>
 
