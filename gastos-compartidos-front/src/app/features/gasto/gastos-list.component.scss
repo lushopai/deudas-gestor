@@ -236,6 +236,11 @@ mat-chip {
 .search-field {
   flex: 1;
   width: 100%;
+
+  .mat-mdc-form-field-icon-prefix {
+    padding-right: 8px;
+    color: var(--text-secondary);
+  }
 }
 
 .filter-btn {

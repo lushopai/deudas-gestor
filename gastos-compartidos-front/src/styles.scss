@@ -1,4 +1,57 @@
 /* ============================================
+   GUÍA DE USO DEL SISTEMA DE DISEÑO
+   ============================================
+
+   BOTONES:
+   - Altura estándar: 44px (heredada automáticamente)
+   - Border radius: 999px (pill shape)
+   - No agregar height custom en componentes
+   - Usar mat-raised-button para acciones primarias
+   - Usar mat-stroked-button para acciones secundarias
+   - Icon buttons: 40x40px automático
+   - FAB: 56x56px automático
+
+   ICONOS:
+   - Form field prefix/suffix: 20px
+   - Icon buttons: 20px
+   - Standalone/decorative: 24px
+   - Headers/grandes: 32px (uso excepcional)
+   - Siempre usar var(--primary-color) para color principal
+
+   ESPACIADO:
+   - Usar variables: var(--spacing-xs) a var(--spacing-xxl)
+   - Gap entre form fields: var(--spacing-md)
+   - Padding de containers: var(--spacing-md) o var(--spacing-lg)
+   - Margin entre secciones: var(--spacing-lg)
+
+   COLORES:
+   - SIEMPRE usar var(--primary-color), nunca hardcoded (#1976d2)
+   - Texto: var(--text-primary), var(--text-secondary), var(--text-tertiary)
+   - Fondos: var(--bg-primary), var(--bg-secondary), var(--bg-tertiary)
+   - Bordes: var(--border-color), var(--divider-color)
+   - Sombras: var(--shadow-sm), var(--shadow-md), var(--shadow-lg)
+   - Estados: var(--success-color), var(--error-color), var(--warning-color)
+
+   FORM FIELDS:
+   - Appearance: "outline" (consistente en toda la app)
+   - Width: 100% (heredado automáticamente)
+   - Border radius: var(--radius-lg) (heredado - 8px)
+   - Labels: usan var(--text-secondary), cambian a var(--primary-color) en focus
+
+   BORDER RADIUS:
+   - Botones: 999px (pill)
+   - Cards: 16px
+   - Form fields: var(--radius-lg) = 8px
+   - Icon buttons: 50% (círculo)
+
+   TIPOGRAFÍA:
+   - Font family: var(--font-family) = Roboto
+   - Tamaños: var(--font-size-sm) a var(--font-size-2xl)
+   - No usar text-transform: uppercase a menos que sea absolutamente necesario
+
+   ============================================ */
+
+/* ============================================
    VARIABLES GLOBALES - DISEÑO MINIMALISTA
    ============================================ */
 :root {
@@ -293,33 +346,47 @@ p {
   /* Borde sutil */
 }
 
-/* Buttons - Pill Shape (Estilo Amigable) */
+/* Buttons - Pill Shape (Estilo Amigable) - Estandarizado a 44px */
 .mat-mdc-button,
 .mat-mdc-raised-button,
 .mat-mdc-flat-button,
 .mat-mdc-stroked-button,
 .mat-mdc-unelevated-button {
-  border-radius: 999px !important;
-  /* Full pill */
-  padding: 0 24px !important;
-  /* Padding lateral generoso */
   height: 44px !important;
-  /* Buena altura táctil */
-  letter-spacing: 0.5px !important;
+  min-width: 88px !important;
+  border-radius: 999px !important;
+  padding: 0 24px !important;
+  font-size: 14px !important;
   font-weight: 500 !important;
+  letter-spacing: 0.5px !important;
   text-transform: none !important;
-  /* No uppercase forzado */
 }
 
-/* Icon Button - asegurar redondez */
+/* Icon Button - tamaño consistente */
 .mat-mdc-icon-button {
+  width: 40px !important;
+  height: 40px !important;
+  padding: 8px !important;
   border-radius: 50% !important;
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
 }
 
-/* FAB */
-.mat-mdc-fab,
-.mat-mdc-mini-fab {
+/* FAB Buttons */
+.mat-mdc-fab {
+  width: 56px !important;
+  height: 56px !important;
   box-shadow: var(--shadow-lg) !important;
+}
+
+.mat-mdc-mini-fab {
+  width: 40px !important;
+  height: 40px !important;
+  box-shadow: var(--shadow-md) !important;
 }
 
 /* INPUTS & FORM FIELDS (Friendly Outline) */
@@ -334,15 +401,11 @@ p {
 
 /* Bordes redondeados y suaves para Outline */
 .mat-mdc-form-field-appearance-outline .mat-mdc-notched-outline__leading {
-  border-top-left-radius: 12px !important;
-  border-bottom-left-radius: 12px !important;
   border-color: rgba(0, 0, 0, 0.12) !important;
   border-width: 1px !important;
 }
 
 .mat-mdc-form-field-appearance-outline .mat-mdc-notched-outline__trailing {
-  border-top-right-radius: 12px !important;
-  border-bottom-right-radius: 12px !important;
   border-color: rgba(0, 0, 0, 0.12) !important;
   border-width: 1px !important;
 }
@@ -366,6 +429,44 @@ p {
 .mat-mdc-input-element {
   font-weight: 500 !important;
   letter-spacing: 0.3px !important;
+}
+
+/* Form field icons - tamaños consistentes */
+.mat-mdc-form-field-icon-prefix,
+.mat-mdc-form-field-icon-suffix {
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    color: var(--text-secondary);
+  }
+}
+
+/* Label consistente */
+.mdc-floating-label {
+  color: var(--text-secondary) !important;
+}
+
+/* Focus state - label y prefix icon */
+.mat-mdc-form-field.mat-focused {
+  .mdc-floating-label {
+    color: var(--primary-color) !important;
+  }
+
+  .mat-mdc-form-field-icon-prefix mat-icon {
+    color: var(--primary-color);
+  }
+}
+
+/* Outline appearance - border radius con variables */
+.mat-mdc-form-field-appearance-outline {
+  .mdc-notched-outline__leading {
+    border-radius: var(--radius-lg) 0 0 var(--radius-lg) !important;
+  }
+
+  .mdc-notched-outline__trailing {
+    border-radius: 0 var(--radius-lg) var(--radius-lg) 0 !important;
+  }
 }
 
 /* Dialogs */

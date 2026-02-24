@@ -1,5 +1,5 @@
 .deuda-form-container {
-  padding: 16px;
+  padding: var(--spacing-md);
   max-width: 600px;
   margin: 0 auto;
 }
@@ -7,8 +7,8 @@
 .page-header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 16px;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
 
   h1 {
     margin: 0;
@@ -22,64 +22,64 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 48px;
-  gap: 16px;
-  color: #666;
+  padding: var(--spacing-xxl);
+  gap: var(--spacing-md);
+  color: var(--text-secondary);
 }
 
 .form-card {
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
 
   mat-card-content {
-    padding: 24px !important;
+    padding: var(--spacing-lg) !important;
   }
 }
 
 form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--spacing-md);
 
   mat-form-field {
     width: 100%;
 
     ::ng-deep {
       .mat-mdc-form-field-label {
-        padding-left: 8px !important;
+        padding-left: var(--spacing-sm) !important;
       }
 
       .mat-mdc-form-field-hint {
-        padding-left: 8px !important;
+        padding-left: var(--spacing-sm) !important;
         font-size: 12px !important;
-        color: rgba(0, 0, 0, 0.6);
+        color: var(--text-secondary);
       }
     }
   }
 }
 
 .section {
-  margin-bottom: 24px;
+  margin-bottom: var(--spacing-lg);
 
   .section-title {
-    margin: 0 0 16px;
+    margin: 0 0 var(--spacing-md);
     font-size: 14px;
     font-weight: 600;
-    color: #1976d2;
+    color: var(--primary-color);
     text-transform: uppercase;
     letter-spacing: 0.5px;
   }
 
   .section-hint {
-    margin: -12px 0 16px;
+    margin: calc(-1 * var(--spacing-sm)) 0 var(--spacing-md);
     font-size: 12px;
-    color: #888;
+    color: var(--text-tertiary);
   }
 }
 
 .row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  gap: var(--spacing-md);
   align-items: flex-start;
 
   mat-form-field {
@@ -87,7 +87,7 @@ form {
 
     ::ng-deep {
       .mat-mdc-select-value {
-        color: rgba(0, 0, 0, 0.87) !important;
+        color: var(--text-primary) !important;
         font-size: 14px !important;
       }
 
@@ -110,10 +110,10 @@ form {
 .form-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 12px;
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid #e0e0e0;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--border-color);
 
   button {
     min-width: 120px;

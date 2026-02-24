@@ -1,19 +1,19 @@
 .form-container {
-  padding: 16px;
+  padding: var(--spacing-md);
   max-width: 600px;
   margin: 0 auto;
 }
 
 .form-card {
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
 
   mat-card-header {
-    margin-bottom: 8px;
+    margin-bottom: var(--spacing-sm);
 
     mat-icon[mat-card-avatar] {
-      background: #f3e5f5;
-      color: #7b1fa2;
-      border-radius: 8px;
+      background: rgba(25, 118, 210, 0.1);
+      color: var(--primary-color);
+      border-radius: var(--radius-lg);
       width: 40px;
       height: 40px;
       display: flex;
@@ -23,15 +23,15 @@
   }
 
   mat-card-content {
-    padding: 24px !important;
+    padding: var(--spacing-lg) !important;
 
     &.loading-content {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 16px;
-      padding: 48px !important;
-      color: #666;
+      gap: var(--spacing-md);
+      padding: var(--spacing-xxl) !important;
+      color: var(--text-secondary);
     }
   }
 }
@@ -39,7 +39,7 @@
 form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--spacing-md);
 
   .full-width {
     width: 100%;
@@ -57,7 +57,7 @@ form {
 
 .form-row {
   display: flex;
-  gap: 16px;
+  gap: var(--spacing-md);
   width: 100%;
 
   mat-form-field {
@@ -73,16 +73,16 @@ form {
 }
 
 .checkbox-row {
-  margin: 8px 0 16px;
+  margin: var(--spacing-sm) 0 var(--spacing-md);
 }
 
 .form-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 12px;
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid #e0e0e0;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--border-color);
 
   button {
     min-width: 120px;
@@ -96,7 +96,7 @@ form {
 @media (max-width: 599px) {
   .form-row {
     flex-direction: column;
-    gap: 16px;
+    gap: var(--spacing-md);
   }
 
   .form-actions {
