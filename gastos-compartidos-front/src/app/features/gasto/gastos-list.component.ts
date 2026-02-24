@@ -17,6 +17,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { GastoService, Gasto, Categoria } from '../../core/services/gasto.service';
 import { PageResponse } from '../../core/models/page-response';
 import { Subject } from 'rxjs';
@@ -49,6 +50,7 @@ import { ClpPipe } from '../../shared/pipes/clp.pipe';
     MatInputModule,
     MatDatepickerModule,
     MatNativeDateModule,
+    MatTooltipModule,
     EmptyStateComponent,
     SkeletonLoaderComponent,
     PullToRefreshDirective,

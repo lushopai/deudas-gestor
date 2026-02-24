@@ -326,10 +326,28 @@ mat-chip-listbox {
 /* FAB Mobile */
 .fab-mobile {
   position: fixed !important;
-  bottom: 24px;
-  right: 24px;
+  bottom: 80px; // Más arriba para no tapar el bottom nav
+  right: 16px;
   z-index: 999;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+
+  // Animación de entrada
+  animation: fabSlideIn 0.3s ease-out;
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+@keyframes fabSlideIn {
+  from {
+    transform: translateY(100px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 /* Load More */
@@ -380,7 +398,9 @@ mat-chip-listbox {
   gap: 1px;
   background: var(--border-color, #eee);
   border-radius: 12px;
-  overflow: hidden;
+  overflow-y: auto;
+  max-height: calc(100vh - 280px); // Deja espacio para header + filtros + bottom nav
+  -webkit-overflow-scrolling: touch;
 }
 
 .gasto-card {
