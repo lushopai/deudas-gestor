@@ -9,8 +9,8 @@
 /* Header */
 .header {
   /* Removed fixed height/flex-shrink issues */
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  background: var(--primary-color);
+  box-shadow: var(--shadow-md);
   position: relative;
   z-index: 10;
 }
@@ -95,9 +95,9 @@ mat-spinner {
 
 /* Avatar Card */
 .avatar-card {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  background: var(--primary-color) !important;
   color: white !important;
-  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.25);
+  box-shadow: var(--shadow-md);
   margin: 0;
   margin-bottom: 16px;
 
@@ -228,7 +228,7 @@ mat-spinner {
   }
 
   mat-icon {
-    color: #667eea;
+    color: var(--primary-color);
   }
 }
 
@@ -236,15 +236,15 @@ mat-spinner {
 .security-content {
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: var(--spacing-md);
 }
 
 .security-item {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   gap: 16px;
-  padding: 16px 0;
+  padding: var(--spacing-md) 0;
 
   &:first-child {
     padding-top: 0;
@@ -266,10 +266,10 @@ mat-spinner {
   flex: 1;
 
   mat-icon {
-    font-size: 32px;
-    width: 32px;
-    height: 32px;
-    color: #667eea;
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    color: var(--primary-color);
   }
 }
 
@@ -321,16 +321,16 @@ mat-spinner {
 .btn-primary,
 .btn-secondary {
   flex: 1;
-  height: 48px;
-  font-size: 15px;
+  height: 44px;
+  font-size: 14px;
   font-weight: 600;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  border-radius: 4px;
+  text-transform: none;
+  letter-spacing: normal;
+  border-radius: 999px;
   transition: all 0.3s ease;
 
   mat-icon {
@@ -346,17 +346,16 @@ mat-spinner {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  background: var(--primary-color) !important;
   color: white !important;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  box-shadow: var(--shadow-md);
 
   &:hover:not(:disabled) {
-    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.45);
-    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
   }
 
   &:active:not(:disabled) {
-    transform: translateY(0);
+    box-shadow: var(--shadow-md);
   }
 }
 
