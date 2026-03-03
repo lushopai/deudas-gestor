@@ -40,7 +40,7 @@ import { MatButtonModule } from '@angular/material/button';
         <mat-slide-toggle
           [checked]="pushSubscribed"
           (change)="pushToggled.emit()"
-          [disabled]="pushLoading"
+          [disabled]="pushLoading || pushPermission === 'denied'"
           color="primary">
         </mat-slide-toggle>
       </div>
@@ -59,8 +59,11 @@ import { MatButtonModule } from '@angular/material/button';
       </div>
 
       <div class="push-info" *ngIf="pushPermission === 'denied'">
-        <mat-icon color="warn">warning</mat-icon>
-        <span>Las notificaciones están bloqueadas. Habilítalas en la configuración de tu navegador.</span>
+        <mat-icon>block</mat-icon>
+        <div class="push-denied-text">
+          <strong>Notificaciones bloqueadas por el navegador</strong>
+          <span>En Chrome/Android: toca el candado en la barra de dirección → Notificaciones → Permitir. En iPhone: Ajustes → Safari → Notificaciones → activa este sitio.</span>
+        </div>
       </div>
     </mat-card>
   `,
@@ -135,14 +138,39 @@ import { MatButtonModule } from '@angular/material/button';
 
     .push-info {
       display: flex;
-      align-items: center;
-      gap: 8px;
+      align-items: flex-start;
+      gap: 10px;
       padding: 12px 16px;
-      background: rgba(255, 152, 0, 0.1);
+      background: rgba(244, 67, 54, 0.08);
       border-radius: 8px;
-      margin-top: 8px;
+      margin: 8px 16px 12px;
       font-size: 13px;
-      color: #ff9800;
+      color: #c62828;
+
+      mat-icon {
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+        flex-shrink: 0;
+        margin-top: 2px;
+      }
+    }
+
+    .push-denied-text {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+
+      strong {
+        font-size: 13px;
+        font-weight: 600;
+      }
+
+      span {
+        font-size: 12px;
+        line-height: 1.4;
+        opacity: 0.85;
+      }
     }
   `],
   changeDetection: ChangeDetectionStrategy.OnPush

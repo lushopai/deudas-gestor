@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -54,7 +55,12 @@ public class UsuarioController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Obtener perfil de usuario", description = "Obtiene la información de un usuario específico")
-    public ResponseEntity<UsuarioResponseDTO> obtenerPerfil(@PathVariable Long id) {
+    public ResponseEntity<UsuarioResponseDTO> obtenerPerfil(
+            @AuthenticationPrincipal CustomUserDetails currentUser,
+            @PathVariable Long id) {
+        if (!id.equals(currentUser.getId())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         UsuarioResponseDTO perfil = usuarioService.obtenerPerfil(id);
         return ResponseEntity.ok(perfil);
     }
