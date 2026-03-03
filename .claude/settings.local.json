@@ -25,7 +25,9 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(git push:*)",
-      "Bash(gh pr:*)"
+      "Bash(gh pr:*)",
+      "Bash(npm start)",
+      "Bash(xargs grep -l \"prebuilt\\\\|indigo-pink\\\\|deeppurple\\\\|pink-blue\\\\|mat\\\\.core\\\\|mat-core\")"
     ]
   }
 }
